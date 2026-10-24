@@ -1,0 +1,70 @@
+RESSOURCES VISUELLES ET SONORES DE MAZE TD
+
+DESTINATION DU JEU
+Jeu mobile Android et iOS. Paysage par défaut, avec une interface qui se
+réorganise en portrait ou paysage selon l'orientation du smartphone.
+Le capteur de rotation est activé dans la configuration Godot ; son
+fonctionnement réel reste à vérifier sur appareils Android et iOS.
+Garder les ressources séparées et utilisables dans les deux dispositions.
+
+OÙ RANGER LES FICHIERS
+tours/               Sprites des huit tours et leurs animations.
+ennemis/terrestres/   Monstres au sol et leurs animations.
+ennemis/aeriens/      Monstres volants et leurs animations.
+ennemis/boss/         Mini boss et gros boss.
+terrain/             Sols, chemins, château et éléments de décor.
+interface/icones/    Icônes de tours, or, vies et commandes.
+interface/boutons/   Images des boutons et de leurs états.
+interface/fonds/     Fonds et panneaux d'interface.
+effets/              Impacts, magie, givre, poison et explosions.
+projectiles/         Flèches, boulets et projectiles magiques.
+audio/musiques/      Musiques.
+audio/effets/        Bruitages.
+polices/             Fichiers de polices et leurs licences.
+sources/             Originaux modifiables : Krita, Aseprite, PSD, etc.
+
+Les dossiers contiennent des fichiers .gitkeep pour qu'ils soient conservés
+dans Git même avant l'ajout des premiers dessins. Ils ne sont pas des images.
+Le fichier .gdignore de sources/ exclut les originaux de l'import Godot ;
+ils restent disponibles dans l'Explorateur et peuvent être suivis dans Git.
+
+POUR COMMENCER
+Créer d'abord un archer statique et un monstre terrestre.
+Exemples de destinations, à partir du dossier assets :
+  tours/archer_n01_repos.png
+  ennemis/terrestres/gobelin_repos.png
+  projectiles/fleche.png
+  terrain/herbe.png
+
+Les autres noms de tours : canon, sorcier, arcane, balliste, frost, seisme,
+poison. Utiliser des minuscules, sans espace ni accent, et des underscores.
+Une seule apparence par tour suffit pour commencer ; les variantes n01 à
+n07 peuvent être ajoutées plus tard.
+
+EXPORT DES IMAGES
+PNG à fond transparent pour tours, ennemis, icônes, projectiles et effets.
+Un premier sprite peut être dessiné sur une toile de 64 x 64 ou 128 x 128
+pixels. La taille du fichier source ne détermine pas sa taille à l'écran.
+Le plateau utilise actuellement une case de 42 unités Godot.
+Garder le même cadrage et le même point d'ancrage entre les images d'une
+animation pour éviter que le personnage saute. Prévoir de l'espace pour
+les armes, ailes et effets sans couper leurs extrémités.
+
+Pour une planche d'animation, garder toutes les cases à la même taille.
+Exemple : tours/archer_n01_tir_sheet.png. Noter le nombre de colonnes,
+de lignes et la cadence souhaitée dans un petit fichier texte associé.
+Noms d'animations suggérés : repos, marche, tir, mort.
+
+CONCEPTION MOBILE
+Conserver les tours, boutons, icônes et fonds en éléments séparés pour
+faciliter l'adaptation au paysage ou au portrait. Éviter de dessiner toute
+l'interface comme une seule image fixe de 720 x 1280 pixels.
+Privilégier des silhouettes et des symboles lisibles sur un petit écran.
+Conserver les fichiers originaux dans sources/, puis exporter les PNG
+dans les dossiers correspondants.
+
+INTÉGRATION ACTUELLE
+Cette arborescence prépare les ressources ; elle ne remplace pas encore
+les dessins du jeu. Les visuels sont toujours générés par board.gd et
+l'interface par main.gd. Le raccordement aux sprites et scènes Godot sera
+fait séparément quand les premières images seront prêtes.

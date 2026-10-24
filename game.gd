@@ -71,7 +71,7 @@ func reset(grid_index: int = 0) -> void:
 	to_spawn = 0
 	spawned = 0
 	destroyed = 0
-	message = "Une minute pour bâtir le premier labyrinthe."
+	message = "Bâtissez ou lancez la vague dès que vous êtes prêt."
 	rebuild_flow()
 
 func inside(cell: Vector2i) -> bool:
@@ -195,8 +195,9 @@ func wave_plan(number: int) -> Dictionary:
 	return {"air": number % 10 == 0, "boss": 2 if number == 50 or number == 100 else (1 if number % 10 == 0 else 0), "armor": "physical" if number % 2 == 1 else "magic", "count": 8 + number * 2}
 
 func start_wave() -> bool:
-	if active or ended or paused or (wave == 0 and preparation > 0.0001) or wave >= LAST_WAVE:
+	if active or ended or paused or wave >= LAST_WAVE:
 		return false
+	preparation = 0.0
 	wave += 1
 	active = true
 	spawned = 0

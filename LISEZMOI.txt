@@ -1,10 +1,23 @@
 MAZE TD — LES MARCHES DU ROYAUME
-Prototype 04 • fantasy médiévale • 24 octobre 2026
+Prototype 06 • fantasy médiévale • 24 octobre 2026
 
 JOUER
 Importer project.godot dans Godot 4.5+ (branche 4.x), puis lancer avec F5.
 La première vague démarre automatiquement après une minute de préparation.
+Le bouton Lancer vague 1 permet de la démarrer immédiatement, quand vous
+êtes prêt, sans attendre la fin des 60 secondes.
 Choisir la taille de grille avant le premier placement de tour.
+
+ORIENTATION MOBILE
+Paysage par défaut. En paysage, le plateau est à gauche et les commandes
+à droite. En portrait, les commandes se placent sous le plateau.
+Le réglage d'orientation Godot utilise le capteur du téléphone pour
+autoriser les deux orientations. L'interface se réorganise quand la
+taille de l'écran change, sans remettre à zéro la partie ni la caméra.
+Les marges de l'interface tiennent compte des zones sûres mobiles.
+Sur ordinateur, redimensionner la fenêtre pour tester les deux dispositions.
+Les tests sur smartphones réels restent à réaliser, notamment la rotation,
+les encoches et les barres système.
 
 GRILLES, HAUTEUR × LONGUEUR
 50 × 100 (par défaut), 25 × 50 ou 100 × 200.
@@ -81,7 +94,8 @@ Entre les vagues : 15 secondes de préparation avec lancement anticipé
 possible. Construction, vente et amélioration possibles en combat et en pause.
 Impossible de construire sous un monstre terrestre ou sur sa case suivante,
 de fermer l'entrée ou de piéger un monstre déjà présent.
-La première minute ne peut pas être écourtée. Les vitesses ×1, ×2, ×3 et ×5 ne concernent
+Toutes les préparations peuvent être écourtées avec le bouton de lancement.
+Les vitesses ×1, ×2, ×3 et ×5 ne concernent
 que le combat ; le bouton parcourt ces quatre vitesses. La pause arrête
 aussi le compte à rebours. La simulation garde une cadence de tir cohérente
 à chaque vitesse.
@@ -109,9 +123,10 @@ L'export iOS nécessite un Mac avec Xcode et la configuration de l'équipe Apple
 https://docs.godotengine.org/en/stable/tutorials/export/exporting_for_ios.html
 
 FICHIERS
-project.godot : configuration et format portrait.
+project.godot : paysage par défaut, orientation capteur et affichage adaptatif.
 main.tscn : scène de démarrage.
 game.gd : règles, navigation, tours, vagues, combats et boss.
 main.gd : interface et sauvegarde du record.
+ui_layout.gd : dispositions paysage et portrait et marges des zones sûres.
 board.gd : rendu, zoom, déplacement et sélection de la grille.
 tests.gd : vérifications automatisées.

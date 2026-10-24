@@ -18,6 +18,17 @@ var sell_button: Button
 var type_buttons: Array[Button] = []
 var saved_best := 0
 var ui_clock := 0.0
+var title_label: Label
+var subtitle_label: Label
+var footer_label: Label
+var entry_button: Button
+var castle_button: Button
+var overview_button: Button
+var zoom_out_button: Button
+var zoom_in_button: Button
+var layout_area := Rect2()
+var layout_size := Vector2.ZERO
+var landscape := true
 
 func _ready() -> void:
 	var save := ConfigFile.new()
@@ -25,6 +36,8 @@ func _ready() -> void:
 		game.best = int(save.get_value("progress", "best_wave", 0))
 	saved_best = game.best
 	make_ui()
+	get_viewport().size_changed.connect(apply_layout)
+	apply_layout(true)
 	refresh_ui()
 
 func label(text_value: String, pos: Vector2, dimensions: Vector2, font_size: int, color := Color("e9e1c8")) -> Label:
@@ -64,8 +77,8 @@ func button(text_value: String, pos: Vector2, dimensions: Vector2, action: Calla
 	return item
 
 func make_ui() -> void:
-	label("LES MARCHES DU ROYAUME", Vector2(32, 30), Vector2(656, 42), 31)
-	label("MAZE TD  /  PROTOTYPE 04", Vector2(32, 76), Vector2(656, 28), 18, Color("a7b596"))
+	title_label = label("LES MARCHES DU ROYAUME", Vector2(32, 30), Vector2(656, 42), 31)
+	subtitle_label = label("MAZE TD  /  PROTOTYPE 06", Vector2(32, 76), Vector2(656, 28), 18, Color("a7b596"))
 	status = label("", Vector2(32, 112), Vector2(656, 32), 22)
 	message = label("", Vector2(32, 150), Vector2(656, 30), 18, Color("ebcc84"))
 	grid_choice = OptionButton.new()
@@ -82,12 +95,12 @@ func make_ui() -> void:
 	board.size = Vector2(656, 600)
 	board.cell_tapped.connect(interact)
 	add_child(board)
-	button("Entrée", Vector2(340, 188), Vector2(108, 48), board.entry_view)
-	button("Château", Vector2(460, 188), Vector2(108, 48), board.castle_view)
-	button("Vue", Vector2(580, 188), Vector2(108, 48), board.overview)
+	entry_button = button("Entrée", Vector2(340, 188), Vector2(108, 48), board.entry_view)
+	castle_button = button("Château", Vector2(460, 188), Vector2(108, 48), board.castle_view)
+	overview_button = button("Vue", Vector2(580, 188), Vector2(108, 48), board.overview)
 	map_info = label("", Vector2(32, 860), Vector2(496, 40), 18, Color("c9c7ac"))
-	button("−", Vector2(544, 858), Vector2(64, 44), func(): board.set_zoom(board.zoom / 1.3, board.size / 2))
-	button("+", Vector2(624, 858), Vector2(64, 44), func(): board.set_zoom(board.zoom * 1.3, board.size / 2))
+	zoom_out_button = button("−", Vector2(544, 858), Vector2(64, 44), func(): board.set_zoom(board.zoom / 1.3, board.size / 2))
+	zoom_in_button = button("+", Vector2(624, 858), Vector2(64, 44), func(): board.set_zoom(board.zoom * 1.3, board.size / 2))
 	detail = label("", Vector2(32, 907), Vector2(656, 48), 18)
 	for i in range(game.TYPES.size()):
 		var index := i
@@ -97,7 +110,16 @@ func make_ui() -> void:
 	wave_button = button("", Vector2(32, 1162), Vector2(320, 60), start_or_reset)
 	pause_button = button("Pause", Vector2(368, 1162), Vector2(154, 60), toggle_pause)
 	speed_button = button("×1", Vector2(538, 1162), Vector2(150, 60), toggle_speed)
-	label("Toucher : bâtir / sélectionner  •  Glisser : déplacer la carte", Vector2(32, 1232), Vector2(656, 25), 16, Color("a7b596"))
+	footer_label = label("Toucher : bâtir / sélectionner  •  Glisser : déplacer la carte", Vector2(32, 1232), Vector2(656, 25), 16, Color("a7b596"))
+
+func apply_layout(force: bool = false) -> void:
+	if not is_instance_valid(speed_button):
+		return
+	var area: Rect2 = preload("res://ui_layout.gd").safe_viewport_area(get_viewport_rect().size)
+	if not force and area.is_equal_approx(layout_area):
+		return
+	layout_area = area
+	preload("res://ui_layout.gd").arrange(self, area)
 
 func change_grid(index: int) -> void:
 	if game.wave != 0 or not game.towers.is_empty():
@@ -166,8 +188,9 @@ func refresh_ui() -> void:
 	elif game.active:
 		wave_button.text = "Vague %d en cours" % game.wave
 	else:
-		wave_button.text = "Préparation : %d s" % int(ceil(game.preparation)) if game.wave == 0 else "Vague %d • %d s" % [game.wave + 1, int(ceil(game.preparation))]
-	wave_button.disabled = game.active or (not game.ended and (game.paused or game.wave == 0))
+		wave_button.text = "Lancer vague %d • %d s" % [game.wave + 1, int(ceil(game.preparation))]
+	wave_button.disabled = game.active or (not game.ended and game.paused)
+	wave_button.tooltip_text = "Démarrer la prochaine vague sans attendre la fin du compte à rebours."
 	pause_button.text = "Reprendre" if game.paused else "Pause"
 	pause_button.disabled = game.ended
 	speed_button.text = "Combat ×%d" % game.speed_multiplier
@@ -209,6 +232,7 @@ func _process(delta: float) -> void:
 	ui_clock += delta
 	if ui_clock >= 0.1:
 		ui_clock = 0.0
+		apply_layout()
 		refresh_ui()
 	else:
 		board.refresh()

@@ -37,6 +37,21 @@ func refresh() -> void:
 func minimum_zoom() -> float:
 	return minf(size.x / (game.cols * CELL), size.y / (game.rows * CELL)) * 0.95
 
+func resize_view(new_size: Vector2) -> void:
+	if size.is_equal_approx(new_size):
+		return
+	var was_overview := is_equal_approx(zoom, minimum_zoom())
+	var focus := (size / 2.0 - pan) / zoom
+	size = new_size
+	dragging = false
+	if was_overview:
+		overview()
+	else:
+		zoom = clampf(zoom, minimum_zoom(), 2.0)
+		pan = size / 2.0 - focus * zoom
+		clamp_pan()
+		refresh()
+
 func set_zoom(value: float, anchor: Vector2) -> void:
 	var world := (anchor - pan) / zoom
 	zoom = clampf(value, minimum_zoom(), 2.0)
