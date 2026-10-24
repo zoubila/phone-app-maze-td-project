@@ -1,3 +1,4 @@
 .godot/
 builds/
 export_credentials.cfg
+.vscode/

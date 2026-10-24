@@ -7,7 +7,7 @@ const COMBAT_SPEEDS := [1, 2, 3, 5]
 const SIMULATION_STEP := 1.0 / 60.0
 const GRID_SIZES := [Vector2i(100, 50), Vector2i(50, 25), Vector2i(200, 100)]
 const TYPES := [
-	{"name": "Archer", "cost": 50, "damage": 15.0, "range": 3.6, "delay": 1.2, "mode": "single", "school": "physical", "air": false, "color": Color("d5ae62")},
+	{"name": "Archer", "cost": 50, "damage": 15.0, "range": 3.6, "delay": 1.2, "mode": "single", "school": "physical", "air": false, "color": Color("#FF0203")},
 	{"name": "Canon", "cost": 85, "damage": 30.0, "range": 4.0, "delay": 2.0, "mode": "aoe", "school": "physical", "air": false, "color": Color("d58b63")},
 	{"name": "Sorcier", "cost": 65, "damage": 22.0, "range": 3.6, "delay": 1.2, "mode": "single", "school": "magic", "air": false, "color": Color("bd9de8")},
 	{"name": "Arcane", "cost": 100, "damage": 26.0, "range": 3.4, "delay": 1.8, "mode": "aoe", "school": "magic", "air": false, "color": Color("df9ace")},
