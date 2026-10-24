@@ -29,6 +29,7 @@ var zoom_in_button: Button
 var layout_area := Rect2()
 var layout_size := Vector2.ZERO
 var landscape := true
+var inspector: Panel
 
 func _ready() -> void:
 	var save := ConfigFile.new()
@@ -78,7 +79,7 @@ func button(text_value: String, pos: Vector2, dimensions: Vector2, action: Calla
 
 func make_ui() -> void:
 	title_label = label("LES MARCHES DU ROYAUME", Vector2(32, 30), Vector2(656, 42), 31)
-	subtitle_label = label("MAZE TD  /  PROTOTYPE 06", Vector2(32, 76), Vector2(656, 28), 18, Color("a7b596"))
+	subtitle_label = label("MAZE TD  /  PROTOTYPE 07", Vector2(32, 76), Vector2(656, 28), 18, Color("a7b596"))
 	status = label("", Vector2(32, 112), Vector2(656, 32), 22)
 	message = label("", Vector2(32, 150), Vector2(656, 30), 18, Color("ebcc84"))
 	grid_choice = OptionButton.new()
@@ -94,6 +95,9 @@ func make_ui() -> void:
 	board.position = Vector2(32, 248)
 	board.size = Vector2(656, 600)
 	board.cell_tapped.connect(interact)
+	board.item_tapped.connect(inspect_item)
+	board.item_hovered.connect(hover_item)
+	board.view_dragged.connect(close_inspection)
 	add_child(board)
 	entry_button = button("Entrée", Vector2(340, 188), Vector2(108, 48), board.entry_view)
 	castle_button = button("Château", Vector2(460, 188), Vector2(108, 48), board.castle_view)
@@ -105,12 +109,19 @@ func make_ui() -> void:
 	for i in range(game.TYPES.size()):
 		var index := i
 		type_buttons.append(button("%s\n%d or" % [game.TYPES[i].name, game.TYPES[i].cost], Vector2(32 + (i % 4) * 166, 963 + (i / 4) * 61), Vector2(158, 56), func(): select_kind(index)))
+		type_buttons[i].mouse_entered.connect(func(): preview_kind(index))
+		type_buttons[i].mouse_exited.connect(hide_hover)
 	upgrade_button = button("Améliorer", Vector2(32, 1096), Vector2(320, 52), upgrade_selected)
 	sell_button = button("Vendre", Vector2(368, 1096), Vector2(320, 52), sell_selected)
 	wave_button = button("", Vector2(32, 1162), Vector2(320, 60), start_or_reset)
 	pause_button = button("Pause", Vector2(368, 1162), Vector2(154, 60), toggle_pause)
 	speed_button = button("×1", Vector2(538, 1162), Vector2(150, 60), toggle_speed)
 	footer_label = label("Toucher : bâtir / sélectionner  •  Glisser : déplacer la carte", Vector2(32, 1232), Vector2(656, 25), 16, Color("a7b596"))
+	inspector = preload("res://inspection.gd").new()
+	add_child(inspector)
+	inspector.sell_requested.connect(sell_tower)
+	inspector.upgrade_requested.connect(upgrade_tower)
+	inspector.dismiss_requested.connect(close_inspection)
 
 func apply_layout(force: bool = false) -> void:
 	if not is_instance_valid(speed_button):
@@ -120,12 +131,14 @@ func apply_layout(force: bool = false) -> void:
 		return
 	layout_area = area
 	preload("res://ui_layout.gd").arrange(self, area)
+	refresh_inspection(true)
 
 func change_grid(index: int) -> void:
 	if game.wave != 0 or not game.towers.is_empty():
 		return
 	grid_index = index
 	game.reset(index)
+	close_inspection()
 	selected = Vector2i(-1, -1)
 	board.entry_view()
 	refresh_ui()
@@ -133,27 +146,100 @@ func change_grid(index: int) -> void:
 func select_kind(index: int) -> void:
 	selected_kind = index
 	selected = Vector2i(-1, -1)
+	open_inspection({"type": "catalog", "kind": index}, type_buttons[index].position + type_buttons[index].size / 2.0, true)
 	refresh_ui()
 
 func interact(cell: Vector2i) -> void:
 	if game.towers.has(cell):
 		selected = cell
+		inspect_item({"type": "tower", "cell": cell}, (Vector2(cell) + Vector2.ONE * 0.5) * board.CELL * board.zoom + board.pan)
+		return
+	elif inspector.visible and inspector.pinned and inspector.target.get("type") != "catalog":
+		# A tap outside a pinned entity card dismisses it without buying a tower.
+		selected = Vector2i(-1, -1)
+		close_inspection()
 	elif game.build(cell, selected_kind):
 		selected = cell
+		close_inspection()
 	refresh_ui()
 
 func upgrade_selected() -> void:
-	game.upgrade(selected)
+	upgrade_tower(selected)
+
+func upgrade_tower(cell: Vector2i) -> void:
+	game.upgrade(cell)
 	refresh_ui()
 
 func sell_selected() -> void:
-	if game.sell(selected):
-		selected = Vector2i(-1, -1)
+	sell_tower(selected)
+
+func sell_tower(cell: Vector2i) -> void:
+	if game.sell(cell):
+		if selected == cell:
+			selected = Vector2i(-1, -1)
+		close_inspection()
 	refresh_ui()
+
+func open_inspection(target: Dictionary, point: Vector2, pin: bool) -> void:
+	if not is_instance_valid(inspector):
+		return
+	inspector.show_card(target, point, pin)
+	refresh_inspection()
+
+func inspect_item(target: Dictionary, point: Vector2) -> void:
+	selected = target.cell if target.type == "tower" else Vector2i(-1, -1)
+	open_inspection(target, board.position + point, true)
+	refresh_ui()
+
+func hover_item(target: Dictionary, point: Vector2) -> void:
+	if inspector.pinned:
+		return
+	if target.is_empty():
+		hide_hover()
+	else:
+		open_inspection(target, board.position + point, false)
+
+func preview_kind(kind: int) -> void:
+	if not is_instance_valid(inspector) or inspector.pinned:
+		return
+	open_inspection({"type": "catalog", "kind": kind}, type_buttons[kind].position + type_buttons[kind].size / 2.0, false)
+
+func hide_hover() -> void:
+	if is_instance_valid(inspector) and not inspector.pinned:
+		inspector.hide_card()
+
+func close_inspection() -> void:
+	if is_instance_valid(inspector):
+		inspector.hide_card()
+
+func refresh_inspection(reanchor: bool = false) -> void:
+	if not is_instance_valid(inspector) or not inspector.visible:
+		return
+	if not inspector.pinned and board.hovering and not board.dragging:
+		var hovered: Dictionary = board.pick_item(board.hover_point)
+		if hovered.is_empty():
+			hide_hover()
+			return
+		inspector.show_card(hovered, board.position + board.hover_point, false)
+	if not inspector.update_card(game):
+		close_inspection()
+		return
+	if inspector.pinned and reanchor:
+		var target: Dictionary = inspector.target
+		if target.type == "tower":
+			inspector.anchor = board.position + board.pan + (Vector2(target.cell) + Vector2.ONE * 0.5) * board.CELL * board.zoom
+		elif target.type == "catalog":
+			inspector.anchor = type_buttons[int(target.kind)].position + type_buttons[int(target.kind)].size / 2.0
+		else:
+			for enemy in game.enemies:
+				if enemy.id == target.id:
+					inspector.anchor = board.position + board.pan + game.position_of(enemy) * board.CELL * board.zoom
+	inspector.fit_inside(Rect2(board.position, board.size))
 
 func start_or_reset() -> void:
 	if game.ended:
 		game.reset(grid_index)
+		close_inspection()
 		selected = Vector2i(-1, -1)
 		board.entry_view()
 	else:
@@ -225,6 +311,7 @@ func refresh_ui() -> void:
 	var level_text := "N%d/7" % level if game.towers.has(selected) else "à construire"
 	detail.text = "%s • %s • portée %.1f • %s\n%s" % [spec.name, level_text, float(spec.range), "air" if spec.air else "sol", effect]
 	board.selected = selected
+	refresh_inspection()
 	board.refresh()
 
 func _process(delta: float) -> void:

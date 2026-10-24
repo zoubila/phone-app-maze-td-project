@@ -44,6 +44,7 @@ var message := ""
 var destroyed := 0
 var revision := 0
 var rng := RandomNumberGenerator.new()
+var next_enemy_id := 1
 
 func _init() -> void:
 	rng.randomize()
@@ -71,6 +72,7 @@ func reset(grid_index: int = 0) -> void:
 	to_spawn = 0
 	spawned = 0
 	destroyed = 0
+	next_enemy_id = 1
 	message = "Bâtissez ou lancez la vague dès que vous êtes prêt."
 	rebuild_flow()
 
@@ -218,6 +220,8 @@ func spawn_enemy() -> Dictionary:
 	var hp := enemy_health(wave, flying, boss)
 	var reward: int = (8 + wave * 2) * (30 if boss == 2 else (8 if boss == 1 else 1))
 	var enemy := {"air": flying, "boss": boss, "armor": "none" if flying else plan.armor, "hp": hp, "max_hp": hp, "cell": entry, "next": next_cell(entry, flow), "fraction": 0.0, "flight": 0.0, "speed": 4.0 if flying else (1.4 if boss > 0 else 2.5), "slow_time": 0.0, "slow_factor": 1.0, "poison": {}, "reward": reward, "attack_clock": 6.0, "escaped": false}
+	enemy.id = next_enemy_id
+	next_enemy_id += 1
 	enemies.append(enemy)
 	spawned += 1
 	to_spawn -= 1

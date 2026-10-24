@@ -1,5 +1,5 @@
 MAZE TD — LES MARCHES DU ROYAUME
-Prototype 06 • fantasy médiévale • 24 octobre 2026
+Prototype 07 • fantasy médiévale • 24 octobre 2026
 
 JOUER
 Importer project.godot dans Godot 4.5+ (branche 4.x), puis lancer avec F5.
@@ -7,6 +7,20 @@ La première vague démarre automatiquement après une minute de préparation.
 Le bouton Lancer vague 1 permet de la démarrer immédiatement, quand vous
 êtes prêt, sans attendre la fin des 60 secondes.
 Choisir la taille de grille avant le premier placement de tour.
+
+SÉLECTION, INFOBULLES ET REVENTE
+Sur ordinateur, survoler une tour, un monstre ou un type de tour dans le
+catalogue pour afficher ses caractéristiques. Cliquer ou toucher garde
+la fiche ouverte. Les PV et les effets des monstres se mettent à jour.
+Cliquer sur une tour construite, y compris sur son toit, sélectionne cette
+tour. Utiliser Vendre dans sa fiche ou dans le panneau de commandes.
+La vente rembourse 70 % de l'or investi et fonctionne pendant les vagues
+et en pause. La fiche permet aussi d'améliorer la tour jusqu'au niveau 7.
+Le simple survol d'une autre tour ne change pas la tour sélectionnée.
+Fermer avec ×. Toucher une case vide ferme d'abord la fiche d'une unité
+sans construire ; le toucher suivant permet de poser une tour.
+Faire glisser la carte ferme la fiche. Une fiche de monstre se ferme
+automatiquement à sa disparition. Toucher un monstre ne construit pas.
 
 ORIENTATION MOBILE
 Paysage par défaut. En paysage, le plateau est à gauche et les commandes
@@ -129,4 +143,5 @@ game.gd : règles, navigation, tours, vagues, combats et boss.
 main.gd : interface et sauvegarde du record.
 ui_layout.gd : dispositions paysage et portrait et marges des zones sûres.
 board.gd : rendu, zoom, déplacement et sélection de la grille.
+inspection.gd : fiches des tours et monstres, survol et actions tactiles.
 tests.gd : vérifications automatisées.

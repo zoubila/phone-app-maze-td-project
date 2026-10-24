@@ -13,6 +13,11 @@ var route_revision := -1
 var route_points := PackedVector2Array()
 var painter: Node2D
 signal cell_tapped(cell: Vector2i)
+signal item_tapped(target: Dictionary, point: Vector2)
+signal item_hovered(target: Dictionary, point: Vector2)
+signal view_dragged
+var hovering := false
+var hover_point := Vector2.ZERO
 
 class MapPainter extends Node2D:
 	var view
@@ -25,6 +30,9 @@ func _ready() -> void:
 	painter = MapPainter.new()
 	painter.view = self
 	add_child(painter)
+	mouse_exited.connect(func():
+		hovering = false
+		item_hovered.emit({}, Vector2.ZERO))
 	entry_view()
 
 func refresh() -> void:
@@ -85,6 +93,39 @@ func cell_at(point: Vector2) -> Vector2i:
 	var local := (point - pan) / (zoom * CELL)
 	return Vector2i(floori(local.x), floori(local.y))
 
+func pick_item(point: Vector2) -> Dictionary:
+	if not Rect2(Vector2.ZERO, size).has_point(point):
+		return {}
+	var world := (point - pan) / zoom
+	# Units are drawn above towers, so inspect the foreground unit first.
+	var nearest: Dictionary = {}
+	var best_distance := INF
+	for enemy in game.enemies:
+		if enemy.hp <= 0:
+			continue
+		var p: Vector2 = game.position_of(enemy) * CELL
+		var radius := 22.0 if enemy.boss == 2 else (18.0 if enemy.boss == 1 else (22.0 if enemy.air else 14.0))
+		var distance := world.distance_squared_to(p)
+		if distance <= radius * radius and distance < best_distance:
+			nearest = {"type": "enemy", "id": enemy.id}
+			best_distance = distance
+	if not nearest.is_empty():
+		return nearest
+	var cell := cell_at(point)
+	# Include roof tips and other drawn pixels outside the logical tile.
+	for y in range(cell.y - 1, cell.y + 2):
+		for x in range(cell.x - 1, cell.x + 2):
+			var candidate := Vector2i(x, y)
+			if not game.towers.has(candidate):
+				continue
+			var center := (Vector2(candidate) + Vector2.ONE * 0.5) * CELL
+			if Rect2(center - Vector2(22, 27), Vector2(44, 49)).has_point(world):
+				var distance := world.distance_squared_to(center)
+				if distance < best_distance:
+					nearest = {"type": "tower", "cell": candidate}
+					best_distance = distance
+	return nearest
+
 func _gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:
 		if event.button_index == MOUSE_BUTTON_WHEEL_UP and event.pressed:
@@ -99,20 +140,29 @@ func _gui_input(event: InputEvent) -> void:
 				pan_start = pan
 			else:
 				if dragging and not moved and Rect2(Vector2.ZERO, size).has_point(event.position):
+					var target := pick_item(event.position)
 					var cell := cell_at(event.position)
-					if game.inside(cell):
+					if not target.is_empty():
+						item_tapped.emit(target, event.position)
+					elif game.inside(cell):
 						if zoom * CELL < 20:
 							set_zoom(1.0, event.position)
 						else:
 							cell_tapped.emit(cell)
 				dragging = false
-	elif event is InputEventMouseMotion and dragging:
-		if event.position.distance_to(start) > 10:
-			moved = true
-		if moved:
-			pan = pan_start + event.position - start
-			clamp_pan()
-			refresh()
+	elif event is InputEventMouseMotion:
+		hover_point = event.position
+		hovering = Rect2(Vector2.ZERO, size).has_point(event.position)
+		if dragging:
+			if not moved and event.position.distance_to(start) > 10:
+				moved = true
+				view_dragged.emit()
+			if moved:
+				pan = pan_start + event.position - start
+				clamp_pan()
+				refresh()
+		else:
+			item_hovered.emit(pick_item(event.position), event.position)
 	elif event is InputEventMagnifyGesture:
 		set_zoom(zoom * event.factor, event.position)
 	accept_event()
