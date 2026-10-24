@@ -1,0 +1,117 @@
+MAZE TD — LES MARCHES DU ROYAUME
+Prototype 04 • fantasy médiévale • 24 octobre 2026
+
+JOUER
+Importer project.godot dans Godot 4.5+ (branche 4.x), puis lancer avec F5.
+La première vague démarre automatiquement après une minute de préparation.
+Choisir la taille de grille avant le premier placement de tour.
+
+GRILLES, HAUTEUR × LONGUEUR
+50 × 100 (par défaut), 25 × 50 ou 100 × 200.
+Faire glisser la carte pour se déplacer ; utiliser + et − pour zoomer.
+Les boutons Entrée, Château et Vue déplacent ou ajustent la vue.
+La molette fonctionne sur ordinateur. En vue très éloignée, un toucher
+rapproche la vue avant de permettre de construire, pour éviter les erreurs.
+
+BUT
+Composer un labyrinthe qui allonge autant que possible le chemin le plus
+court des monstres terrestres. Les déplacements sont orthogonaux, sans
+diagonales. Un placement qui ferme tout passage est refusé sans paiement.
+Le chemin affiché inclut la case d'entrée et celle du château.
+
+LES HUIT TOURS, TOUTES AMÉLIORABLES JUSQU'AU NIVEAU 7
+Archer : dégâts physiques sur une cible.
+Canon : dégâts physiques de zone.
+Sorcier : dégâts magiques sur une cible.
+Arcane : dégâts magiques de zone.
+Balliste : dégâts physiques, cibles aériennes uniquement.
+Frost : ralentissement sur une cible terrestre, aucun dégât.
+Séisme : ralentissement de zone terrestre, aucun dégât.
+Poison : dégâts magiques sur la durée sur une cible terrestre.
+
+CAMPAGNE
+100 vagues. Vagues impaires : résistance physique et faiblesse magique.
+Vagues paires : résistance magique et faiblesse physique.
+Toutes les 10 vagues : alternance de volants et de monstres terrestres, plus un mini boss terrestre.
+Aux vagues 50 et 100, un gros boss remplace le mini boss.
+Les unités aériennes suivent la ligne directe vers le château. Elles sont
+immunisées aux tours et contrôles terrestres. La balliste leur inflige des
+dégâts physiques normaux, sans bonus de faiblesse ni réduction de résistance.
+L'or par ennemi augmente avec le numéro de vague. Aucun or pour une fuite.
+
+GROS BOSS
+Toutes les 6 secondes, il a 65 % de chances de tenter une attaque sur une
+construction. Jusqu'à 16 constructions sont tirées au hasard et examinées.
+Il choisit aléatoirement parmi celles dont la suppression réduirait son
+trajet restant. Les attaques n'ont pas de limite de portée dans ce prototype.
+Les tours possèdent des points de vie, renforcés à chaque niveau. La mort
+d'une tour ne donne pas de remboursement. Le chemin est recalculé dès sa
+destruction ; les monstres continuent leur déplacement sans téléportation.
+
+RÉGLAGES PROVISOIRES D'ÉQUILIBRAGE
+Départ : 600 or, château à 20 points.
+Prix N1 : Archer 50, Canon 85, Sorcier 65, Arcane 100, Balliste 70,
+Frost 60, Séisme 90, Poison 80.
+Amélioration : plafond(prix N1 × 1,45^niveau actuel).
+Dégâts : valeur de base × 1,55^(niveau − 1).
+Portée : fixe pour chaque type de tour, du niveau 1 au niveau 7.
+La cadence ne change pas non plus avec les niveaux. Les améliorations de
+dégâts augmentent les dégâts par tir, sans accélérer les attaques.
+Intervalle entre deux tirs à vitesse normale : Archer 1,2 s, Canon 2,0 s,
+Sorcier 1,2 s, Arcane 1,8 s, Balliste 0,9 s. Poison : application toutes
+les 1,2 s, Frost toutes les 0,8 s, Séisme toutes les 1,5 s.
+Tours : 120 PV au niveau 1 puis +60 PV par niveau supplémentaire.
+Vente : 70 % de tout l'or investi, arrondi à l'entier inférieur.
+Résistance terrestre : dégâts ×0,5 ; faiblesse : dégâts ×1,5.
+Rayon des effets de zone : 1,5 case autour de la cible.
+Frost : vitesse ×0,60 au N1 jusqu'à ×0,36 au N7.
+Séisme : vitesse ×0,75 au N1 jusqu'à ×0,51 au N7.
+Ralentissements : 2 + niveau ×0,2 secondes. Le plus fort s'applique,
+sans multiplication des ralentissements ; une nouvelle application du
+même effet renouvelle sa durée.
+Poison : 7 dégâts magiques/seconde au N1, augmentés avec les niveaux.
+Durée : 4 + niveau ×0,5 secondes. Une même tour renouvelle son poison.
+Les poisons provenant de tours différentes se cumulent.
+Ennemis : 50 PV au départ, puis +6 % de PV à chaque vague. Les volants ont
+60 % des PV des monstres terrestres de la même vague (environ 51 PV à la
+vague 10). Boss : multiplicateurs de PV ×16 pour les mini boss et ×75
+pour les gros boss. Par rapport au prototype 03, les mini boss ont deux
+fois plus de PV et les gros boss trois fois plus de PV à vague égale.
+Entre les vagues : 15 secondes de préparation avec lancement anticipé
+possible. Construction, vente et amélioration possibles en combat et en pause.
+Impossible de construire sous un monstre terrestre ou sur sa case suivante,
+de fermer l'entrée ou de piéger un monstre déjà présent.
+La première minute ne peut pas être écourtée. Les vitesses ×1, ×2, ×3 et ×5 ne concernent
+que le combat ; le bouton parcourt ces quatre vitesses. La pause arrête
+aussi le compte à rebours. La simulation garde une cadence de tir cohérente
+à chaque vitesse.
+Fuite au château : 1 point pour une unité, 3 pour un mini boss, 5 pour un
+boss majeur. Victoire après la vague 100 entièrement terminée.
+Ces paramètres servent à tester les mécaniques et demandent de l'équilibrage.
+
+VÉRIFICATIONS
+Exécuté avec Godot 4.5.1. Pour lancer les tests :
+godot --headless --path . --script tests.gd
+Les tests couvrent les trois grilles, les distances comparées à AStarGrid2D,
+les huit tours, leurs niveaux, le ciblage sol/air, les résistances, les effets,
+les boss et le recalcul de chemin, les temporisations, l'économie et les
+commandes de vue. Une simulation parcourt les 100 vagues avec des ennemis
+éliminés artificiellement : elle vérifie le déroulement, pas la difficulté.
+Le record est sauvegardé localement ; la partie en cours n'est pas sauvegardée.
+Les graphismes sont temporaires, sans dépendances externes.
+
+MOBILE
+Aucun APK ni IPA fourni. Le tactile et les performances restent à tester sur
+appareils. Adapter les zones sûres aux encoches et aux différents écrans.
+Android : modèles d'export de votre version Godot, OpenJDK et SDK Android.
+https://docs.godotengine.org/en/stable/tutorials/export/exporting_for_android.html
+L'export iOS nécessite un Mac avec Xcode et la configuration de l'équipe Apple.
+https://docs.godotengine.org/en/stable/tutorials/export/exporting_for_ios.html
+
+FICHIERS
+project.godot : configuration et format portrait.
+main.tscn : scène de démarrage.
+game.gd : règles, navigation, tours, vagues, combats et boss.
+main.gd : interface et sauvegarde du record.
+board.gd : rendu, zoom, déplacement et sélection de la grille.
+tests.gd : vérifications automatisées.
