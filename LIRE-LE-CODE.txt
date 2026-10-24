@@ -1,0 +1,70 @@
+LIRE LE CODE DE MAZE TD
+
+OUVRIR LES FICHIERS
+Dans Godot, importer project.godot, puis ouvrir les scripts depuis le panneau
+Système de fichiers. Ils sont également lisibles dans VS Code ou un éditeur
+de texte. Le jeu se lance depuis Godot avec F5 ou avec Jouer-MazeTD.cmd.
+
+ORDRE DE LECTURE CONSEILLÉ
+1. main.gd : démarrage, création des boutons et liaison avec le jeu.
+2. game.gd : données des tours, achats, vagues, navigation et combat.
+3. board.gd : dessin de la carte, caméra, zoom et clics/touchers.
+4. inspection.gd : fiches des tours/monstres et demandes de vente/amélioration.
+5. ui_layout.gd : positions des commandes en paysage/portrait et zones sûres.
+6. tests.gd : exemples de scénarios et résultats attendus.
+
+COMMENT LIRE LES COMMENTAIRES
+## avant une fonction : son rôle, les paramètres utiles, le résultat renvoyé
+et les données modifiées. Godot reconnaît ce format comme documentation.
+# dans une fonction : explication d'une étape ou d'une décision importante.
+Les noms de fonctions sont conservés en anglais pour retrouver les appels.
+
+QUELQUES TERMES GDSCRIPT
+extends : type Godot dont le script hérite (nœud visuel, objet de données…).
+const : valeur de référence qui ne change pas pendant l'exécution.
+var : variable ; := demande à Godot d'en déduire le type.
+func : fonction ; les paramètres sont entre parenthèses.
+-> bool / int / Vector2 : type de résultat ; -> void signifie aucun résultat.
+return : quitte la fonction, éventuellement en renvoyant un résultat.
+Vector2i : paire d'entiers, utilisée pour une case (x, y).
+Vector2 : paire de nombres décimaux, utilisée pour une position ou une taille.
+Rect2 : rectangle défini par sa position et ses dimensions.
+Array : liste ordonnée ; Dictionary : valeurs associées à des clés.
+Exemple : tower.level est ici la valeur de la clé "level" du dictionnaire.
+signal / emit / connect : une action émet un événement, une fonction connectée
+le reçoit. Cela permet aux boutons et au plateau de prévenir main.gd.
+func(): dans un appel : petite fonction anonyme, utilisée comme rappel.
+delta ou dt : temps écoulé en secondes. Le sens précis est décrit dans la fonction.
+res:// : racine du projet ; user:// : données locales de l'application.
+_ready, _process, _draw, _gui_input : rappels que Godot appelle automatiquement.
+L'indentation détermine quels blocs appartiennent à une condition ou une boucle.
+
+EXEMPLE : QUE SE PASSE-T-IL LORS D'UNE VENTE ?
+board._gui_input reçoit le toucher, puis pick_item identifie la tour dessinée.
+Le signal item_tapped appelle main.inspect_item et ouvre sa fiche.
+Le bouton de fiche émet sell_requested ; le panneau principal utilise sell_selected.
+Les deux chemins appellent main.sell_tower, puis game.sell.
+game.sell rembourse l'or, retire la tour et recalcule les chemins.
+main.refresh_ui actualise l'or, la sélection, les boutons et le plateau.
+
+EXEMPLE : COMMENT LE COMBAT AVANCE-T-IL ?
+Godot appelle main._process à chaque image.
+main appelle game.tick avec le temps écoulé.
+tick gère préparation/pause ou découpe le combat en pas de 1/60 seconde.
+combat_step fait apparaître et déplacer les monstres, applique les effets,
+fait attaquer les tours et vérifie les récompenses et la fin de vague.
+board.paint dessine ensuite les positions et effets ; il ne calcule pas les dégâts.
+
+OÙ MODIFIER QUOI ?
+Prix, dégâts, portée et cadence : catalogue TYPES au début de game.gd.
+Progression des PV : game.enemy_health ; composition : game.wave_plan.
+Achats et remboursements : game.build, upgrade_cost, upgrade et sell.
+Chemin le plus court : game.field_without, next_cell et rebuild_flow.
+Dessin des tours/monstres : board.paint ; ressources graphiques : assets/.
+Textes et boutons principaux : main.make_ui et main.refresh_ui.
+Contenu des fiches : inspection.update_card ; leur apparence : inspection._ready.
+Disposition mobile : ui_layout.portrait_layout et landscape_layout.
+Les fichiers .uid et le dossier .godot sont gérés par Godot ; ne pas les annoter à la main.
+
+Les commentaires décrivent le fonctionnement actuel du prototype. Une modification
+des règles doit être accompagnée d'une mise à jour des commentaires concernés.

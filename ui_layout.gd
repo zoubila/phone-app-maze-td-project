@@ -1,6 +1,11 @@
 extends RefCounted
-## Two mobile layouts sharing the same controls, board and game state.
+## DISPOSITION MOBILE : deux agencements des mêmes contrôles, sans changer la partie.
+## Les méthodes static s'appellent sur le script directement, sans créer d'instance.
+## Les positions sont logiques : arrange règle l'échelle pour les adapter aux pixels de l'écran.
 
+## Renvoie la zone utilisable en coordonnées du viewport, hors encoches et barres système.
+## Sur ordinateur ou si le système ne fournit pas de zone valide, utilise tout le viewport.
+## Convertit les pixels de fenêtre en coordonnées logiques selon le rapport de taille.
 static func safe_viewport_area(viewport_size: Vector2) -> Rect2:
 	var full := Rect2(Vector2.ZERO, viewport_size)
 	if not OS.has_feature("android") and not OS.has_feature("ios"):
@@ -12,18 +17,26 @@ static func safe_viewport_area(viewport_size: Vector2) -> Rect2:
 	var safe := Rect2(DisplayServer.get_display_safe_area()).intersection(Rect2(window_origin, window_size))
 	if not safe.has_area():
 		return full
+	# La zone système est en pixels ; l'interface peut être étirée dans un autre espace de coordonnées.
 	var ratio := viewport_size / window_size
 	return Rect2((safe.position - window_origin) * ratio, safe.size * ratio)
 
+## Positionne et dimensionne control dans son parent ; les valeurs sont des unités logiques.
+## Utilitaire commun aux dispositions portrait et paysage pour éviter de répéter les affectations.
 static func place(control: Control, x: float, y: float, width: float, height: float) -> void:
 	control.position = Vector2(x, y)
 	control.size = Vector2(width, height)
 
+## Choisit portrait ou paysage selon area, puis adapte l'échelle de toute l'interface.
+## ui est la scène main ; area est sa zone sûre. Les références sont 720×1280 et 1280×720.
+## Réutilise les mêmes contrôles et le même modèle : une rotation ne relance aucune partie.
 static func arrange(ui, area: Rect2) -> void:
 	if not area.has_area():
 		return
 	ui.landscape = area.size.x >= area.size.y
 	var reference := Vector2(1280, 720) if ui.landscape else Vector2(720, 1280)
+	# Prend le rapport le plus petit pour que toute l'interface tienne dans la zone sûre.
+	# Le surplus de largeur/hauteur augmente ensuite l'espace logique disponible.
 	var factor := minf(area.size.x / reference.x, area.size.y / reference.y)
 	ui.position = area.position
 	ui.scale = Vector2.ONE * factor
@@ -34,6 +47,8 @@ static func arrange(ui, area: Rect2) -> void:
 		portrait_layout(ui, ui.layout_size.x, ui.layout_size.y)
 	ui.board.refresh()
 
+## Place les commandes sous la carte dans l'espace logique width × height.
+## Le catalogue forme deux rangées de quatre tours ; le plateau absorbe la hauteur disponible.
 static func portrait_layout(ui, width: float, height: float) -> void:
 	var content := width - 64
 	place(ui.title_label, 32, 30, content, 42)
@@ -45,12 +60,14 @@ static func portrait_layout(ui, width: float, height: float) -> void:
 	place(ui.castle_button, width - 260, 188, 108, 48)
 	place(ui.overview_button, width - 140, 188, 108, 48)
 	ui.board.position = Vector2(32, 248)
+	# Réserve le bas aux commandes ; resize_view conserve le cadrage de la carte pendant la rotation.
 	ui.board.resize_view(Vector2(content, height - 680))
 	place(ui.map_info, 32, height - 420, content - 160, 40)
 	place(ui.zoom_out_button, width - 176, height - 422, 64, 44)
 	place(ui.zoom_in_button, width - 96, height - 422, 64, 44)
 	ui.detail.autowrap_mode = TextServer.AUTOWRAP_OFF
 	place(ui.detail, 32, height - 373, content, 48)
+	# Quatre boutons séparés par trois espaces de 8 unités.
 	var button_width := (content - 24) / 4
 	for i in range(ui.type_buttons.size()):
 		place(ui.type_buttons[i], 32 + (i % 4) * (button_width + 8), height - 317 + (i / 4) * 61, button_width, 56)
@@ -64,7 +81,10 @@ static func portrait_layout(ui, width: float, height: float) -> void:
 	ui.footer_label.visible = true
 	place(ui.footer_label, 32, height - 48, content, 25)
 
+## Place la carte à gauche et les commandes dans une colonne à droite.
+## width et height sont les dimensions logiques après mise à l'échelle ; le catalogue a deux colonnes.
 static func landscape_layout(ui, width: float, height: float) -> void:
+	# Colonne de commandes de largeur fixe dans l'espace logique ; la carte occupe la largeur restante.
 	var panel_width := 356.0
 	var panel_x := width - panel_width - 24
 	var map_width := panel_x - 48

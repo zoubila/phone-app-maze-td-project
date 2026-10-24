@@ -137,6 +137,8 @@ L'export iOS nécessite un Mac avec Xcode et la configuration de l'équipe Apple
 https://docs.godotengine.org/en/stable/tutorials/export/exporting_for_ios.html
 
 FICHIERS
+Les six scripts .gd sont commentés en français, fonction par fonction.
+Lire LIRE-LE-CODE.txt pour l'ordre de lecture, les termes et les points d'entrée.
 project.godot : paysage par défaut, orientation capteur et affichage adaptatif.
 main.tscn : scène de démarrage.
 game.gd : règles, navigation, tours, vagues, combats et boss.

@@ -1,23 +1,38 @@
 extends SceneTree
+## VÉRIFICATIONS AUTOMATISÉES : exécuter godot --headless --path . --script tests.gd.
+## SceneTree sert ici de programme de test, et non de scène de jeu normale.
+## Les messages de test restent en anglais pour garder les résultats existants identifiables.
+## Les scénarios isolés et les morts artificielles ne mesurent pas l'équilibrage d'une partie jouée.
+# Le même modèle que le jeu est testé ; checks et failures comptent les assertions exécutées/échouées.
 const Model = preload("res://game.gd")
 var checks := 0
 var failures := 0
 
+## Enregistre une vérification ; condition=false incrémente les échecs et affiche title.
+## Ne stoppe pas la suite pour pouvoir signaler plusieurs problèmes dans une seule exécution.
 func check(condition: bool, title: String) -> void:
 	checks += 1
 	if not condition:
 		failures += 1
 		push_error(title)
 
+## Compare deux nombres avec une tolérance absolue de 0,001.
+## Utilise check car les calculs flottants ne sont pas toujours égaux au bit près.
 func near(value: float, expected: float, title: String) -> void:
 	check(absf(value - expected) < 0.001, title + " (%f vs %f)" % [value, expected])
 
+## Point d'entrée du script de tests, lancé avec --headless --script tests.gd.
+## Diffère run pour attendre que Godot ait initialisé l'arbre de scènes.
 func _initialize() -> void:
 	call_deferred("run")
 
+## Fabrique un dictionnaire de tour de test sans payer ni construire sur la carte.
+## kind choisit le type, level le niveau ; utile pour isoler ciblage, impacts et effets.
 func tower(kind: int, level := 1) -> Dictionary:
 	return {"kind": kind, "level": level, "spent": Model.TYPES[kind].cost, "hp": 120.0 + (level - 1) * 60, "cooldown": 0.0}
 
+## Ajoute un ennemi de test au modèle game, puis force sa catégorie et ses PV à 1000.
+## Renvoie le même dictionnaire que celui de la liste game.enemies pour suivre les modifications.
 func enemy(game, air := false, armor := "none") -> Dictionary:
 	var item: Dictionary = game.spawn_enemy()
 	item.air = air
@@ -26,6 +41,8 @@ func enemy(game, air := false, armor := "none") -> Dictionary:
 	item.max_hp = 1000.0
 	return item
 
+## Envoie un appui puis un relâchement gauche dans le viewport pour tester un clic réel.
+## point est en coordonnées du viewport, après transformation des contrôles si nécessaire.
 func gui_click(point: Vector2) -> void:
 	for pressed in [true, false]:
 		var event := InputEventMouseButton.new()
@@ -36,9 +53,13 @@ func gui_click(point: Vector2) -> void:
 		event.global_position = point
 		root.push_input(event, true)
 
+## Exécute les scénarios : navigation, économie, tours, vagues, combats et interface mobile.
+## Utilise un modèle neuf ou reset entre les scénarios pour isoler les résultats.
+## Termine par inspection_tests, affiche le bilan et quitte avec le code 1 si un test a échoué.
 func run() -> void:
 	var started := Time.get_ticks_msec()
 	var game = Model.new()
+	# NAVIGATION : pour chaque grille, compare le plus court chemin avec AStarGrid2D de Godot.
 	for index in range(3):
 		game.reset(index)
 		check(game.cols == Model.GRID_SIZES[index].x and game.rows == Model.GRID_SIZES[index].y, "Selected dimensions")
@@ -60,11 +81,13 @@ func run() -> void:
 			var difference: Vector2i = game.route[i] - game.route[i - 1]
 			check(absi(difference.x) + absi(difference.y) == 1 and not game.towers.has(game.route[i]), "Path continuity and obstacle avoidance")
 	game.reset(1)
+	# VALIDATION DES ACHATS : entrée, sortie, limites, type de tour et budget.
 	check(not game.build(game.entry, 0) and not game.build(game.exit_cell, 0), "Protect entry and exit")
 	check(not game.build(Vector2i(-1, 2), 0) and not game.build(Vector2i(game.cols, 2), 0), "Reject out-of-bounds coordinates")
 	check(not game.build(Vector2i(1, 1), -1) and not game.build(Vector2i(1, 1), 8), "Reject invalid tower types")
 	game.gold = 0
 	check(not game.build(Vector2i(1, 1), 0), "Reject unaffordable purchase")
+	# Vérifie les types de tours dans ce scénario ; les appels check décrivent l'attendu individuel.
 	for kind in range(8):
 		game.reset(1)
 		game.gold = 100000
@@ -82,11 +105,13 @@ func run() -> void:
 		var before: int = game.gold
 		check(game.sell(cell) and game.gold == before + refund, "Refund all investment at 70 percent")
 	game.reset(1)
+	# DÉPART ET TEMPS : lancement manuel, attente automatique et pause, même avec combat accéléré.
 	game.speed_multiplier = 2
 	check(game.start_wave(), "Can launch the first wave immediately")
 	check(game.active and game.wave == 1 and game.preparation == 0, "Manual launch clears preparation countdown")
 	check(not game.start_wave() and game.wave == 1, "Repeated launch cannot create a second active wave")
 	game.reset(1)
+	# DÉPART ET TEMPS : lancement manuel, attente automatique et pause, même avec combat accéléré.
 	game.speed_multiplier = 2
 	game.tick(59.9)
 	check(not game.active and game.wave == 0, "No wave before 60 seconds even in double speed")
@@ -113,6 +138,7 @@ func run() -> void:
 	game.paused = false
 	game.tick(0.1)
 	near(game.position_of(game.enemies[0]).distance_to(original), 0.5, "Double combat speed")
+	# COMPOSITION : calendrier des boss, alternance des résistances et croissance régulière des PV.
 	for wave in range(1, 101):
 		var plan: Dictionary = game.wave_plan(wave)
 		check(bool(plan.air) == (wave % 10 == 0), "Flying units every tenth wave")
@@ -120,6 +146,7 @@ func run() -> void:
 		check(plan.armor == ("physical" if wave % 2 == 1 else "magic"), "Alternating ground resistances")
 		if wave > 1:
 			near(game.enemy_health(wave) / game.enemy_health(wave - 1), 1.06, "Enemy health increases by six percent each wave")
+	# VAGUES MIXTES : vérifie des aériens et des terrestres ordinaires à chaque multiple de dix.
 	for wave in range(10, 101, 10):
 		game.reset(1)
 		game.wave = wave
@@ -138,6 +165,7 @@ func run() -> void:
 	near(game.enemy_health(10, false, 1), game.enemy_health(10) * 16.0, "Mini boss durability doubled from prototype 03")
 	for boss_wave in [50, 100]:
 		near(game.enemy_health(boss_wave, false, 2), game.enemy_health(boss_wave) * 75.0, "Major boss durability tripled from prototype 03")
+	# CADENCE ET PORTÉE : relève les instants de tir d'un archer N1 puis N7 contre une cible immobile.
 	for level in [1, 7]:
 		game.reset(1)
 		game.gold = 100000
@@ -170,6 +198,7 @@ func run() -> void:
 	game.build(game.entry + Vector2i(1, -1), 0)
 	game.preparation = 0
 	game.start_wave()
+	# DURÉE DU COMBAT : mesure le temps nécessaire à un archer pour enlever 300 PV sans résistance.
 	var ttk_dummy: Dictionary = enemy(game)
 	ttk_dummy.hp = 300.0
 	ttk_dummy.speed = 0.0
@@ -180,6 +209,7 @@ func run() -> void:
 		measured_ttk += 1.0 / 60.0
 	check(measured_ttk >= 22.8 and measured_ttk < 22.9, "Archer TTK is 22.8 seconds against neutral stationary 300 HP target")
 	game.reset(1)
+	# SCÉNARIO ANTIAÉRIEN : deux Ballistes contre le contingent volant de la vague 10.
 	game.build(game.entry + Vector2i(2, -1), 4)
 	game.build(game.entry + Vector2i(7, -1), 4)
 	game.wave = 9
@@ -187,20 +217,21 @@ func run() -> void:
 	game.start_wave()
 	for frame in range(1000):
 		game.tick(0.1)
-		# Isolate antiair balance: ground units are removed by the harness.
+		# Selon le scénario, parcourt les ennemis pour relever leur état ou isoler une mécanique.
 		for item in game.enemies:
+			# Retire artificiellement le sol pour tester seulement la capacité des Ballistes contre les volants.
 			if not item.air:
 				item.hp = 0
 		if not game.active:
 			break
 	check(not game.active and game.lives == 20, "Two level-one ballistas can defeat the first flying contingent")
-	# Dynamic building may reroute, but may never trap an already spawned enemy.
 	game.reset(1)
 	game.gold = 100000
 	for cell in [Vector2i(3, 4), Vector2i(4, 3), Vector2i(4, 5), Vector2i(5, 3), Vector2i(5, 5)]:
 		game.build(cell, 0)
 	game.preparation = 0.0
 	game.start_wave()
+	# CONSTRUCTION DYNAMIQUE : place un monstre à mi-segment et vérifie qu'on ne peut pas le piéger.
 	var trapped: Dictionary = game.spawn_enemy()
 	trapped.cell = Vector2i(4, 4)
 	trapped.next = Vector2i(5, 4)
@@ -212,8 +243,8 @@ func run() -> void:
 	var moving_position: Vector2 = game.position_of(trapped)
 	check(game.sell(Vector2i(4, 3)), "Selling works in live combat")
 	check(game.position_of(trapped) == moving_position, "Live sale and repath do not teleport units")
-	# Identical simulated time must produce identical combat at every speed.
 	var reference: Dictionary = {}
+	# VITESSES : compare les résultats après une même durée SIMULÉE à chaque accélération.
 	for speed in Model.COMBAT_SPEEDS:
 		game.reset(1)
 		game.gold = 10000
@@ -228,6 +259,7 @@ func run() -> void:
 			game.tick(0.02)
 		var health := 0.0
 		var positions := 0.0
+		# Selon le scénario, parcourt les ennemis pour relever leur état ou isoler une mécanique.
 		for item in game.enemies:
 			health += item.hp
 			positions += game.position_of(item).x
@@ -239,6 +271,7 @@ func run() -> void:
 			near(result.health, reference.health, "Speed preserves damage and poison")
 			near(result.positions, reference.positions, "Speed preserves movement")
 	game.reset(1)
+	# DÉGÂTS : vérifie séparément résistances, faiblesses, ciblage sol/air et ralentissements sans dégâts.
 	var armored := enemy(game, false, "physical")
 	var warded := enemy(game, false, "magic")
 	game.apply_hit(Vector2i.ZERO, tower(0), armored)
@@ -250,6 +283,7 @@ func run() -> void:
 	near(armored.hp, 959.5, "Magic vulnerability")
 	near(warded.hp, 966.5, "Magic resistance")
 	var flying := enemy(game, true)
+	# Vérifie les types de tours dans ce scénario ; les appels check décrivent l'attendu individuel.
 	for kind in range(8):
 		if kind != 4:
 			game.apply_hit(Vector2i.ZERO, tower(kind), flying)
@@ -267,6 +301,7 @@ func run() -> void:
 	var strongest: float = ground.slow_factor
 	game.apply_hit(Vector2i.ZERO, tower(6), ground)
 	near(ground.slow_factor, strongest, "Weaker slow cannot replace stronger one")
+	# ZONE : deux monstres proches doivent recevoir les dégâts ou le contrôle de la même attaque.
 	for kind in [1, 3, 6]:
 		game.reset(1)
 		var first := enemy(game)
@@ -278,6 +313,7 @@ func run() -> void:
 		else:
 			check(first.hp < 1000 and second.hp < 1000, "Physical and magical area damage")
 	game.reset(1)
+	# POISON : vérifie renouvellement par source, cumul entre tours et arrêt exact à expiration.
 	ground = enemy(game, false, "physical")
 	game.apply_hit(Vector2i(1, 1), tower(7), ground)
 	near(ground.hp, 1000.0, "Poison has no instant damage")
@@ -290,9 +326,9 @@ func run() -> void:
 	game.poison_tick(ground, 10.0)
 	near(ground.hp, 905.5, "DoT expiry prevents excess damage on long frame")
 	check(ground.poison.is_empty(), "Expired poison removed")
-	# Real movement after a major boss destroys a relevant wall, without teleporting.
 	game.reset(1)
 	game.gold = 10000
+	# BOSS : construit un mur utile, force une attaque et contrôle raccourci, mouvement et absence de remboursement.
 	for y in range(10, 15):
 		game.build(Vector2i(3, y), 0)
 	game.wave = 50
@@ -333,11 +369,11 @@ func run() -> void:
 	var reward_early: int = game.spawn_enemy().reward
 	game.wave = 99
 	check(game.spawn_enemy().reward > reward_early, "Rewards increase with wave")
-	# Exercise the full campaign state machine. Enemies are deliberately killed
-	# by the harness; this tests scheduling, payouts and victory, not balancing.
 	game = Model.new()
 	game.reset(1)
 	game.preparation = 0.0
+	# CAMPAGNE : supprime artificiellement les ennemis pour tester les 100 vagues et les paiements.
+	# Cette boucle ne démontre pas que la campagne est gagnable avec de vraies tours.
 	var kills := 0
 	for expected_wave in range(1, 101):
 		check(game.start_wave(), "Start each campaign wave")
@@ -345,6 +381,7 @@ func run() -> void:
 		var steps := 0
 		while game.active and steps < 500:
 			game.tick(0.65)
+			# Selon le scénario, parcourt les ennemis pour relever leur état ou isoler une mécanique.
 			for item in game.enemies:
 				item.hp = 0
 				kills += 1
@@ -361,6 +398,7 @@ func run() -> void:
 	game.start_wave()
 	game.lives = 1
 	game.to_spawn = 1
+	# DÉFAITE : fait atteindre le château à un monstre alors qu'il ne reste qu'une vie.
 	var leak: Dictionary = game.spawn_enemy()
 	leak.cell = game.exit_cell - Vector2i.RIGHT
 	leak.next = game.exit_cell
@@ -370,10 +408,11 @@ func run() -> void:
 	check(game.gold == 600, "No gold for escaped enemy")
 	game.reset(1)
 	check(not game.ended and game.wave == 0 and game.preparation == 60, "Replay restores first preparation")
-	# UI input uses actual GUI events: tap builds, drag pans without building.
+	# INTERFACE RÉELLE : instancie la scène et envoie des clics, plutôt que d'appeler seulement les actions.
 	var scene = load("res://main.tscn").instantiate()
 	root.size = Vector2i(720, 1280)
 	root.add_child(scene)
+	# Fige le temps pendant les clics ; les états de combat restent contrôlés par le scénario.
 	scene.set_process(false)
 	await process_frame
 	check(not scene.wave_button.disabled and scene.wave_button.text.contains("60"), "First-wave launch button is enabled at 60 seconds")
@@ -420,6 +459,7 @@ func run() -> void:
 	var tower_count: int = scene.game.towers.size()
 	press.pressed = true
 	board._gui_input(press)
+	# CAMÉRA : vérifie qu'un glissement déplace la carte sans construire de tour.
 	var motion := InputEventMouseMotion.new()
 	motion.position = screen + Vector2(-60, 30)
 	board._gui_input(motion)
@@ -443,8 +483,7 @@ func run() -> void:
 	check(board.zoom == 1.0 and scene.game.towers.size() == before_overview, "Overview tap zooms without accidental construction")
 	board.castle_view()
 	check(board.cell_at(Vector2(board.size.x - 35, board.size.y / 2)) == scene.game.exit_cell, "Castle shortcut")
-	# Rotate and resize a live paused game. Test actual GUI coordinates as well
-	# as bounds, non-overlap, safe-area scaling and preservation of game state.
+	# ORIENTATION : vérifie configuration, conservation de partie/caméra et contrôles après rotation.
 	check(ProjectSettings.get_setting("display/window/handheld/orientation") == DisplayServer.SCREEN_SENSOR, "Phone sensor enables portrait and landscape")
 	check(ProjectSettings.get_setting("display/window/size/window_width_override") > ProjectSettings.get_setting("display/window/size/window_height_override"), "Default desktop window is landscape")
 	scene.game.gold = 100000
@@ -458,6 +497,8 @@ func run() -> void:
 	board.zoom = 1.0
 	board.pan = board.size / 2.0 - Vector2(25, 25) * board.CELL
 	var focus_before: Vector2 = (board.size / 2.0 - board.pan) / board.zoom
+	# Répète les interactions sur paysage, portrait, tablette et écrans allongés.
+	# await process_frame laisse Godot appliquer les tailles et transformations avant de cliquer.
 	for dimensions in [Vector2i(1280, 720), Vector2i(720, 1280), Vector2i(1600, 720), Vector2i(1024, 768), Vector2i(1080, 2400), Vector2i(2400, 1080)]:
 		root.size = dimensions
 		await process_frame
@@ -497,6 +538,7 @@ func run() -> void:
 	await process_frame
 	scene.apply_layout(true)
 	near(board.zoom, board.minimum_zoom(), "Overview refits entire map after rotation")
+	# Simule une zone sûre réduite, sans prétendre reproduire tous les modèles de téléphone.
 	var safe_area := Rect2(40, 24, 1200, 656)
 	preload("res://ui_layout.gd").arrange(scene, safe_area)
 	check(safe_area.grow(0.1).encloses(Rect2(scene.position, scene.layout_size * scene.scale)), "UI respects simulated notch and system-bar safe area")
@@ -506,18 +548,24 @@ func run() -> void:
 	print("CHECKS: %d / FAILURES: %d / CAMPAIGN KILLS: %d / MS: %d" % [checks, failures, kills, Time.get_ticks_msec() - started])
 	quit(0 if failures == 0 else 1)
 
+## Envoie un déplacement de souris vers point dans le viewport, pour tester le survol.
 func gui_move(point: Vector2) -> void:
 	var event := InputEventMouseMotion.new()
 	event.position = point
 	event.global_position = point
 	root.push_input(event, true)
 
+## Vérifie les fiches et la sélection avec de vrais événements graphiques sur six formats.
+## Couvre toit des tours, vente, amélioration, catalogue, suivi de monstre, fermeture et rotation.
+## Fige la simulation pendant les clics afin que les cibles et résultats restent reproductibles.
 func inspection_tests() -> void:
 	var ui = load("res://main.tscn").instantiate()
 	root.add_child(ui)
 	ui.set_process(false)
 	await process_frame
 	var board: Control = ui.board
+	# Répète les interactions sur paysage, portrait, tablette et écrans allongés.
+	# await process_frame laisse Godot appliquer les tailles et transformations avant de cliquer.
 	for dimensions in [Vector2i(1280, 720), Vector2i(720, 1280), Vector2i(1600, 720), Vector2i(1024, 768), Vector2i(1080, 2400), Vector2i(2400, 1080)]:
 		ui.close_inspection()
 		ui.game.reset(0)
@@ -536,6 +584,7 @@ func inspection_tests() -> void:
 		ui.game.paused = true
 		ui.refresh_ui()
 		await process_frame
+		# RÉGRESSION DE VENTE : clique sur le toit, qui dépasse la case et sélectionnait auparavant la mauvaise case.
 		var roof: Vector2 = board.pan + ((Vector2(first_cell) + Vector2.ONE * 0.5) * board.CELL + Vector2(0, -23)) * board.zoom
 		var screen_roof: Vector2 = board.get_global_transform_with_canvas() * roof
 		var picked: Dictionary = board.pick_item(roof)
@@ -563,6 +612,7 @@ func inspection_tests() -> void:
 		before_gold = ui.game.gold
 		gui_click(ui.sell_button.get_global_transform_with_canvas() * (ui.sell_button.size / 2))
 		check(ui.game.towers.is_empty() and ui.game.gold == before_gold + refund, "Main sale button works while contextual information is open")
+		# CATALOGUE : l'aperçu reste passif ; un choix au toucher permet de construire au clic suivant.
 		gui_move(ui.type_buttons[2].get_global_transform_with_canvas() * (ui.type_buttons[2].size / 2))
 		check(ui.inspector.visible and not ui.inspector.pinned and ui.inspector.target.get("kind") == 2, "Catalog tower hover displays stats")
 		gui_click(ui.type_buttons[2].get_global_transform_with_canvas() * (ui.type_buttons[2].size / 2))
@@ -576,6 +626,7 @@ func inspection_tests() -> void:
 		check(ui.game.towers[first_cell].level == 2 and ui.inspector.title_label.text.contains("N2/7"), "Context upgrade updates level and pinned stats")
 		gui_click(ui.inspector.close_button.get_global_transform_with_canvas() * (ui.inspector.close_button.size / 2))
 		check(not ui.inspector.visible and ui.selected == first_cell, "Closing card preserves main sale selection")
+		# FICHE MONSTRE : vérifie identifiant stable, mise à jour des PV/effets et absence d'achat involontaire.
 		var monster: Dictionary = ui.game.spawn_enemy()
 		monster.cell = ui.game.entry + Vector2i(6, 0)
 		monster.next = monster.cell + Vector2i.RIGHT
@@ -626,6 +677,7 @@ func inspection_tests() -> void:
 		down.position = drag.position
 		root.push_input(down, true)
 		check(not ui.inspector.visible and ui.game.towers.size() == tower_count, "Dragging closes the card without buying or selling")
+	# ROTATION AVEC FICHE : conserve la bonne cible puis vérifie la vente dans le combat repris.
 	var remaining_cell: Vector2i = ui.game.towers.keys()[0]
 	ui.inspect_item({"type": "tower", "cell": remaining_cell}, board.pan + (Vector2(remaining_cell) + Vector2.ONE * 0.5) * board.CELL * board.zoom)
 	root.size = Vector2i(720, 1280)
