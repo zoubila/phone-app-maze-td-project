@@ -40,14 +40,14 @@ static func create_overlay_controls(ui) -> void:
 	ui.hud_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 	var background := StyleBoxFlat.new()
-	background.bg_color = Color("112219b8")
+	background.bg_color = Color("#112219b8")
 	background.set_corner_radius_all(8)
 	ui.hud_panel.add_theme_stylebox_override("panel", background)
 	ui.add_child(ui.hud_panel)
 	ui.status = Controls.label(ui, "", Vector2.ZERO, Vector2.ZERO, 20)
-	ui.message = Controls.label(ui, "", Vector2.ZERO, Vector2.ZERO, 17, Color("ebd5a2"))
+	ui.message = Controls.label(ui, "", Vector2.ZERO, Vector2.ZERO, 17, Color("#ebd5a2"))
 	ui.message.add_theme_constant_override("outline_size", 4)
-	ui.message.add_theme_color_override("font_outline_color", Color("07130ed9"))
+	ui.message.add_theme_color_override("font_outline_color", Color("#07130ed9"))
 	ui.pause_button = Controls.button(ui, "Pause", Vector2.ZERO, Vector2(100, 44), ui.toggle_pause)
 	ui.speed_button = Controls.button(ui, "Vitesse ×1", Vector2.ZERO, Vector2(120, 44), ui.toggle_speed)
 	ui.settings_button = Controls.button(ui, "⚙", Vector2.ZERO, Vector2(44, 44), ui.open_settings)
@@ -57,7 +57,7 @@ static func create_overlay_controls(ui) -> void:
 
 	for button in [ui.pause_button, ui.speed_button, ui.settings_button, ui.wave_button]:
 		var style := background.duplicate() as StyleBoxFlat
-		style.border_color = Color("c2ac7377")
+		style.border_color = Color("#c2ac7377")
 		style.set_border_width_all(1)
 		button.add_theme_stylebox_override("normal", style)
 

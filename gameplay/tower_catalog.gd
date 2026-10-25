@@ -32,7 +32,7 @@ const TYPES := [
 		"mode": "aoe",
 		"school": "physical",
 		"air": false,
-		"color": Color("d58b63"),
+		"color": Color("#d58b63"),
 	},
 	{
 		"name": "Sorcier",
@@ -43,7 +43,7 @@ const TYPES := [
 		"mode": "single",
 		"school": "magic",
 		"air": false,
-		"color": Color("bd9de8"),
+		"color": Color("#bd9de8"),
 	},
 	{
 		"name": "Arcane",
@@ -54,7 +54,7 @@ const TYPES := [
 		"mode": "aoe",
 		"school": "magic",
 		"air": false,
-		"color": Color("df9ace"),
+		"color": Color("#df9ace"),
 	},
 	{
 		"name": "Balliste",
@@ -65,7 +65,7 @@ const TYPES := [
 		"mode": "single",
 		"school": "physical",
 		"air": true,
-		"color": Color("f1d18a"),
+		"color": Color("#f1d18a"),
 	},
 	{
 		"name": "Frost",
@@ -76,7 +76,7 @@ const TYPES := [
 		"mode": "slow",
 		"school": "none",
 		"air": false,
-		"color": Color("8ed7df"),
+		"color": Color("#8ed7df"),
 	},
 	{
 		"name": "Séisme",
@@ -87,7 +87,7 @@ const TYPES := [
 		"mode": "slow_aoe",
 		"school": "none",
 		"air": false,
-		"color": Color("c7a883"),
+		"color": Color("#c7a883"),
 	},
 	{
 		"name": "Poison",
@@ -98,6 +98,6 @@ const TYPES := [
 		"mode": "dot",
 		"school": "magic",
 		"air": false,
-		"color": Color("9bc974"),
+		"color": Color("#9bc974"),
 	}
 ]

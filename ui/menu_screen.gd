@@ -25,16 +25,16 @@ func _ready() -> void:
 	card = Panel.new()
 
 	var style := StyleBoxFlat.new()
-	style.bg_color = Color("101f19f5")
-	style.border_color = Color("bfa56b")
+	style.bg_color = Color("#101f19f5")
+	style.border_color = Color("#bfa56b")
 	style.set_border_width_all(1)
 	style.set_corner_radius_all(18)
-	style.shadow_color = Color("00000088")
+	style.shadow_color = Color("#00000088")
 	style.shadow_size = 28
 	card.add_theme_stylebox_override("panel", style)
 	add_child(card)
 
-	title = Controls.label(card, "LES MARCHES\nDU ROYAUME", Vector2.ZERO, Vector2.ZERO, 36, Color("f3dfaf"))
+	title = Controls.label(card, "LES MARCHES\nDU ROYAUME", Vector2.ZERO, Vector2.ZERO, 36, Color("#f3dfaf"))
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	description = Controls.label(
@@ -43,11 +43,11 @@ func _ready() -> void:
 		Vector2.ZERO,
 		Vector2.ZERO,
 		19,
-		Color("bdc8b1"),
+		Color("#bdc8b1"),
 	)
 	description.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	description.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	grid_label = Controls.label(card, "TAILLE DU TERRAIN", Vector2.ZERO, Vector2.ZERO, 15, Color("bfa56b"))
+	grid_label = Controls.label(card, "TAILLE DU TERRAIN", Vector2.ZERO, Vector2.ZERO, 15, Color("#bfa56b"))
 
 	grid_choice = OptionButton.new()
 	grid_choice.add_theme_font_size_override("font_size", 20)
@@ -65,21 +65,21 @@ func _ready() -> void:
 	)
 
 	var primary := style.duplicate() as StyleBoxFlat
-	primary.bg_color = Color("bfa56b")
+	primary.bg_color = Color("#bfa56b")
 	primary.set_corner_radius_all(8)
 	primary.shadow_size = 0
 	start_button.add_theme_stylebox_override("normal", primary)
 
 	var hover := primary.duplicate() as StyleBoxFlat
-	hover.bg_color = Color("ddc58e")
+	hover.bg_color = Color("#ddc58e")
 	start_button.add_theme_stylebox_override("hover", hover)
 
 	var pressed := primary.duplicate() as StyleBoxFlat
-	pressed.bg_color = Color("a88b52")
+	pressed.bg_color = Color("#a88b52")
 	start_button.add_theme_stylebox_override("pressed", pressed)
-	start_button.add_theme_color_override("font_color", Color("15231b"))
-	start_button.add_theme_color_override("font_hover_color", Color("15231b"))
-	start_button.add_theme_color_override("font_pressed_color", Color("15231b"))
+	start_button.add_theme_color_override("font_color", Color("#15231b"))
+	start_button.add_theme_color_override("font_hover_color", Color("#15231b"))
+	start_button.add_theme_color_override("font_pressed_color", Color("#15231b"))
 	start_button.add_theme_font_size_override("font_size", 22)
 	options_button = Controls.button(card, "Options", Vector2.ZERO, Vector2.ZERO, func(): pass)
 	options_button.tooltip_text = "Les options seront ajoutées prochainement."
@@ -115,11 +115,11 @@ func arrange() -> void:
 ## Réutilise les illustrations du jeu comme décor du menu, sans déplacer la carte de la partie.
 func _draw() -> void:
 	draw_texture_rect(FOREST, Rect2(Vector2.ZERO, size), true)
-	draw_rect(Rect2(Vector2.ZERO, size), Color("07130ec7"))
-	draw_texture_rect(CAVE, Rect2(Vector2(12, size.y - 245), Vector2(330, 220)), false, Color(1, 1, 1, 0.58))
+	draw_rect(Rect2(Vector2.ZERO, size), Color("#07130ec7"))
+	draw_texture_rect(CAVE, Rect2(Vector2(12, size.y - 245), Vector2(330, 220)), false, Color(Color("#ffffff"), 0.58))
 	draw_texture_rect(
 		CASTLE,
 		Rect2(Vector2(size.x - 310, size.y - 320), Vector2(300, 300)),
 		false,
-		Color(1, 1, 1, 0.7),
+		Color(Color("#ffffff"), 0.7),
 	)

@@ -18,6 +18,7 @@
 ## Lisibilité et commentaires
 
 - L'utilisateur découvre GDScript. Expliquer les fonctions et les étapes importantes avec de vraies phrases en français, en précisant les données utilisées, le résultat et les raisons des vérifications.
+- Écrire les couleurs hexadécimales avec le préfixe #, par exemple Color("#d58b63") ou Color("#112219b8"), pour que VS Code puisse afficher leur aperçu. Conserver les valeurs et la transparence lors d'un changement de notation.
 - Séparer les responsabilités dans gameplay/, ui/, rendering/ et tests/. Garder les fonctions de coordination simples, sans multiplier les fichiers pour des détails insignifiants.
 - Aérer les étapes avec des lignes vides et développer les dictionnaires et les conditions complexes sur plusieurs lignes. Éviter les longues conditions imbriquées difficiles à lire.
 - Mettre à jour LIRE-LE-CODE.txt si un fichier change de rôle ou de dossier. Garder game.gd comme point d'accès aux règles pour main.gd et les tests.

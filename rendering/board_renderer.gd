@@ -34,7 +34,7 @@ static func paint_ground(view, canvas: Node2D, visible: Rect2) -> void:
 		canvas.draw_line(
 			Vector2(x * view.CELL, y0 * view.CELL),
 			Vector2(x * view.CELL, y1 * view.CELL),
-			Color("cad8a33b"),
+			Color("#cad8a33b"),
 			1.0 / view.zoom,
 		)
 
@@ -42,7 +42,7 @@ static func paint_ground(view, canvas: Node2D, visible: Rect2) -> void:
 		canvas.draw_line(
 			Vector2(x0 * view.CELL, y * view.CELL),
 			Vector2(x1 * view.CELL, y * view.CELL),
-			Color("cad8a33b"),
+			Color("#cad8a33b"),
 			1.0 / view.zoom,
 		)
 
@@ -60,7 +60,7 @@ static func paint_route(view, canvas: Node2D) -> void:
 		view.route_revision = view.game.revision
 
 	if view.route_points.size() > 1:
-		canvas.draw_polyline(view.route_points, Color("d5bc7766"), 10, true)
+		canvas.draw_polyline(view.route_points, Color("#d5bc7766"), 10, true)
 	view.scenery.paint_landmarks(canvas, view.game, view.CELL)
 
 
@@ -70,8 +70,8 @@ static func paint_range(view, canvas: Node2D) -> void:
 	if view.game.towers.has(view.selected):
 		var point = (Vector2(view.selected) + Vector2.ONE * 0.5) * view.CELL
 		var radius: float = view.game.tower_range(view.game.towers[view.selected]) * view.CELL
-		canvas.draw_circle(point, radius, Color("efd58a12"))
-		canvas.draw_arc(point, radius, 0, TAU, 64, Color("efd58a88"), 2, true)
+		canvas.draw_circle(point, radius, Color("#efd58a12"))
+		canvas.draw_arc(point, radius, 0, TAU, 64, Color("#efd58a88"), 2, true)
 
 
 ## Dessine les tours provisoires, leur niveau, leur sélection et leurs éventuelles blessures.
@@ -85,8 +85,8 @@ static func paint_towers(view, canvas: Node2D, visible: Rect2) -> void:
 
 		var tower: Dictionary = view.game.towers[cell]
 		var color: Color = view.game.TYPES[int(tower.kind)].color
-		canvas.draw_circle(p + Vector2(2, 3), 18, Color("15251b"))
-		canvas.draw_rect(Rect2(p - Vector2(14, 13), Vector2(28, 30)), Color("b8af96"))
+		canvas.draw_circle(p + Vector2(2, 3), 18, Color("#15251b"))
+		canvas.draw_rect(Rect2(p - Vector2(14, 13), Vector2(28, 30)), Color("#b8af96"))
 
 		if tower.kind <= 1:
 			canvas.draw_colored_polygon(
@@ -113,17 +113,17 @@ static func paint_towers(view, canvas: Node2D, visible: Rect2) -> void:
 				HORIZONTAL_ALIGNMENT_LEFT,
 				-1,
 				16,
-				Color("263325"),
+				Color("#263325"),
 			)
 
 		if cell == view.selected:
-			canvas.draw_rect(Rect2(p - Vector2(20, 20), Vector2(40, 40)), Color("f8dc8b"), false, 2)
+			canvas.draw_rect(Rect2(p - Vector2(20, 20), Vector2(40, 40)), Color("#f8dc8b"), false, 2)
 
 		if tower.hp < 120.0 + (tower.level - 1) * 60:
 			canvas.draw_line(
 				p + Vector2(-16, 20),
 				p + Vector2(-16 + 32 * tower.hp / (120.0 + (tower.level - 1) * 60), 20),
-				Color("d67762"),
+				Color("#d67762"),
 				3,
 			)
 
@@ -137,16 +137,16 @@ static func paint_enemies(view, canvas: Node2D, visible: Rect2) -> void:
 		if not visible.has_point(p):
 			continue
 
-		var color = Color("c6b88a") if enemy.armor == "physical" else Color("bd91ce")
+		var color = Color("#c6b88a") if enemy.armor == "physical" else Color("#bd91ce")
 
 		if enemy.air:
-			color = Color("edc96a")
+			color = Color("#edc96a")
 
 		if enemy.boss > 0:
-			color = Color("e47755")
+			color = Color("#e47755")
 
 		if enemy.slow_time > 0:
-			color = Color("8ad8ea")
+			color = Color("#8ad8ea")
 
 		var radius = 19.0 if enemy.boss == 2 else (15.0 if enemy.boss == 1 else 10.0)
 		canvas.draw_circle(p, radius, color)
@@ -156,17 +156,17 @@ static func paint_enemies(view, canvas: Node2D, visible: Rect2) -> void:
 			canvas.draw_line(p, p + Vector2(22, -10), color, 5)
 
 		if not enemy.poison.is_empty():
-			canvas.draw_arc(p, radius + 4, 0, TAU, 18, Color("96d768"), 2)
+			canvas.draw_arc(p, radius + 4, 0, TAU, 18, Color("#96d768"), 2)
 
 		# Les détails fins sont masqués quand la carte est très éloignée, car ils deviendraient illisibles.
 		if view.zoom > 0.4:
-			canvas.draw_circle(p + Vector2(-3, -2), 2, Color("263325"))
-			canvas.draw_circle(p + Vector2(3, -2), 2, Color("263325"))
-			canvas.draw_line(p + Vector2(-15, -radius - 7), p + Vector2(15, -radius - 7), Color("492c26"), 3)
+			canvas.draw_circle(p + Vector2(-3, -2), 2, Color("#263325"))
+			canvas.draw_circle(p + Vector2(3, -2), 2, Color("#263325"))
+			canvas.draw_line(p + Vector2(-15, -radius - 7), p + Vector2(15, -radius - 7), Color("#492c26"), 3)
 			canvas.draw_line(
 				p + Vector2(-15, -radius - 7),
 				p + Vector2(-15 + 30 * maxf(0, enemy.hp / enemy.max_hp), -radius - 7),
-				Color("b2d078"),
+				Color("#b2d078"),
 				3,
 			)
 
@@ -180,7 +180,7 @@ static func paint_shots(view, canvas: Node2D) -> void:
 ## On annule ici le décalage et le zoom pour couvrir exactement la zone visible du plateau.
 static func paint_pause(view, canvas: Node2D) -> void:
 	if view.game.paused:
-		canvas.draw_rect(Rect2(-view.pan / view.zoom, view.size / view.zoom), Color("000000aa"))
+		canvas.draw_rect(Rect2(-view.pan / view.zoom, view.size / view.zoom), Color("#000000aa"))
 		canvas.draw_string(
 			ThemeDB.fallback_font,
 			(view.size / 2.0 - view.pan) / view.zoom,
@@ -188,5 +188,5 @@ static func paint_pause(view, canvas: Node2D) -> void:
 			HORIZONTAL_ALIGNMENT_LEFT,
 			-1,
 			int(32 / view.zoom),
-			Color("f8e2b1"),
+			Color("#f8e2b1"),
 		)

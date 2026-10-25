@@ -46,7 +46,7 @@ static func boss_attack(game, enemy: Dictionary, force := false) -> bool:
 	game.shots.append({
 		"from": game.position_of(enemy),
 		"to": Vector2(cell) + Vector2.ONE * 0.5,
-		"color": Color("f16b54"),
+		"color": Color("#f16b54"),
 		"life": 0.45,
 		"splash": true,
 	})

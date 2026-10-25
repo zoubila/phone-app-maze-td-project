@@ -262,8 +262,8 @@ func _gui_input(event: InputEvent) -> void:
 
 ## Dessine le fond et le contour du Control, fixes à l'écran malgré le zoom du contenu.
 func _draw() -> void:
-	draw_rect(Rect2(Vector2.ZERO, size), Color("17271d"))
-	draw_rect(Rect2(Vector2.ZERO, size), Color("89744c"), false, 3)
+	draw_rect(Rect2(Vector2.ZERO, size), Color("#17271d"))
+	draw_rect(Rect2(Vector2.ZERO, size), Color("#89744c"), false, 3)
 
 ## Demande au dessinateur de représenter la partie avec la caméra actuelle.
 ## Le détail des couches est dans rendering/board_renderer.gd ; ce fichier garde les interactions avec la carte.

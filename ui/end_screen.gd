@@ -20,18 +20,18 @@ func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_STOP
 
 	var veil := StyleBoxFlat.new()
-	veil.bg_color = Color("09150dd9")
+	veil.bg_color = Color("#09150dd9")
 	add_theme_stylebox_override("panel", veil)
 	card = Panel.new()
 
 	var style := StyleBoxFlat.new()
-	style.bg_color = Color("18291ff5")
-	style.border_color = Color("bfa56b")
+	style.bg_color = Color("#18291ff5")
+	style.border_color = Color("#bfa56b")
 	style.set_border_width_all(1)
 	style.set_corner_radius_all(14)
 	card.add_theme_stylebox_override("panel", style)
 	add_child(card)
-	title = Controls.label(card, "", Vector2(24, 24), Vector2(392, 54), 34, Color("f3dfaf"))
+	title = Controls.label(card, "", Vector2(24, 24), Vector2(392, 54), 34, Color("#f3dfaf"))
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	description = Controls.label(card, "", Vector2(24, 90), Vector2(392, 56), 19)
 	description.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER

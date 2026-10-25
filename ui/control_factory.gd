@@ -13,7 +13,7 @@ static func label(
 	pos: Vector2,
 	dimensions: Vector2,
 	font_size: int,
-	color := Color("e9e1c8"),
+	color := Color("#e9e1c8"),
 ) -> Label:
 	var item := Label.new()
 	item.text = text_value
@@ -39,19 +39,19 @@ static func button(parent, text_value: String, pos: Vector2, dimensions: Vector2
 	item.focus_mode = Control.FOCUS_NONE
 
 	var normal := StyleBoxFlat.new()
-	normal.bg_color = Color("24372a")
-	normal.border_color = Color("60704c")
+	normal.bg_color = Color("#24372a")
+	normal.border_color = Color("#60704c")
 	normal.set_border_width_all(1)
 	normal.set_corner_radius_all(5)
 	item.add_theme_stylebox_override("normal", normal)
 
 	var hover: StyleBoxFlat = normal.duplicate()
-	hover.bg_color = Color("374d35")
+	hover.bg_color = Color("#374d35")
 	item.add_theme_stylebox_override("hover", hover)
 
 	var disabled: StyleBoxFlat = normal.duplicate()
-	disabled.bg_color = Color("1a281e")
-	disabled.border_color = Color("394434")
+	disabled.bg_color = Color("#1a281e")
+	disabled.border_color = Color("#394434")
 	item.add_theme_stylebox_override("disabled", disabled)
 
 	# On enregistre la fonction à appeler plus tard. Connecter le bouton n'exécute pas immédiatement l'action.

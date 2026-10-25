@@ -42,7 +42,7 @@ static func refresh(ui) -> void:
 		ui.selected = Vector2i(-1, -1)
 
 	for kind in range(ui.type_buttons.size()):
-		ui.type_buttons[kind].modulate = Color("f8d788") if kind == highlighted else Color.WHITE
+		ui.type_buttons[kind].modulate = Color("#f8d788") if kind == highlighted else Color("#ffffff")
 
 	if ui.game.ended:
 		ui.close_inspection()

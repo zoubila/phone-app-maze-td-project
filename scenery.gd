@@ -36,7 +36,7 @@ func paint_ground(canvas: Node2D, game, cell_size: float, visible: Rect2) -> voi
 				tile,
 				Rect2(source.position, source.size * tile.size / tile_size),
 			)
-	canvas.draw_rect(grid, Color("142a2238"))
+	canvas.draw_rect(grid, Color("#142a2238"))
 
 ## Dessine la caverne à gauche et le château à droite, avant les monstres et les tours.
 ## Les points d'ancrage placent la bouche et la porte près des cases d'entrée/sortie.

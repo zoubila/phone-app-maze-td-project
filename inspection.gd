@@ -26,11 +26,11 @@ func _ready() -> void:
 	z_index = 20
 
 	var style := StyleBoxFlat.new()
-	style.bg_color = Color("17271ff5")
-	style.border_color = Color("d5bc77")
+	style.bg_color = Color("#17271ff5")
+	style.border_color = Color("#d5bc77")
 	style.set_border_width_all(2)
 	style.set_corner_radius_all(8)
-	style.shadow_color = Color("00000066")
+	style.shadow_color = Color("#00000066")
 	style.shadow_size = 8
 	add_theme_stylebox_override("panel", style)
 	title_label = make_label(Vector2(14, 10), Vector2(240, 30), 21)
@@ -60,7 +60,7 @@ func make_label(pos: Vector2, dimensions: Vector2, font_size: int) -> Label:
 	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	label.clip_text = true
 	label.add_theme_font_size_override("font_size", font_size)
-	label.add_theme_color_override("font_color", Color("eee4c8"))
+	label.add_theme_color_override("font_color", Color("#eee4c8"))
 	add_child(label)
 	return label
 
