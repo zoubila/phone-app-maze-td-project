@@ -2,3 +2,4 @@
 builds/
 export_credentials.cfg
 .vscode/
+.env.local

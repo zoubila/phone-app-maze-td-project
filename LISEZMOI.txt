@@ -2,6 +2,19 @@ MAZE TD — LES MARCHES DU ROYAUME
 Prototype 09 • fantasy médiévale • 25 octobre 2026
 
 JOUER
+Sous Windows, double-cliquer sur Jouer-MazeTD.cmd dans ce dossier MazeTD.
+Le lanceur lit .env puis .env.local. GODOT_EXE est le chemin de l'executable
+Godot ; GAME_DIR est le dossier contenant project.godot. Les chemins relatifs
+partent du dossier MazeTD, meme si le terminal est ouvert ailleurs.
+.env contient les valeurs partagees ; .env.local contient les reglages de
+cette machine et est ignore par Git. Les variables deja definies dans le
+terminal ont priorite sur ces deux fichiers. Les chemins avec espaces
+peuvent etre entoures de guillemets. Ne pas ajouter de commentaire en fin de valeur.
+Pour une autre machine, creer .env.local et y renseigner GODOT_EXE.
+Le lanceur fonctionne aussi avec godot.exe dans le PATH, sans .env.local.
+Verification sans lancer le jeu :
+powershell -NoProfile -ExecutionPolicy Bypass -File tools/lancer-jeu.ps1 -Check
+
 Importer project.godot dans Godot 4.5+ (branche 4.x), puis lancer avec F5.
 La première vague démarre automatiquement après une minute de préparation.
 Le bouton Lancer vague 1 permet de la démarrer immédiatement, quand vous
