@@ -10,6 +10,8 @@ var scenery = preload("res://scenery.gd").new()
 # Les tirs sont dessinés à part pour pouvoir remplacer leurs sprites sans toucher au combat.
 var projectiles = preload("res://projectiles.gd").new()
 var game
+# Les gestes tactiles sont séparés des règles de jeu et des commandes de souris.
+var touch_gestures = preload("res://input/board_touch.gd").new()
 # CAMÉRA ET SÉLECTION : selected sert à dessiner portée et contour ; pan/zoom cadrent la carte.
 var selected := Vector2i(-1, -1)
 var zoom := 1.0
@@ -82,6 +84,7 @@ func resize_view(new_size: Vector2) -> void:
 	var focus := (size / 2.0 - pan) / zoom
 	size = new_size
 	dragging = false
+	touch_gestures.reset()
 
 	if was_overview:
 		overview()
@@ -99,6 +102,12 @@ func set_zoom(value: float, anchor: Vector2) -> void:
 	zoom = clampf(value, minimum_zoom(), 2.0)
 	pan = anchor - world * zoom
 	clamp_pan()
+	if dragging:
+		# La molette peut être utilisée pendant que la souris est tenue : le zoom ne doit pas acheter une tour.
+		# Le prochain déplacement repart de la caméra actuelle pour éviter un saut vers l'ancien cadrage.
+		pan_start = pan
+		start = anchor
+		moved = true
 	refresh()
 
 ## Limite le décalage de la carte pour éviter de la perdre entièrement hors du plateau.
@@ -194,6 +203,10 @@ func pick_item(point: Vector2) -> Dictionary:
 ## Distingue un toucher d'un glissement par un seuil de 10 unités ; émet ensuite les signaux.
 ## Le tactile utilise l'émulation souris de Godot pour ces mêmes commandes.
 func _gui_input(event: InputEvent) -> void:
+	if touch_gestures.handle(self, event):
+		accept_event()
+		return
+
 	if event is InputEventMouseButton:
 		if event.button_index == MOUSE_BUTTON_WHEEL_UP and event.pressed:
 			set_zoom(zoom * 1.2, event.position)
@@ -239,6 +252,10 @@ func _gui_input(event: InputEvent) -> void:
 		else:
 			item_hovered.emit(pick_item(event.position), event.position)
 	elif event is InputEventMagnifyGesture:
+		# Un pincement ne doit jamais se terminer par un clic qui achète une tour.
+		dragging = false
+		moved = true
+		view_dragged.emit()
 		set_zoom(zoom * event.factor, event.position)
 	# Marque l'événement comme traité pour éviter qu'un autre contrôle l'utilise aussi.
 	accept_event()

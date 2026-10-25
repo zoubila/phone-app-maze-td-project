@@ -21,3 +21,12 @@
 - Séparer les responsabilités dans gameplay/, ui/, rendering/ et tests/. Garder les fonctions de coordination simples, sans multiplier les fichiers pour des détails insignifiants.
 - Aérer les étapes avec des lignes vides et développer les dictionnaires et les conditions complexes sur plusieurs lignes. Éviter les longues conditions imbriquées difficiles à lire.
 - Mettre à jour LIRE-LE-CODE.txt si un fichier change de rôle ou de dossier. Garder game.gd comme point d'accès aux règles pour main.gd et les tests.
+
+## Interface de la partie
+
+- Le menu initial contient le titre, la description, le choix de la grille, Commencer et Options (sans action pour le moment). Le temps de jeu ne doit pas avancer dans ce menu.
+- Réserver plus de 80 % de la surface utile au plateau. Le catalogue contient uniquement les huit tours, à droite en paysage et sous la carte en portrait.
+- Vendre et Améliorer sont uniquement dans les fiches des tours. Ne pas réintroduire de boutons globaux ni de boutons Entrée, Château, Vue ou zoom.
+- Pause et Vitesse sont des commandes flottantes à fond semi-transparent sur la carte. Le lancement anticipé flotte seulement pendant la préparation. Rejouer apparaît au centre du plateau après une victoire ou une défaite.
+- Conserver le glissement de la carte, la molette et le pincement, sans achat involontaire à la fin d'un zoom.
+- L'engrenage voisin de Pause et Vitesse ouvre une fenêtre qui suspend le temps et bloque les commandes derrière elle. Options reste sans effet ; Retour accueil quitte la partie pour le menu. La croix conserve l'état de pause antérieur. Le résultat propose aussi Retour accueil sous Rejouer.

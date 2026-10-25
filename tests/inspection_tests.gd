@@ -11,6 +11,7 @@ static func run(suite) -> void:
 	var ui = load("res://main.tscn").instantiate()
 	suite.root.add_child(ui)
 	ui.set_process(false)
+	ui.start_game(0)
 	await suite.process_frame
 
 	var board: Control = ui.board
@@ -112,10 +113,10 @@ static func run(suite) -> void:
 
 		var refund = int(ui.game.towers[second_cell].spent * 0.7)
 		before_gold = ui.game.gold
-		suite.gui_click(ui.sell_button.get_global_transform_with_canvas() * (ui.sell_button.size / 2))
+		suite.gui_click(ui.inspector.sell_button.get_global_transform_with_canvas() * (ui.inspector.sell_button.size / 2))
 		suite.check(
 			ui.game.towers.is_empty() and ui.game.gold == before_gold + refund,
-			"Main sale button works while contextual information is open",
+			"Second tower can be sold from its contextual information",
 		)
 		suite.gui_move(ui.type_buttons[2].get_global_transform_with_canvas() * (ui.type_buttons[2].size / 2))
 		suite.check(
@@ -144,7 +145,7 @@ static func run(suite) -> void:
 		suite.gui_click(ui.inspector.close_button.get_global_transform_with_canvas() * (ui.inspector.close_button.size / 2))
 		suite.check(
 			not ui.inspector.visible and ui.selected == first_cell,
-			"Closing card preserves main sale selection",
+			"Closing card preserves the selected tower for its range and later inspection",
 		)
 
 		# La fiche d'un monstre doit suivre ses points de vie, mais ne doit ni acheter ni vendre de tour.

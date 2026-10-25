@@ -34,12 +34,18 @@ MazeTD/
 
   ui/
     control_factory.gd          Apparence commune des textes et des boutons.
-    build_interface.gd          Création des différentes zones de l'interface.
+    build_interface.gd          Carte, catalogue des tours et commandes flottantes.
+    menu_screen.gd              Titre, description, grille, Commencer et Options.
+    end_screen.gd               Résultat centré, Rejouer et Retour accueil.
+    settings_screen.gd          Fenêtre des paramètres, Options et Retour accueil.
     update_interface.gd         Actualisation des textes et des boutons existants.
     inspection_text.gd          Phrases et statistiques des fiches de tours/monstres.
 
   rendering/
     board_renderer.gd           Dessin du terrain, des tours et des monstres.
+
+  input/
+    board_touch.gd              Pincement à deux doigts et protection contre les clics accidentels après un zoom.
 
   tests.gd                      Point de départ et outils communs des vérifications.
   tests/
@@ -48,7 +54,9 @@ MazeTD/
     campaign_tests.gd           Cent vagues, récompenses, victoire et défaite.
     interface_tests.gd          Clics, caméra, rotation et zones sûres.
     inspection_tests.gd         Survol, fiches, sélection, vente et amélioration.
+    tower_actions_tests.gd      Vente/amélioration dans les fiches avec appui prolongé.
     projectile_tests.gd         Orientation et durée des flèches.
+    touch_gestures_tests.gd     Menu, construction et vente au toucher, puis zoom à deux doigts.
 
   assets/                       Images, sons, polices et fichiers sources.
   Jouer-MazeTD.cmd              Lanceur Windows à double-cliquer.
@@ -75,8 +83,10 @@ COMMENT SUIVRE UNE ACTION : VENDRE UNE TOUR
 7. rendering/board_renderer.gd dessine la carte sans la tour vendue.
 
 COMMENT LE TEMPS ET LE DESSIN SONT-ILS SÉPARÉS ?
-Godot appelle main._process à chaque image.
-Cette fonction transmet le temps écoulé à game.tick, puis à simulation.gd.
+Godot appelle main._process à chaque image. Tant que in_menu est vrai,
+la fonction revient immédiatement : le menu n'utilise pas le temps de préparation.
+Le bouton Commencer appelle main.start_game, qui prépare la grille choisie.
+La fonction _process transmet ensuite le temps à game.tick, puis à simulation.gd.
 Le combat avance par petits intervalles de 1/60 seconde de jeu.
 combat_step appelle les étapes dans un ordre explicite : apparitions,
 poison et déplacements, attaques, récompenses et fin éventuelle de vague.
@@ -141,3 +151,12 @@ Depuis le dossier du projet : godot --headless --path . --script tests.gd
 Les scénarios sont classés dans tests/ ; tests.gd les lance tous et affiche le bilan.
 Ne modifiez pas à la main les fichiers .uid ni le dossier .godot : Godot les gère.
 Quand une règle change, actualisez aussi le commentaire qui l'explique.
+
+L'INTERFACE ALLÉGÉE
+Le nom, la description et le choix de grille appartiennent au menu initial.
+En jeu, seuls les huit boutons des tours occupent le catalogue. Les autres
+commandes flottent sur la carte : ressources, Pause, Vitesse et lancement
+anticipé pendant la préparation. Les boutons de vente et d'amélioration
+appartiennent à inspection.gd. Le résultat final appartient à end_screen.gd.
+ui_layout.gd donne les places et tailles de tous ces éléments en fonction
+de l'écran ; il conserve la caméra et la partie lors de la rotation.

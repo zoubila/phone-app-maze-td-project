@@ -37,9 +37,10 @@ static func start_wave(game) -> bool:
 	game.spawn_clock = 0.0
 
 	var plan = game.wave_plan(game.wave)
+	var armor_label := "physique" if plan.armor == "physical" else "magique"
 	game.message = "Vague %d : %s%s" % [
 		game.wave,
-		"sol + air" if plan.air else "résistance " + plan.armor,
+		"sol + air" if plan.air else "résistance " + armor_label,
 		" + GROS BOSS" if plan.boss == 2 else (" + mini boss" if plan.boss == 1 else ""),
 	]
 	return true

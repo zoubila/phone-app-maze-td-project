@@ -1,5 +1,5 @@
 MAZE TD — LES MARCHES DU ROYAUME
-Prototype 10 • fantasy médiévale • 25 octobre 2026
+Prototype 12 • fantasy médiévale • 25 octobre 2026
 
 JOUER
 Sous Windows, double-cliquer sur Jouer-MazeTD.cmd dans ce dossier MazeTD.
@@ -16,17 +16,28 @@ Verification sans lancer le jeu :
 powershell -NoProfile -ExecutionPolicy Bypass -File tools/lancer-jeu.ps1 -Check
 
 Importer project.godot dans Godot 4.5+ (branche 4.x), puis lancer avec F5.
-La première vague démarre automatiquement après une minute de préparation.
+Le menu présente le nom du jeu, sa description et le choix de la grille.
+Commencer la partie ouvre le plateau ; Options est un bouton réservé à plus tard.
+Le temps ne s'écoule pas dans le menu. La première vague démarre automatiquement
+après une minute de préparation comptée à partir de Commencer la partie.
 Le bouton Lancer vague 1 permet de la démarrer immédiatement, quand vous
 êtes prêt, sans attendre la fin des 60 secondes.
-Choisir la taille de grille avant le premier placement de tour.
+La taille de grille est choisie dans le menu, avant le début de la partie.
+
+PARAMÈTRES ET RETOUR À L'ACCUEIL
+L'engrenage à côté de Pause et Vitesse ouvre les paramètres. Le jeu est
+suspendu pendant l'ouverture de cette fenêtre. Options est réservé à plus tard.
+La croix ferme la fenêtre et conserve l'état de pause choisi précédemment.
+Retour accueil quitte la partie et affiche le menu ; Commencer lance alors
+une nouvelle partie. Après une victoire ou une défaite, Retour accueil est
+également proposé sous Rejouer au centre du plateau.
 
 SÉLECTION, INFOBULLES ET REVENTE
 Sur ordinateur, survoler une tour, un monstre ou un type de tour dans le
 catalogue pour afficher ses caractéristiques. Cliquer ou toucher garde
 la fiche ouverte. Les PV et les effets des monstres se mettent à jour.
 Cliquer sur une tour construite, y compris sur son toit, sélectionne cette
-tour. Utiliser Vendre dans sa fiche ou dans le panneau de commandes.
+tour. Utiliser Vendre dans sa fiche : les boutons globaux de vente et d’amélioration ont été retirés.
 La vente rembourse 70 % de l'or investi et fonctionne pendant les vagues
 et en pause. La fiche permet aussi d'améliorer la tour jusqu'au niveau 7.
 Le simple survol d'une autre tour ne change pas la tour sélectionnée.
@@ -37,7 +48,10 @@ automatiquement à sa disparition. Toucher un monstre ne construit pas.
 
 ORIENTATION MOBILE
 Paysage par défaut. En paysage, le plateau est à gauche et les commandes
-à droite. En portrait, les commandes se placent sous le plateau.
+à droite, uniquement pour les tours. En portrait, ce catalogue se place
+sous le plateau. La carte utilise plus de 80 % de l'espace disponible.
+L'or, les vies, la vague, Pause et Vitesse sont affichés en transparence
+sur la carte. Vendre et Améliorer se trouvent uniquement dans les fiches.
 Le réglage d'orientation Godot utilise le capteur du téléphone pour
 autoriser les deux orientations. L'interface se réorganise quand la
 taille de l'écran change, sans remettre à zéro la partie ni la caméra.
@@ -48,9 +62,11 @@ les encoches et les barres système.
 
 GRILLES, HAUTEUR × LONGUEUR
 50 × 100 (par défaut), 25 × 50 ou 100 × 200.
-Faire glisser la carte pour se déplacer ; utiliser + et − pour zoomer.
-Les boutons Entrée, Château et Vue déplacent ou ajustent la vue.
-La molette fonctionne sur ordinateur. En vue très éloignée, un toucher
+Faire glisser la carte pour se déplacer. La molette permet de zoomer sur
+ordinateur et le pincement sur smartphone. Les anciens boutons de caméra
+et de zoom ont été retirés. Un zoom pendant un appui ne construit pas de tour.
+Le pincement suit les deux doigts et conserve le point de la carte sous leur milieu.
+En vue très éloignée, un toucher
 rapproche la vue avant de permettre de construire, pour éviter les erreurs.
 
 BUT
@@ -155,7 +171,10 @@ Lire LIRE-LE-CODE.txt pour l'ordre de lecture, les termes et les points d'entré
 project.godot : paysage par défaut, orientation capteur et affichage adaptatif.
 main.tscn : scène de démarrage.
 game.gd : données de la partie et accès aux règles détaillées dans gameplay/.
-main.gd : démarrage, actions du joueur et sauvegarde du record.
+main.gd : passage du menu à la partie, actions du joueur et sauvegarde du record.
+ui/menu_screen.gd : menu avant la partie.
+ui/end_screen.gd : résultat et bouton Rejouer au centre du plateau.
+input/board_touch.gd : zoom tactile à deux doigts et prévention des clics de construction après un pincement.
 ui/ : création des contrôles, actualisation et composition des textes des fiches.
 ui_layout.gd : dispositions paysage et portrait et marges des zones sûres.
 board.gd : zoom, déplacement et sélection de la grille.
@@ -170,8 +189,8 @@ assets/terrain/foret.png : forêt et clairière utilisées pour le fond.
 assets/terrain/caverne.png : sortie de caverne à l'arrivée des monstres, à gauche.
 assets/terrain/chateau.png : château médiéval à défendre, à droite.
 Les deux bâtiments ont un fond transparent. Leurs ancrages et tailles
-d'affichage se règlent dans scenery.gd ; les boutons Entrée et Château
-les cadrent avec une marge. Le décor suit la carte, le zoom et la rotation.
+d'affichage se règlent dans scenery.gd ; la caméra garde de la place
+pour les silhouettes complètes. Le décor suit la carte, le zoom et la rotation.
 La forêt est décorative : seules les tours bloquent les monstres.
 Images créées avec l'outil de génération d'images intégré. Les prompts
 complets sont conservés dans assets/sources/PROMPTS-DECOR.txt.
@@ -185,3 +204,8 @@ seconde de jeu, selon la distance ; pause et vitesses de combat s'appliquent.
 L'animation reste visuelle : les dégâts sont toujours appliqués au départ
 du tir. Les dégâts, la cadence de l'archer et les autres tirs sont conservés.
 Image créée avec l'outil intégré ; prompt dans assets/sources/PROMPT-FLECHE.txt.
+
+FIN DE PARTIE
+Après une victoire ou une défaite, Rejouer apparaît uniquement au milieu
+du plateau. Il recommence une partie avec la même grille. Le catalogue
+reste désactivé jusqu'à ce redémarrage.

@@ -52,81 +52,63 @@ static func arrange(ui, area: Rect2) -> void:
 		landscape_layout(ui, ui.layout_size.x, ui.layout_size.y)
 	else:
 		portrait_layout(ui, ui.layout_size.x, ui.layout_size.y)
+	place_overlays(ui)
+	ui.menu_screen.position = Vector2.ZERO
+	ui.menu_screen.size = ui.layout_size
+	ui.menu_screen.arrange()
+	ui.end_screen.position = ui.board.position
+	ui.end_screen.size = ui.board.size
+	ui.end_screen.arrange()
+	ui.settings_screen.position = Vector2.ZERO
+	ui.settings_screen.size = ui.layout_size
+	ui.settings_screen.arrange()
 	ui.board.refresh()
 
-## Place les commandes sous la carte dans l'espace logique width × height.
-## Le catalogue forme deux rangées de quatre tours ; le plateau absorbe la hauteur disponible.
-static func portrait_layout(ui, width: float, height: float) -> void:
-	var content := width - 64
-	place(ui.title_label, 32, 30, content, 42)
-	place(ui.subtitle_label, 32, 76, content, 28)
-	place(ui.status, 32, 112, content, 32)
-	place(ui.message, 32, 150, content, 30)
-	place(ui.grid_choice, 32, 188, content - 360, 48)
-	place(ui.entry_button, width - 380, 188, 108, 48)
-	place(ui.castle_button, width - 260, 188, 108, 48)
-	place(ui.overview_button, width - 140, 188, 108, 48)
-	ui.board.position = Vector2(32, 248)
-	# Réserve le bas aux commandes ; resize_view conserve le cadrage de la carte pendant la rotation.
-	ui.board.resize_view(Vector2(content, height - 680))
-	place(ui.map_info, 32, height - 420, content - 160, 40)
-	place(ui.zoom_out_button, width - 176, height - 422, 64, 44)
-	place(ui.zoom_in_button, width - 96, height - 422, 64, 44)
-	ui.detail.autowrap_mode = TextServer.AUTOWRAP_OFF
-	place(ui.detail, 32, height - 373, content, 48)
-	# Quatre boutons séparés par trois espaces de 8 unités.
-	var button_width := (content - 24) / 4
 
-	for i in range(ui.type_buttons.size()):
+## En portrait, le catalogue occupe deux rangées au bas de l'écran ; tout le reste devient le plateau.
+static func portrait_layout(ui, width: float, height: float) -> void:
+	ui.board.position = Vector2(12, 12)
+	ui.board.resize_view(Vector2(width - 24, height - 184))
+
+	var button_width := (width - 48) / 4.0
+
+	for kind in range(ui.type_buttons.size()):
 		place(
-			ui.type_buttons[i],
-			32 + (i % 4) * (button_width + 8),
-			height - 317 + (i / 4) * 61,
+			ui.type_buttons[kind],
+			12 + (kind % 4) * (button_width + 8),
+			height - 160 + (kind / 4) * 76,
 			button_width,
-			56,
+			68,
 		)
 
-	var half := (content - 16) / 2
-	place(ui.upgrade_button, 32, height - 184, half, 52)
-	place(ui.sell_button, 48 + half, height - 184, half, 52)
-	place(ui.wave_button, 32, height - 118, half, 60)
 
-	var small := (half - 16) / 2
-	place(ui.pause_button, 48 + half, height - 118, small, 60)
-	place(ui.speed_button, 64 + half + small, height - 118, small, 60)
-	ui.footer_label.visible = true
-	place(ui.footer_label, 32, height - 48, content, 25)
-
-## Place la carte à gauche et les commandes dans une colonne à droite.
-## width et height sont les dimensions logiques après mise à l'échelle ; le catalogue a deux colonnes.
+## En paysage, une seule colonne étroite contient les tours ; le plateau utilise toute la hauteur.
 static func landscape_layout(ui, width: float, height: float) -> void:
-	# Colonne de commandes de largeur fixe dans l'espace logique ; la carte occupe la largeur restante.
-	var panel_width := 356.0
-	var panel_x := width - panel_width - 24
-	var map_width := panel_x - 48
-	place(ui.title_label, 24, 20, map_width, 42)
-	place(ui.subtitle_label, 24, 62, map_width, 24)
-	place(ui.status, 24, 94, map_width, 30)
-	place(ui.message, 24, 132, map_width, 30)
-	place(ui.grid_choice, 24, 174, 280, 44)
-	place(ui.entry_button, 316, 174, 100, 44)
-	place(ui.castle_button, 428, 174, 100, 44)
-	place(ui.overview_button, 540, 174, 100, 44)
-	place(ui.zoom_out_button, 652, 174, 64, 44)
-	place(ui.zoom_in_button, 728, 174, 64, 44)
-	ui.board.position = Vector2(24, 232)
-	ui.board.resize_view(Vector2(map_width, height - 292))
-	place(ui.map_info, 24, height - 48, map_width, 30)
-	ui.detail.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	place(ui.detail, panel_x, 24, panel_width, 100)
+	var catalog_width := 144.0
+	ui.board.position = Vector2(12, 12)
+	ui.board.resize_view(Vector2(width - catalog_width - 36, height - 24))
 
-	var half := (panel_width - 12) / 2
+	var button_height := (height - 24 - 7 * 8) / 8.0
 
-	for i in range(ui.type_buttons.size()):
-		place(ui.type_buttons[i], panel_x + (i % 2) * (half + 12), 140 + (i / 2) * 76, half, 64)
-	place(ui.upgrade_button, panel_x, height - 268, panel_width, 52)
-	place(ui.sell_button, panel_x, height - 204, panel_width, 52)
-	place(ui.wave_button, panel_x, height - 132, panel_width, 52)
-	place(ui.pause_button, panel_x, height - 68, half, 44)
-	place(ui.speed_button, panel_x + half + 12, height - 68, half, 44)
-	ui.footer_label.visible = false
+	for kind in range(ui.type_buttons.size()):
+		place(
+			ui.type_buttons[kind],
+			width - catalog_width - 12,
+			12 + kind * (button_height + 8),
+			catalog_width,
+			button_height,
+		)
+
+
+## Les commandes de pause et vitesse flottent sur le décor, à l'intérieur du plateau.
+## Le fond laisse voir la forêt ; seul le rectangle de chaque bouton intercepte les touchers.
+static func place_overlays(ui) -> void:
+	var board: Rect2 = Rect2(ui.board.position, ui.board.size)
+	place(ui.hud_panel, board.position.x + 8, board.position.y + 8, board.size.x - 16, 56)
+	place(ui.status, board.position.x + 20, board.position.y + 22, board.size.x - 320, 30)
+	ui.status.add_theme_font_size_override("font_size", 16 if board.size.x < 800 else 20)
+	place(ui.pause_button, board.end.x - 292, board.position.y + 14, 100, 44)
+	place(ui.speed_button, board.end.x - 184, board.position.y + 14, 116, 44)
+	place(ui.settings_button, board.end.x - 60, board.position.y + 14, 44, 44)
+	place(ui.wave_button, board.get_center().x - 136, board.end.y - 108, 272, 44)
+	place(ui.message, board.position.x + 18, board.end.y - 42, board.size.x - 36, 26)
