@@ -8,13 +8,18 @@ extends RefCounted
 ## Convertit les pixels de fenêtre en coordonnées logiques selon le rapport de taille.
 static func safe_viewport_area(viewport_size: Vector2) -> Rect2:
 	var full := Rect2(Vector2.ZERO, viewport_size)
+
 	if not OS.has_feature("android") and not OS.has_feature("ios"):
 		return full
+
 	var window_size := Vector2(DisplayServer.window_get_size())
+
 	if window_size.x <= 0 or window_size.y <= 0:
 		return full
+
 	var window_origin := Vector2(DisplayServer.window_get_position())
 	var safe := Rect2(DisplayServer.get_display_safe_area()).intersection(Rect2(window_origin, window_size))
+
 	if not safe.has_area():
 		return full
 	# La zone système est en pixels ; l'interface peut être étirée dans un autre espace de coordonnées.
@@ -34,6 +39,7 @@ static func arrange(ui, area: Rect2) -> void:
 	if not area.has_area():
 		return
 	ui.landscape = area.size.x >= area.size.y
+
 	var reference := Vector2(1280, 720) if ui.landscape else Vector2(720, 1280)
 	# Prend le rapport le plus petit pour que toute l'interface tienne dans la zone sûre.
 	# Le surplus de largeur/hauteur augmente ensuite l'espace logique disponible.
@@ -41,6 +47,7 @@ static func arrange(ui, area: Rect2) -> void:
 	ui.position = area.position
 	ui.scale = Vector2.ONE * factor
 	ui.layout_size = area.size / factor
+
 	if ui.landscape:
 		landscape_layout(ui, ui.layout_size.x, ui.layout_size.y)
 	else:
@@ -69,12 +76,21 @@ static func portrait_layout(ui, width: float, height: float) -> void:
 	place(ui.detail, 32, height - 373, content, 48)
 	# Quatre boutons séparés par trois espaces de 8 unités.
 	var button_width := (content - 24) / 4
+
 	for i in range(ui.type_buttons.size()):
-		place(ui.type_buttons[i], 32 + (i % 4) * (button_width + 8), height - 317 + (i / 4) * 61, button_width, 56)
+		place(
+			ui.type_buttons[i],
+			32 + (i % 4) * (button_width + 8),
+			height - 317 + (i / 4) * 61,
+			button_width,
+			56,
+		)
+
 	var half := (content - 16) / 2
 	place(ui.upgrade_button, 32, height - 184, half, 52)
 	place(ui.sell_button, 48 + half, height - 184, half, 52)
 	place(ui.wave_button, 32, height - 118, half, 60)
+
 	var small := (half - 16) / 2
 	place(ui.pause_button, 48 + half, height - 118, small, 60)
 	place(ui.speed_button, 64 + half + small, height - 118, small, 60)
@@ -103,7 +119,9 @@ static func landscape_layout(ui, width: float, height: float) -> void:
 	place(ui.map_info, 24, height - 48, map_width, 30)
 	ui.detail.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	place(ui.detail, panel_x, 24, panel_width, 100)
+
 	var half := (panel_width - 12) / 2
+
 	for i in range(ui.type_buttons.size()):
 		place(ui.type_buttons[i], panel_x + (i % 2) * (half + 12), 140 + (i / 2) * 76, half, 64)
 	place(ui.upgrade_button, panel_x, height - 268, panel_width, 52)

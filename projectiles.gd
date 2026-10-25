@@ -11,7 +11,11 @@ const ARROW_WIDTH := 48.0
 static func arrow_transform(shot: Dictionary, cell_size: float) -> Transform2D:
 	var origin: Vector2 = shot.from * cell_size
 	var target: Vector2 = shot.to * cell_size
+	# life diminue jusqu'à zéro, tandis que duration garde la durée initiale.
+	# Leur rapport passe de 1 à 0 : le soustraire de 1 donne une progression qui va du départ à l'arrivée.
+	# clampf empêche une petite erreur d'arrondi de placer la flèche avant ou après sa trajectoire.
 	var progress := clampf(1.0 - float(shot.life) / maxf(0.001, float(shot.duration)), 0.0, 1.0)
+	# lerp calcule le point situé à cette proportion entre origin et target.
 	return Transform2D((target - origin).angle(), origin.lerp(target, progress))
 
 ## Dessine une flèche de taille constante dans le monde, tournée vers sa cible.
@@ -30,8 +34,10 @@ func paint(canvas: Node2D, shots: Array, cell_size: float) -> void:
 		if shot.get("kind", -1) == 0:
 			paint_arrow(canvas, shot, cell_size)
 			continue
+
 		var color: Color = shot.color
 		color.a = minf(1.0, shot.life / 0.18)
 		canvas.draw_line(shot.from * cell_size, shot.to * cell_size, color, 3, true)
+
 		if shot.splash:
 			canvas.draw_arc(shot.to * cell_size, cell_size * 1.5 * (1.0 - color.a), 0, TAU, 24, color, 2, true)

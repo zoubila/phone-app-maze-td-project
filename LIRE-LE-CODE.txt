@@ -1,73 +1,143 @@
-LIRE LE CODE DE MAZE TD
+LIRE ET MODIFIER LE CODE DE MAZE TD
 
-OUVRIR LES FICHIERS
-Dans Godot, importer project.godot, puis ouvrir les scripts depuis le panneau
-Système de fichiers. Ils sont également lisibles dans VS Code ou un éditeur
-de texte. Le jeu se lance depuis Godot avec F5 ou avec Jouer-MazeTD.cmd.
+Ce projet est écrit en GDScript, le langage de Godot. Les fichiers sont
+maintenant séparés par sujet pour que vous puissiez en lire un à la fois.
+Vous pouvez les ouvrir dans l'éditeur de Godot ou dans votre éditeur de texte.
 
-ORDRE DE LECTURE CONSEILLÉ
-1. main.gd : démarrage, création des boutons et liaison avec le jeu.
-2. game.gd : données des tours, achats, vagues, navigation et combat.
-3. board.gd : dessin de la carte, caméra, zoom et clics/touchers.
-   scenery.gd : fond forestier et images de la caverne et du château.
-4. inspection.gd : fiches des tours/monstres et demandes de vente/amélioration.
-5. ui_layout.gd : positions des commandes en paysage/portrait et zones sûres.
-6. tests.gd : exemples de scénarios et résultats attendus.
+PAR OÙ COMMENCER ?
+1. Ouvrez main.gd et cherchez _ready : Godot y prépare l'application.
+2. Ouvrez game.gd et cherchez reset : vous y trouverez l'état initial d'une partie.
+3. Pour une première règle concrète, lisez build dans gameplay/construction.gd.
+   Cette fonction vérifie un achat, teste le passage des monstres, puis retire l'or.
+4. Lisez tick, puis combat_step dans gameplay/simulation.gd pour suivre le combat.
+5. Choisissez ensuite le sujet qui vous intéresse dans le plan ci-dessous.
 
-COMMENT LIRE LES COMMENTAIRES
-## avant une fonction : son rôle, les paramètres utiles, le résultat renvoyé
-et les données modifiées. Godot reconnaît ce format comme documentation.
-# dans une fonction : explication d'une étape ou d'une décision importante.
-Les noms de fonctions sont conservés en anglais pour retrouver les appels.
+PLAN DU PROJET
+MazeTD/
+  main.gd                       Démarrage et réactions aux actions du joueur.
+  game.gd                       Données de la partie et accès aux règles.
+  board.gd                      Caméra, zoom et identification des cases touchées.
+  inspection.gd                 Apparence et boutons de la fiche d'informations.
+  ui_layout.gd                  Disposition mobile en portrait et en paysage.
+  scenery.gd                    Forêt, caverne et château.
+  projectiles.gd                Dessin et orientation des flèches.
 
-QUELQUES TERMES GDSCRIPT
-extends : type Godot dont le script hérite (nœud visuel, objet de données…).
-const : valeur de référence qui ne change pas pendant l'exécution.
-var : variable ; := demande à Godot d'en déduire le type.
-func : fonction ; les paramètres sont entre parenthèses.
--> bool / int / Vector2 : type de résultat ; -> void signifie aucun résultat.
-return : quitte la fonction, éventuellement en renvoyant un résultat.
-Vector2i : paire d'entiers, utilisée pour une case (x, y).
-Vector2 : paire de nombres décimaux, utilisée pour une position ou une taille.
-Rect2 : rectangle défini par sa position et ses dimensions.
-Array : liste ordonnée ; Dictionary : valeurs associées à des clés.
-Exemple : tower.level est ici la valeur de la clé "level" du dictionnaire.
-signal / emit / connect : une action émet un événement, une fonction connectée
-le reçoit. Cela permet aux boutons et au plateau de prévenir main.gd.
-func(): dans un appel : petite fonction anonyme, utilisée comme rappel.
-delta ou dt : temps écoulé en secondes. Le sens précis est décrit dans la fonction.
-res:// : racine du projet ; user:// : données locales de l'application.
-_ready, _process, _draw, _gui_input : rappels que Godot appelle automatiquement.
-L'indentation détermine quels blocs appartiennent à une condition ou une boucle.
+  gameplay/
+    tower_catalog.gd            Prix et caractéristiques de base des huit tours.
+    construction.gd             Achat, amélioration et vente des tours.
+    navigation.gd               Distances au château et chemins des terrestres.
+    waves.gd                    Composition des vagues et création des monstres.
+    enemies.gd                  Mouvement et arrivée des monstres au château.
+    tower_combat.gd             Ciblage, dégâts, ralentissements et poison.
+    bosses.gd                   Choix et destruction des tours par les gros boss.
+    simulation.gd               Temps de jeu et ordre des événements du combat.
 
-EXEMPLE : QUE SE PASSE-T-IL LORS D'UNE VENTE ?
-board._gui_input reçoit le toucher, puis pick_item identifie la tour dessinée.
-Le signal item_tapped appelle main.inspect_item et ouvre sa fiche.
-Le bouton de fiche émet sell_requested ; le panneau principal utilise sell_selected.
-Les deux chemins appellent main.sell_tower, puis game.sell.
-game.sell rembourse l'or, retire la tour et recalcule les chemins.
-main.refresh_ui actualise l'or, la sélection, les boutons et le plateau.
+  ui/
+    control_factory.gd          Apparence commune des textes et des boutons.
+    build_interface.gd          Création des différentes zones de l'interface.
+    update_interface.gd         Actualisation des textes et des boutons existants.
+    inspection_text.gd          Phrases et statistiques des fiches de tours/monstres.
 
-EXEMPLE : COMMENT LE COMBAT AVANCE-T-IL ?
+  rendering/
+    board_renderer.gd           Dessin du terrain, des tours et des monstres.
+
+  tests.gd                      Point de départ et outils communs des vérifications.
+  tests/
+    progression_tests.gd        Grilles, achats, vagues, cadence et vitesse.
+    combat_tests.gd             Résistances, effets et gros boss.
+    campaign_tests.gd           Cent vagues, récompenses, victoire et défaite.
+    interface_tests.gd          Clics, caméra, rotation et zones sûres.
+    inspection_tests.gd         Survol, fiches, sélection, vente et amélioration.
+    projectile_tests.gd         Orientation et durée des flèches.
+
+  assets/                       Images, sons, polices et fichiers sources.
+  Jouer-MazeTD.cmd              Lanceur Windows à double-cliquer.
+  .env                          Chemins partagés du lanceur.
+  .env.local                    Réglages de votre machine, exclus de Git.
+  tools/lancer-jeu.ps1          Lecture des réglages et démarrage de Godot.
+
+POURQUOI CERTAINES FONCTIONS DE GAME.GD SONT-ELLES TRÈS COURTES ?
+L'interface appelle toujours game.build, game.sell ou game.tick : elle n'a
+pas besoin de connaître tous les fichiers qui réalisent ces actions.
+Ces courtes fonctions transmettent la même partie au fichier spécialisé.
+Par exemple, game.sell appelle Construction.sell(self, cell).
+self signifie « cet objet-ci » : il ne crée pas une deuxième partie.
+Pour lire le détail de la vente, ouvrez gameplay/construction.gd.
+Le but est de garder les données au même endroit et les règles rangées par sujet.
+
+COMMENT SUIVRE UNE ACTION : VENDRE UNE TOUR
+1. board.gd reçoit le clic et identifie la tour avec pick_item.
+2. Un signal prévient main.gd, qui sélectionne cette tour et ouvre sa fiche.
+3. Le bouton Vendre appelle sell_tower, puis game.sell.
+4. gameplay/construction.gd rembourse l'or et retire la construction.
+5. gameplay/navigation.gd recalcule les distances des monstres au château.
+6. ui/update_interface.gd actualise l'or et les boutons.
+7. rendering/board_renderer.gd dessine la carte sans la tour vendue.
+
+COMMENT LE TEMPS ET LE DESSIN SONT-ILS SÉPARÉS ?
 Godot appelle main._process à chaque image.
-main appelle game.tick avec le temps écoulé.
-tick gère préparation/pause ou découpe le combat en pas de 1/60 seconde.
-combat_step fait apparaître et déplacer les monstres, applique les effets,
-fait attaquer les tours et vérifie les récompenses et la fin de vague.
-board.paint dessine ensuite les positions et effets ; il ne calcule pas les dégâts.
+Cette fonction transmet le temps écoulé à game.tick, puis à simulation.gd.
+Le combat avance par petits intervalles de 1/60 seconde de jeu.
+combat_step appelle les étapes dans un ordre explicite : apparitions,
+poison et déplacements, attaques, récompenses et fin éventuelle de vague.
+Le dessin vient ensuite représenter ces données. Dessiner une flèche ne
+retire pas de points de vie : les dégâts sont déjà décidés dans tower_combat.gd.
 
-OÙ MODIFIER QUOI ?
-Prix, dégâts, portée et cadence : catalogue TYPES au début de game.gd.
-Progression des PV : game.enemy_health ; composition : game.wave_plan.
-Achats et remboursements : game.build, upgrade_cost, upgrade et sell.
-Chemin le plus court : game.field_without, next_cell et rebuild_flow.
-Dessin des tours/monstres : board.paint ; ressources graphiques : assets/.
-Fond, caverne et château : scenery.gd ; images dans assets/terrain/.
-Flèche de l'archer et autres tirs : projectiles.gd ; sprite assets/projectiles/fleche.png.
-Textes et boutons principaux : main.make_ui et main.refresh_ui.
-Contenu des fiches : inspection.update_card ; leur apparence : inspection._ready.
-Disposition mobile : ui_layout.portrait_layout et landscape_layout.
-Les fichiers .uid et le dossier .godot sont gérés par Godot ; ne pas les annoter à la main.
+OÙ MODIFIER UNE VALEUR OU UN DESSIN ?
+Prix, dégâts, portée et cadence : gameplay/tower_catalog.gd, dans TYPES.
+Progression des points de vie : enemy_health dans gameplay/waves.gd.
+Composition des vagues : wave_plan dans ce même fichier.
+Prix d'amélioration et remboursement : gameplay/construction.gd.
+Chemins des monstres : gameplay/navigation.gd.
+Aspect provisoire des tours/monstres : rendering/board_renderer.gd.
+Forêt, caverne et château : scenery.gd et assets/terrain/.
+Flèche de l'archer : projectiles.gd et assets/projectiles/fleche.png.
+Création des boutons : ui/build_interface.gd ; apparence : ui/control_factory.gd.
+Textes actualisés pendant la partie : ui/update_interface.gd.
+Texte détaillé des fiches : ui/inspection_text.gd.
+Apparence de la fiche : inspection.gd ; position des commandes : ui_layout.gd.
 
-Les commentaires décrivent le fonctionnement actuel du prototype. Une modification
-des règles doit être accompagnée d'une mise à jour des commentaires concernés.
+LES COMMENTAIRES DANS LES SCRIPTS
+Un paragraphe commençant par ## explique la fonction qui suit : son rôle,
+ses paramètres utiles, son résultat et les modifications qu'elle réalise.
+Un commentaire commençant par # explique une étape précise ou la raison
+d'une vérification. Les lignes vides séparent les étapes d'une fonction.
+Les mots anglais des noms de fonctions sont conservés pour retrouver les appels.
+Les explications sont en français ; les intitulés historiques des tests restent en anglais.
+
+LE VOCABULAIRE NÉCESSAIRE POUR COMMENCER
+extends : indique la catégorie d'objet Godot utilisée par le fichier.
+Node2D : un élément de scène qui peut avoir une position et dessiner en deux dimensions.
+Control : un élément d'interface qui peut recevoir des clics et des touchers.
+RefCounted : un objet de données ou d'aide qui n'a pas besoin d'être affiché dans une scène.
+const : une valeur de référence qui ne sera pas réaffectée pendant l'exécution.
+var : une variable ; le nom permet de retrouver la valeur plus loin dans la fonction.
+var nombre: int : une variable dont le type est explicitement un entier.
+var nombre := 3 : Godot déduit ici le type entier à partir de la valeur 3.
+func : une fonction ; les paramètres à fournir sont entre parenthèses.
+static func : une fonction appelée directement sur le script, sans créer un objet avec new().
+-> bool : la fonction renvoie un vrai ou un faux ; -> void : elle ne renvoie pas de résultat.
+return : quitte la fonction, et peut transmettre une valeur à celui qui l'a appelée.
+if / elif / else : choisissent les instructions selon les conditions vérifiées.
+for / while : répètent des instructions pour parcourir des éléments ou tant qu'une condition reste vraie.
+continue : ignore la suite du tour de boucle actuel et passe au suivant.
+Array : une liste ordonnée. Dictionary : des valeurs retrouvées grâce à leurs clés.
+enemy.hp : ici, c'est la valeur de la clé « hp » dans le dictionnaire du monstre.
+Vector2i : deux entiers, utilisés pour une case (colonne, ligne).
+Vector2 : deux nombres avec décimales, utilisés pour une position précise ou une taille.
+Rect2 : un rectangle, constitué d'une position et de dimensions.
+signal : un événement auquel une autre partie du code peut réagir.
+connect : relie une fonction à cet événement ; emit : annonce que l'événement a eu lieu.
+func(): au milieu d'une instruction : une petite fonction sans nom, conservée pour être appelée plus tard.
+await : attend un événement, comme la prochaine image, sans bloquer toute l'application.
+delta / dt : une durée en secondes ; le commentaire de la fonction précise s'il s'agit de temps réel ou de jeu.
+% dans une formule : le reste d'une division ; dans un texte : l'insertion de valeurs formatées.
+res:// : la racine du projet. user:// : le dossier de données privées du jeu sur l'appareil.
+_ready, _process, _draw, _gui_input : fonctions que Godot appelle aux moments correspondants.
+L'indentation indique quels blocs appartiennent à une fonction, une condition ou une boucle.
+
+VÉRIFIER APRÈS UNE MODIFICATION
+Depuis le dossier du projet : godot --headless --path . --script tests.gd
+Les scénarios sont classés dans tests/ ; tests.gd les lance tous et affiche le bilan.
+Ne modifiez pas à la main les fichiers .uid ni le dossier .godot : Godot les gère.
+Quand une règle change, actualisez aussi le commentaire qui l'explique.

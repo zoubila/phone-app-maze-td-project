@@ -24,6 +24,7 @@ var anchor := Vector2.ZERO
 func _ready() -> void:
 	size = Vector2(320, 300)
 	z_index = 20
+
 	var style := StyleBoxFlat.new()
 	style.bg_color = Color("17271ff5")
 	style.border_color = Color("d5bc77")
@@ -96,6 +97,7 @@ func show_card(value: Dictionary, point: Vector2, pin: bool) -> void:
 	mouse_filter = Control.MOUSE_FILTER_STOP if pin and value.type != "catalog" else Control.MOUSE_FILTER_IGNORE
 	close_button.visible = pin
 	close_button.mouse_filter = Control.MOUSE_FILTER_STOP if pin else Control.MOUSE_FILTER_IGNORE
+
 	var actions: bool = pin and value.type == "tower"
 	sell_button.visible = actions
 	upgrade_button.visible = actions
@@ -106,52 +108,69 @@ func show_card(value: Dictionary, point: Vector2, pin: bool) -> void:
 ## Essaie la droite et le bas, puis l'autre côté si nécessaire, avec des marges de 12 unités.
 func fit_inside(bounds: Rect2) -> void:
 	var desired := anchor + Vector2(16, 16)
+
 	if desired.x + size.x > bounds.end.x - 12:
 		desired.x = anchor.x - size.x - 16
+
 	if desired.y + size.y > bounds.end.y - 12:
 		desired.y = anchor.y - size.y - 16
-	position = Vector2(clampf(desired.x, bounds.position.x + 12, bounds.end.x - size.x - 12), clampf(desired.y, bounds.position.y + 12, bounds.end.y - size.y - 12))
+	position = Vector2(
+		clampf(desired.x, bounds.position.x + 12, bounds.end.x - size.x - 12),
+		clampf(desired.y, bounds.position.y + 12, bounds.end.y - size.y - 12),
+	)
 
-## Lit le modèle game pour remplir les textes et l'état des boutons, sans changer le jeu.
-## Retrouve un monstre par son identifiant stable ; calcule les valeurs actuelles de la tour.
-## Renvoie false si la cible n'existe plus, afin que main.gd ferme la fiche.
+## Actualise une fiche déjà ouverte à partir des données de la partie.
+## Renvoie false si sa cible a disparu : main.gd doit alors fermer la fiche.
 func update_card(game) -> bool:
 	if target.is_empty():
 		return false
-	# BRANCHE MONSTRE : recherche par id, pour ne jamais transférer la fiche à un autre monstre semblable.
+
 	if target.type == "enemy":
-		for enemy in game.enemies:
-			if enemy.id == target.id and enemy.hp > 0:
-				title_label.text = "Gros boss" if enemy.boss == 2 else ("Mini boss" if enemy.boss == 1 else ("Unité aérienne" if enemy.air else "Monstre terrestre"))
-				var resistance := "Aucune faiblesse physique" if enemy.air else ("Aucune résistance" if enemy.armor == "none" else ("Résiste au physique • faible à la magie" if enemy.armor == "physical" else "Résiste à la magie • faible au physique"))
-				var speed: float = enemy.speed * (enemy.slow_factor if enemy.slow_time > 0 else 1.0)
-				body_label.text = "PV : %.0f / %.0f\n%s\nVitesse : %.2f cases/s\nRécompense : %d or\nCiblage : %s\nGivre : %s • Poison : %d\n%s" % [maxf(0, enemy.hp), enemy.max_hp, resistance, speed, enemy.reward, "Ballistes uniquement" if enemy.air else "tours terrestres", "actif" if enemy.slow_time > 0 else "non", enemy.poison.size(), "Peut détruire les constructions" if enemy.boss == 2 else ("Fiche fixe • × pour fermer" if pinned else "Cliquer / toucher pour garder la fiche")]
-				return true
-		return false
+		return show_enemy_card(game)
+
+	return show_tower_card(game)
+
+
+## Retrouve exactement le monstre sélectionné grâce à son identifiant.
+## On ne remplace jamais un monstre mort par un autre monstre qui lui ressemble.
+func show_enemy_card(game) -> bool:
+	var descriptions = preload("res://ui/inspection_text.gd")
+
+	for enemy in game.enemies:
+		if enemy.id == target.id and enemy.hp > 0:
+			title_label.text = descriptions.enemy_title(enemy)
+			body_label.text = descriptions.enemy_body(enemy, pinned)
+			return true
+
+	return false
+
+
+## Actualise les statistiques et les boutons d'une tour construite ou du catalogue.
+## Le catalogue utilise une fiche de niveau 1 fictive : aucune tour n'est réellement achetée ici.
+func show_tower_card(game) -> bool:
+	var descriptions = preload("res://ui/inspection_text.gd")
 	var tower: Dictionary
-	# BRANCHE TOUR : le catalogue simule les statistiques N1 sans créer ni acheter de tour.
 	var catalog: bool = target.type == "catalog"
+
 	if catalog:
 		tower = {"kind": target.kind, "level": 1, "hp": 120.0, "spent": game.TYPES[int(target.kind)].cost}
 	elif game.towers.has(target.cell):
 		tower = game.towers[target.cell]
 	else:
 		return false
+
 	var spec: Dictionary = game.TYPES[int(tower.kind)]
 	var level := int(tower.level)
-	var damage := float(spec.damage) * pow(1.55, level - 1)
-	var effect := ""
-	# Adapte la description au type d'effet : givre sans dégâts, poison en DPS ou dégâts par impact.
-	match spec.mode:
-		"slow", "slow_aoe":
-			var factor := maxf(0.35, (0.6 if spec.mode == "slow" else 0.75) - (level - 1) * 0.04)
-			effect = "Ralentit de %.0f %% • zéro dégât\nDurée : %.1f s • %s" % [(1.0 - factor) * 100, 2.0 + level * 0.2, "en zone" if spec.mode == "slow_aoe" else "une cible"]
-		"dot": effect = "Poison magique : %.1f dégâts/s\nDurée : %.1f s par application" % [damage, 4.0 + level * 0.5]
-		_: effect = "%.1f dégâts %s / tir\n%.1f s entre tirs • %s" % [damage, "physiques" if spec.school == "physical" else "magiques", spec.delay, "zone" if spec.mode == "aoe" else "une cible"]
-	title_label.text = "%s • %s" % [spec.name, "à construire" if catalog else "N%d/7" % level]
-	# Calcule le prochain prix et le remboursement réel ; les boutons reflètent or, niveau et fin de partie.
 	var price := int(game.upgrade_cost(tower))
-	body_label.text = "Cibles : %s\n%s\nPortée fixe : %.1f cases\nPV : %.0f / %.0f\n%s\n%s" % ["air uniquement" if spec.air else "sol uniquement", effect, game.tower_range(tower), tower.hp, 120.0 + (level - 1) * 60, "Prix : %d or" % spec.cost if catalog else ("Niveau maximum atteint" if level == 7 else "Amélioration : %d or" % price), "Choisir une case pour construire" if catalog else "Vente : %d or (70 %%)" % int(tower.spent * 0.7)]
+	var level_text := "à construire"
+
+	if not catalog:
+		level_text = "N%d/7" % level
+
+	title_label.text = "%s • %s" % [spec.name, level_text]
+	body_label.text = descriptions.tower_body(game, tower, catalog)
+
+	# Le remboursement utilise tout l'or investi, pas seulement le prix du niveau 1.
 	sell_button.text = "Vendre • %d or" % int(tower.spent * 0.7)
 	upgrade_button.text = "Niveau 7" if level == 7 else "N%d • %d or" % [level + 1, price]
 	upgrade_button.disabled = game.ended or level == 7 or game.gold < price

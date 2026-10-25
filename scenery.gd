@@ -20,14 +20,22 @@ static func world_bounds(game, cell_size: float) -> Rect2:
 ## visible limite les tuiles dessinées à la portion affichée ; aucune copie d'image n'est créée.
 func paint_ground(canvas: Node2D, game, cell_size: float, visible: Rect2) -> void:
 	canvas.draw_texture_rect(FOREST, world_bounds(game, cell_size), true)
+
 	var grid := Rect2(Vector2.ZERO, Vector2(game.cols, game.rows) * cell_size)
 	var area := visible.intersection(grid)
+	# On ne prélève que la clairière au centre de l'image, pour ne pas placer de grands arbres sur les cases jouables.
+	# Les proportions 0,28 et 0,44 décrivent ce rectangle dans la texture, quelle que soit sa résolution.
 	var source := Rect2(FOREST.get_size() * 0.28, FOREST.get_size() * 0.44)
 	var tile_size := 512.0
+
 	for y in range(floori(area.position.y / tile_size), ceili(area.end.y / tile_size)):
 		for x in range(floori(area.position.x / tile_size), ceili(area.end.x / tile_size)):
 			var tile := Rect2(Vector2(x, y) * tile_size, Vector2.ONE * tile_size).intersection(grid)
-			canvas.draw_texture_rect_region(FOREST, tile, Rect2(source.position, source.size * tile.size / tile_size))
+			canvas.draw_texture_rect_region(
+				FOREST,
+				tile,
+				Rect2(source.position, source.size * tile.size / tile_size),
+			)
 	canvas.draw_rect(grid, Color("142a2238"))
 
 ## Dessine la caverne à gauche et le château à droite, avant les monstres et les tours.

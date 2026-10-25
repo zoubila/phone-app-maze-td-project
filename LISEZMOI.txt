@@ -1,5 +1,5 @@
 MAZE TD — LES MARCHES DU ROYAUME
-Prototype 09 • fantasy médiévale • 25 octobre 2026
+Prototype 10 • fantasy médiévale • 25 octobre 2026
 
 JOUER
 Sous Windows, double-cliquer sur Jouer-MazeTD.cmd dans ce dossier MazeTD.
@@ -154,14 +154,16 @@ Les scripts .gd sont commentés en français, fonction par fonction.
 Lire LIRE-LE-CODE.txt pour l'ordre de lecture, les termes et les points d'entrée.
 project.godot : paysage par défaut, orientation capteur et affichage adaptatif.
 main.tscn : scène de démarrage.
-game.gd : règles, navigation, tours, vagues, combats et boss.
-main.gd : interface et sauvegarde du record.
+game.gd : données de la partie et accès aux règles détaillées dans gameplay/.
+main.gd : démarrage, actions du joueur et sauvegarde du record.
+ui/ : création des contrôles, actualisation et composition des textes des fiches.
 ui_layout.gd : dispositions paysage et portrait et marges des zones sûres.
-board.gd : rendu, zoom, déplacement et sélection de la grille.
+board.gd : zoom, déplacement et sélection de la grille.
+rendering/board_renderer.gd : dessin des couches du plateau.
 scenery.gd : décor forestier, caverne à gauche et château à droite.
 projectiles.gd : dessin et rotation des flèches, effets des autres tirs.
 inspection.gd : fiches des tours et monstres, survol et actions tactiles.
-tests.gd : vérifications automatisées.
+tests.gd : lancement des vérifications automatisées, classées par sujet dans tests/.
 
 DÉCOR FORESTIER
 assets/terrain/foret.png : forêt et clairière utilisées pour le fond.
