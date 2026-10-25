@@ -102,7 +102,7 @@ func button(text_value: String, pos: Vector2, dimensions: Vector2, action: Calla
 ## Crée la fiche d'inspection en dernier pour qu'elle s'affiche au-dessus du plateau.
 func make_ui() -> void:
 	title_label = label("LES MARCHES DU ROYAUME", Vector2(32, 30), Vector2(656, 42), 31)
-	subtitle_label = label("MAZE TD  /  PROTOTYPE 07", Vector2(32, 76), Vector2(656, 28), 18, Color("a7b596"))
+	subtitle_label = label("MAZE TD  /  PROTOTYPE 09", Vector2(32, 76), Vector2(656, 28), 18, Color("a7b596"))
 	status = label("", Vector2(32, 112), Vector2(656, 32), 22)
 	message = label("", Vector2(32, 150), Vector2(656, 30), 18, Color("ebcc84"))
 	grid_choice = OptionButton.new()

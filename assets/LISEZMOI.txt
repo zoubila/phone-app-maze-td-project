@@ -64,7 +64,17 @@ Conserver les fichiers originaux dans sources/, puis exporter les PNG
 dans les dossiers correspondants.
 
 INTÉGRATION ACTUELLE
-Cette arborescence prépare les ressources ; elle ne remplace pas encore
-les dessins du jeu. Les visuels sont toujours générés par board.gd et
-l'interface par main.gd. Le raccordement aux sprites et scènes Godot sera
-fait séparément quand les premières images seront prêtes.
+Le décor est intégré : terrain/foret.png, terrain/caverne.png et
+terrain/chateau.png sont chargés par scenery.gd. Pour les remplacer,
+garder ces noms et conserver la transparence des deux bâtiments.
+Le sol utilise la clairière centrale du PNG sur les cases constructibles,
+et la forêt sur les marges. Les tailles et points d'ancrage se règlent
+dans scenery.gd ; adapter ces points si la porte ou la bouche change.
+Les PNG ne doivent pas contenir d'interface ni de quadrillage.
+Les tours et les monstres restent dessinés dans board.gd ; leurs sprites
+seront raccordés séparément. L'interface se trouve dans main.gd.
+
+Le projectile de l'archer est intégré : projectiles/fleche.png, chargé par
+projectiles.gd. Pour le remplacer, dessiner une seule flèche horizontale
+pointant à droite, centrée dans un PNG transparent. La taille d'affichage
+ARROW_WIDTH et la rotation sont gérées par le code, pas par la résolution du PNG.

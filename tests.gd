@@ -58,6 +58,7 @@ func gui_click(point: Vector2) -> void:
 ## Termine par inspection_tests, affiche le bilan et quitte avec le code 1 si un test a échoué.
 func run() -> void:
 	var started := Time.get_ticks_msec()
+	projectile_tests()
 	var game = Model.new()
 	# NAVIGATION : pour chaque grille, compare le plus court chemin avec AStarGrid2D de Godot.
 	for index in range(3):
@@ -482,7 +483,7 @@ func run() -> void:
 	board._gui_input(press)
 	check(board.zoom == 1.0 and scene.game.towers.size() == before_overview, "Overview tap zooms without accidental construction")
 	board.castle_view()
-	check(board.cell_at(Vector2(board.size.x - 35, board.size.y / 2)) == scene.game.exit_cell, "Castle shortcut")
+	check(board.cell_at(Vector2(board.size.x - board.scenery.LANDMARK_INSET, board.size.y / 2)) == scene.game.exit_cell, "Castle shortcut frames the gate with room for its silhouette")
 	# ORIENTATION : vérifie configuration, conservation de partie/caméra et contrôles après rotation.
 	check(ProjectSettings.get_setting("display/window/handheld/orientation") == DisplayServer.SCREEN_SENSOR, "Phone sensor enables portrait and landscape")
 	check(ProjectSettings.get_setting("display/window/size/window_width_override") > ProjectSettings.get_setting("display/window/size/window_height_override"), "Default desktop window is landscape")
@@ -576,6 +577,8 @@ func inspection_tests() -> void:
 		ui.apply_layout(true)
 		board.entry_view()
 		board.set_zoom(1.3, Vector2(35, board.size.y / 2))
+		# Cadre les deux tours du scénario dans le plateau étroit, indépendamment de la marge du décor.
+		board.pan.x -= 200.0
 		var first_cell: Vector2i = ui.game.entry + Vector2i(4, -1)
 		var second_cell: Vector2i = ui.game.entry + Vector2i(8, -1)
 		ui.game.build(first_cell, 0)
@@ -693,3 +696,35 @@ func inspection_tests() -> void:
 	check(not ui.game.towers.has(remaining_cell) and ui.game.gold == before_live_sale + live_refund, "Context sale works in unpaused combat after rotating")
 	ui.queue_free()
 	await process_frame
+
+## Vérifie la flèche orientée dans les quatre directions et sa progression du départ à la cible.
+## Contrôle aussi le marquage du tir, la pause et son expiration en vitesse accélérée.
+func projectile_tests() -> void:
+	var renderer = preload("res://projectiles.gd")
+	for direction in [Vector2.RIGHT, Vector2.DOWN, Vector2.LEFT, Vector2.UP]:
+		var shot := {"from": Vector2(4, 4), "to": Vector2(4, 4) + direction * 2.0, "duration": 0.3, "life": 0.3}
+		for progress in [0.0, 0.5, 1.0]:
+			shot.life = shot.duration * (1.0 - progress)
+			var transform: Transform2D = renderer.arrow_transform(shot, 42.0)
+			check(transform.origin.is_equal_approx(shot.from.lerp(shot.to, progress) * 42.0), "Arrow moves from tower to target without overshoot")
+			check(transform.x.is_equal_approx(direction), "Arrow sprite points towards target in all four directions")
+	var game = Model.new()
+	game.reset(1)
+	game.start_wave()
+	var dummy: Dictionary = enemy(game)
+	var archer := tower(0)
+	game.fire_tower(game.entry + Vector2i(1, -1), archer)
+	check(game.shots.size() == 1 and game.shots[0].kind == 0, "Archer shot is identified for sprite rendering")
+	near(dummy.hp, 985.0, "Arrow animation preserves existing archer damage")
+	near(archer.cooldown, 1.2, "Arrow sprite does not change archer cadence")
+	var life: float = game.shots[0].life
+	game.paused = true
+	game.tick(0.2)
+	near(game.shots[0].life, life, "Pause freezes arrow flight")
+	game.paused = false
+	game.speed_multiplier = 5
+	game.tick(0.1)
+	check(game.shots.is_empty(), "Arrow expires with accelerated combat time")
+	game.fire_tower(game.entry + Vector2i(1, -1), tower(2))
+	check(game.shots.size() == 1 and game.shots[0].kind == 2, "Other towers remain distinguishable from arrows")
+	near(game.shots[0].life, 0.18, "Other tower visual duration stays unchanged")

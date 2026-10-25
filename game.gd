@@ -381,7 +381,10 @@ func fire_tower(cell: Vector2i, tower: Dictionary) -> void:
 	else:
 		apply_hit(cell, tower, target)
 	tower.cooldown = float(spec.delay)
-	shots.append({"from": origin, "to": point, "color": spec.color, "life": 0.18, "splash": splash})
+	# Le type permet au rendu de choisir le sprite. duration mémorise la durée initiale du vol.
+	# Le temps restant life diminue avec le temps de jeu : pause et vitesses s'appliquent aussi aux flèches.
+	var duration := clampf(origin.distance_to(point) / 12.0, 0.12, 0.32) if int(tower.kind) == 0 else 0.18
+	shots.append({"kind": int(tower.kind), "from": origin, "to": point, "color": spec.color, "duration": duration, "life": duration, "splash": splash})
 
 ## Fait subir à enemy les dégâts de ses poisons pendant dt secondes de jeu.
 ## Chaque source a sa propre durée ; limite les dégâts au temps restant et retire les effets expirés.

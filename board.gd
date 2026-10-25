@@ -5,6 +5,10 @@ extends Control
 ## Le modèle game reste indépendant de ces déplacements de caméra et de la résolution.
 # Une case vaut 42 unités graphiques avant zoom ; la simulation ne dépend pas de cette taille.
 const CELL := 42.0
+# Décor séparé du modèle : changer ses textures ne change ni les cases ni le chemin des monstres.
+var scenery = preload("res://scenery.gd").new()
+# Les tirs sont dessinés à part pour pouvoir remplacer leurs sprites sans toucher au combat.
+var projectiles = preload("res://projectiles.gd").new()
 var game
 # CAMÉRA ET SÉLECTION : selected sert à dessiner portée et contour ; pan/zoom cadrent la carte.
 var selected := Vector2i(-1, -1)
@@ -62,7 +66,8 @@ func refresh() -> void:
 ## Renvoie le zoom permettant de voir toute la carte avec une marge de 5 %.
 ## Utilise la taille disponible du plateau et les dimensions de la grille.
 func minimum_zoom() -> float:
-	return minf(size.x / (game.cols * CELL), size.y / (game.rows * CELL)) * 0.95
+	var bounds: Rect2 = scenery.world_bounds(game, CELL)
+	return minf(size.x / bounds.size.x, size.y / bounds.size.y) * 0.95
 
 ## Change la taille du plateau en conservant la position du monde au centre de la vue.
 ## Si la vue montrait toute la carte, réajuste plutôt la vue d'ensemble au nouvel écran.
@@ -96,21 +101,24 @@ func set_zoom(value: float, anchor: Vector2) -> void:
 ## Limite le décalage de la carte pour éviter de la perdre entièrement hors du plateau.
 ## Autorise une marge de 24 unités graphiques autour de ses bords.
 func clamp_pan() -> void:
-	var world := Vector2(game.cols, game.rows) * CELL * zoom
-	pan.x = clampf(pan.x, minf(24.0, size.x - world.x - 24.0), maxf(24.0, size.x - world.x - 24.0))
-	pan.y = clampf(pan.y, minf(24.0, size.y - world.y - 24.0), maxf(24.0, size.y - world.y - 24.0))
+	var bounds: Rect2 = scenery.world_bounds(game, CELL)
+	# Les marges autorisent à voir les silhouettes complètes, même hors de la grille logique.
+	var minimum := size - bounds.end * zoom - Vector2.ONE * 24.0
+	var maximum := -bounds.position * zoom + Vector2.ONE * 24.0
+	pan.x = clampf(pan.x, minf(minimum.x, maximum.x), maxf(minimum.x, maximum.x))
+	pan.y = clampf(pan.y, minf(minimum.y, maximum.y), maxf(minimum.y, maximum.y))
 
-## Revient au zoom ×1 et place l'entrée près du bord gauche, à mi-hauteur du plateau.
+## Revient au zoom ×1 et cadre la caverne entière à gauche, à mi-hauteur du plateau.
 func entry_view() -> void:
 	zoom = 1.0
-	pan = Vector2(35, size.y / 2.0) - (Vector2(game.entry) + Vector2.ONE * 0.5) * CELL * zoom
+	pan = Vector2(scenery.LANDMARK_INSET, size.y / 2.0) - (Vector2(game.entry) + Vector2.ONE * 0.5) * CELL * zoom
 	clamp_pan()
 	refresh()
 
-## Revient au zoom ×1 et place le château près du bord droit, à mi-hauteur du plateau.
+## Revient au zoom ×1 et cadre le château entier à droite, à mi-hauteur du plateau.
 func castle_view() -> void:
 	zoom = 1.0
-	pan = Vector2(size.x - 35, size.y / 2.0) - (Vector2(game.exit_cell) + Vector2.ONE * 0.5) * CELL * zoom
+	pan = Vector2(size.x - scenery.LANDMARK_INSET, size.y / 2.0) - (Vector2(game.exit_cell) + Vector2.ONE * 0.5) * CELL * zoom
 	clamp_pan()
 	refresh()
 
@@ -191,6 +199,9 @@ func _gui_input(event: InputEvent) -> void:
 							set_zoom(1.0, event.position)
 						else:
 							cell_tapped.emit(cell)
+					else:
+						# Le décor hors grille peut aussi fermer une fiche ; game.build refuse cette case sans achat.
+						cell_tapped.emit(cell)
 				dragging = false
 	elif event is InputEventMouseMotion:
 		hover_point = event.position
@@ -218,22 +229,22 @@ func _draw() -> void:
 
 ## Dessine sur canvas les éléments du monde, transformés par pan et zoom.
 ## Ordre des couches : grille, chemin, portée, tours, entrée/château, monstres, tirs puis pause.
-## Les graphismes sont provisoires ; cette méthode accueillera les textures et animations.
+## scenery.gd dessine le décor texturé ; les tours et monstres gardent leur dessin provisoire.
 func paint(canvas: Node2D) -> void:
 	if game == null:
 		return
 	# Calcule la portion du monde visible ; la marge d'une case inclut les dessins débordants.
 	# Limiter le quadrillage et les unités dessinées économise du travail sur les grandes cartes.
 	var visible := Rect2(-pan / zoom, size / zoom).grow(CELL)
-	canvas.draw_rect(Rect2(Vector2.ZERO, Vector2(game.cols, game.rows) * CELL), Color("304632"))
+	scenery.paint_ground(canvas, game, CELL, visible)
 	var x0 := maxi(0, floori(visible.position.x / CELL))
 	var x1 := mini(game.cols, ceili(visible.end.x / CELL))
 	var y0 := maxi(0, floori(visible.position.y / CELL))
 	var y1 := mini(game.rows, ceili(visible.end.y / CELL))
 	for x in range(x0, x1 + 1):
-		canvas.draw_line(Vector2(x * CELL, y0 * CELL), Vector2(x * CELL, y1 * CELL), Color("5b6548"), 1.0 / zoom)
+		canvas.draw_line(Vector2(x * CELL, y0 * CELL), Vector2(x * CELL, y1 * CELL), Color("cad8a33b"), 1.0 / zoom)
 	for y in range(y0, y1 + 1):
-		canvas.draw_line(Vector2(x0 * CELL, y * CELL), Vector2(x1 * CELL, y * CELL), Color("5b6548"), 1.0 / zoom)
+		canvas.draw_line(Vector2(x0 * CELL, y * CELL), Vector2(x1 * CELL, y * CELL), Color("cad8a33b"), 1.0 / zoom)
 	# Reconstruit les points de la ligne seulement si les obstacles ont changé, pas à chaque image.
 	if route_revision != game.revision:
 		route_points.clear()
@@ -242,6 +253,7 @@ func paint(canvas: Node2D) -> void:
 		route_revision = game.revision
 	if route_points.size() > 1:
 		canvas.draw_polyline(route_points, Color("d5bc7766"), 10, true)
+	scenery.paint_landmarks(canvas, game, CELL)
 	# COUVERTURE : cercle de portée fixe de la tour choisie, derrière les constructions.
 	if game.towers.has(selected):
 		var point := (Vector2(selected) + Vector2.ONE * 0.5) * CELL
@@ -267,14 +279,6 @@ func paint(canvas: Node2D) -> void:
 			canvas.draw_rect(Rect2(p - Vector2(20, 20), Vector2(40, 40)), Color("f8dc8b"), false, 2)
 		if tower.hp < 120.0 + (tower.level - 1) * 60:
 			canvas.draw_line(p + Vector2(-16, 20), p + Vector2(-16 + 32 * tower.hp / (120.0 + (tower.level - 1) * 60), 20), Color("d67762"), 3)
-	# REPÈRES : entrée et château restent identifiables même à faible zoom.
-	var entry_point := (Vector2(game.entry) + Vector2.ONE * 0.5) * CELL
-	canvas.draw_circle(entry_point, maxf(15.0, 5 / zoom), Color("c98644"))
-	var castle := (Vector2(game.exit_cell) + Vector2.ONE * 0.5) * CELL
-	if zoom < 0.3:
-		canvas.draw_circle(castle, 5 / zoom, Color("ddd0ae"))
-	canvas.draw_rect(Rect2(castle - Vector2(16, 18), Vector2(32, 36)), Color("ddd0ae"))
-	canvas.draw_rect(Rect2(castle + Vector2(-5, 3), Vector2(10, 15)), Color("51422f"))
 	# MONSTRES : couleur de résistance/type, teinte de givre, anneau de poison et barre de vie.
 	# Les détails fins sont masqués à faible zoom pour garder une vue lisible.
 	for enemy in game.enemies:
@@ -300,13 +304,8 @@ func paint(canvas: Node2D) -> void:
 			canvas.draw_circle(p + Vector2(3, -2), 2, Color("263325"))
 			canvas.draw_line(p + Vector2(-15, -radius - 7), p + Vector2(15, -radius - 7), Color("492c26"), 3)
 			canvas.draw_line(p + Vector2(-15, -radius - 7), p + Vector2(-15 + 30 * maxf(0, enemy.hp / enemy.max_hp), -radius - 7), Color("b2d078"), 3)
-	# EFFETS DE TIR : segments et anneaux temporaires ; les dégâts ont déjà été appliqués par le modèle.
-	for shot in game.shots:
-		var color: Color = shot.color
-		color.a = minf(1.0, shot.life / 0.18)
-		canvas.draw_line(shot.from * CELL, shot.to * CELL, color, 3, true)
-		if shot.splash:
-			canvas.draw_arc(shot.to * CELL, CELL * 1.5 * (1.0 - color.a), 0, TAU, 24, color, 2, true)
+	# EFFETS DE TIR : flèches animées des archers et effets actuels des autres tours et boss.
+	projectiles.paint(canvas, game.shots, CELL)
 	# VOILE DE PAUSE : convertit le rectangle d'écran en coordonnées du dessinateur transformé.
 	if game.paused:
 		canvas.draw_rect(Rect2(-pan / zoom, size / zoom), Color("000000aa"))

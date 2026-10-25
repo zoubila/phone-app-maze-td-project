@@ -11,5 +11,6 @@
 
 - Ranger les exports dans `assets/` selon `assets/LISEZMOI.txt`.
 - Conserver les originaux modifiables dans `assets/sources/`, exclu de l'import Godot par `.gdignore`.
-- Les sprites ne sont pas encore raccordés au jeu : les dessins actuels se trouvent dans `board.gd`, l'interface dans `main.gd`, ses dispositions adaptatives dans `ui_layout.gd` et les règles dans `game.gd`.
+- Le décor est raccordé dans `scenery.gd` : forêt, caverne et château utilisent les PNG de `assets/terrain/`. Les tours et monstres restent dessinés dans `board.gd`. L'interface se trouve dans `main.gd`, ses dispositions dans `ui_layout.gd` et les règles dans `game.gd`.
 - Les fiches au survol et au toucher se trouvent dans `inspection.gd`. Garder les actions de vente et d'amélioration accessibles au toucher pendant les vagues et en pause ; le survol ne doit pas changer la tour sélectionnée.
+- Les tirs se dessinent dans `projectiles.gd`. L'archer utilise `assets/projectiles/fleche.png`, orienté vers la droite au repos. Le vol est visuel ; les dégâts restent appliqués au tir dans `game.gd`.

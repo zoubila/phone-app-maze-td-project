@@ -1,0 +1,6 @@
+FLÈCHE D'ARCHER — 25 octobre 2026
+Génération avec l'outil intégré image_gen, transparent_background=true.
+Sprite final : assets/projectiles/fleche.png. Aucune retouche des pixels.
+
+Use case: stylized-concept. Asset type: one game-ready arrow projectile sprite for a medieval fantasy mobile tower defense. A SINGLE straight horizontal medieval arrow pointing exactly RIGHT, sharp broad triangular silver steel arrowhead at right, warm light wooden shaft, small ivory feather fletching with dark brown trim at left, tiny leather binding. Side-on orthographic 2D silhouette, no perspective, zero tilt. Hand-painted polished fantasy game asset matching mossy forest medieval game art, bold clear silhouette, readable when drawn only 40 pixels long, moderately thick shaft and strong simple feathers, no tiny ornaments. Arrow centered vertically and horizontally, fills 88 percent of width and about 20 percent of height in a wide horizontal canvas. Entire arrow visible, comfortable transparent margin, isolated true alpha transparent background. No shadow on ground, no glow, no trail, no bow, no hands, no duplicates, no text, no border, no watermark. Wide 1536 by 1024 image is acceptable with lots of transparent vertical space, but projectile axis must be exactly horizontal.
+

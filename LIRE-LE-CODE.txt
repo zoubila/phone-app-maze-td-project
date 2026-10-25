@@ -9,6 +9,7 @@ ORDRE DE LECTURE CONSEILLÉ
 1. main.gd : démarrage, création des boutons et liaison avec le jeu.
 2. game.gd : données des tours, achats, vagues, navigation et combat.
 3. board.gd : dessin de la carte, caméra, zoom et clics/touchers.
+   scenery.gd : fond forestier et images de la caverne et du château.
 4. inspection.gd : fiches des tours/monstres et demandes de vente/amélioration.
 5. ui_layout.gd : positions des commandes en paysage/portrait et zones sûres.
 6. tests.gd : exemples de scénarios et résultats attendus.
@@ -61,6 +62,8 @@ Progression des PV : game.enemy_health ; composition : game.wave_plan.
 Achats et remboursements : game.build, upgrade_cost, upgrade et sell.
 Chemin le plus court : game.field_without, next_cell et rebuild_flow.
 Dessin des tours/monstres : board.paint ; ressources graphiques : assets/.
+Fond, caverne et château : scenery.gd ; images dans assets/terrain/.
+Flèche de l'archer et autres tirs : projectiles.gd ; sprite assets/projectiles/fleche.png.
 Textes et boutons principaux : main.make_ui et main.refresh_ui.
 Contenu des fiches : inspection.update_card ; leur apparence : inspection._ready.
 Disposition mobile : ui_layout.portrait_layout et landscape_layout.
