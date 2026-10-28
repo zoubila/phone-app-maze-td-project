@@ -1,0 +1,16 @@
+{
+  "tool": "imagegen intégré",
+  "style": "Cartoon fantasy médiéval, cohérent avec le portail et le bourg existants.",
+  "assets": [
+    {
+      "file": "assets/tours/tours_cartoon_atlas.png",
+      "layout": "4 colonnes × 2 lignes ; archer, canon, sorcier, arcane, balliste, frost, séisme, poison.",
+      "prompt": "Use case: stylized-concept. Asset type: ONE game sprite atlas, 4 columns by 2 rows, transparent PNG, landscape 2:1 aspect ratio, ideally 2048x1024. Eight equally sized square cells, each contains ONE complete isolated medieval fantasy tower, centered at exactly the same scale and ground line, with generous transparent padding between cells. NO drawn grid, NO text, NO labels, NO background. Fixed reading order left to right: TOP ROW 1) archer tower warm stone watchtower with teal conical roof, small wooden bow turret and green pennant; 2) cannon turret squat stone platform with chunky bronze cannon and red pennant; 3) wizard tower slender cream stone teal roof with bright violet magical orb; 4) arcane tower circular engraved stone pedestal with a hovering magenta crystal. BOTTOM ROW 5) wooden ballista mounted on round stone tower with golden details; 6) frost tower icy pale blue crystal spire on stone base; 7) earthquake tower sturdy stone and bronze totem with amber rune slab; 8) poison tower small alchemist tower with green glass cauldron and emerald magical glow. Art style: polished hand-painted CARTOON mobile tower defense, chunky bevelled shapes, 3/4 orthographic elevated view, consistent frontal camera and upper-left light, highly readable distinct silhouettes, subtle 3D volume on 2D sprites. Soft small contact shadows only. Towers fill about 65 percent cell width and 78 percent cell height; no sprite may touch another cell. Real alpha transparent background, no checkerboard, no scene, no people, no UI, no watermark. One atlas image with exactly EIGHT towers in a REGULAR 4 by 2 layout."
+    },
+    {
+      "file": "assets/ennemis/ennemis_cartoon_atlas.png",
+      "layout": "2 colonnes × 2 lignes ; gobelin, mage, wyverne, ogre.",
+      "prompt": "Use case: stylized-concept. ONE square transparent PNG game sprite atlas in a STRICT 2 columns x 2 rows layout, four equal square cells. Each cell contains one small isolated complete cartoon fantasy enemy with an ample EMPTY TRANSPARENT gutter on ALL sides. TOP LEFT: green goblin raider with leather armor, small sword and round shield. TOP RIGHT: green goblin in purple wizard robe with glowing lilac wand. BOTTOM LEFT: golden small flying wyvern, teal bat wings fully inside its cell. BOTTOM RIGHT: orange armored ogre with wooden club. Each sprite centered in its cell, feet at 80 percent down its own cell, NO sprite fills more than 65 percent cell width or 75 percent cell height. Do NOT make a lineup: the sprites MUST be arranged TWO ON TOP and TWO BELOW with a large blank cross between them. Polished hand-painted cartoon mobile medieval fantasy strategy game, chibi readable silhouettes, elevated three-quarter orthographic view facing right, upper-left light, gentle bevelled 3D shading. No scene, no background, no drawn grid, no letters, no text, no border, no UI, no ground plane or watermark. Real transparent alpha. ONE SQUARE image, exactly four separate enemies in the four quadrants."
+    }
+  ]
+}

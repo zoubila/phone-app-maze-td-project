@@ -1,0 +1,25 @@
+{
+  "tool": "imagegen intégré",
+  "direction": "Cartoon mobile, grands volumes lisibles, couleurs franches et peu de microtextures. Ressources originales.",
+  "assets": [
+    {
+      "file": "assets/terrain/sol_toon_v2.png",
+      "prompt": "Use case: stylized-concept. Asset type: seamless square top-down 2D ground texture for an ORIGINAL medieval fantasy MOBILE tower defense. Strongly CARTOON, bold simple forms, smooth matte toy-like 3D shading, broad clean color areas like a polished casual strategy game. Absolutely NOT realistic, NOT detailed hand-painted fantasy, NOT gritty, NOT noisy. Around half the surface fresh lively apple-green lawn with broad softly bevelled patches, one third warm pale honey-brown compacted earth clearings, remaining area a few large rounded flat slate-grey stepping stones sunk flush in the earth. Only a handful of grass tufts and tiny three-leaf plants, no gravel or leaf texture, no tiny cracks, no individual blades carpeting the ground. The shapes should read beautifully at tiny phone scale. Muted warm sunlight from upper left, gentle short contact shadows under broad stones. All four edges tile seamlessly, full-bleed square, no central composition, no border. No fixed route or road, no buildings, no trees, no tall obstacles, no characters, no text, no UI, no logos or watermark. A clean quiet surface that supports a separately drawn winding path and units."
+    },
+    {
+      "file": "assets/terrain/chene_toon_v2.png",
+      "prompt": "Use case: stylized-concept. Asset type: one isolated tree sprite, true transparent background, for an ORIGINAL cartoon medieval fantasy mobile strategy game. One friendly chunky oak with a short thick warm-brown trunk and 5 LARGE inflated rounded canopy lobes in bright green, moss green shadow and warm lime highlight. Ultra-clean toy-like 3D cartoon rendering, low-detail smooth bevelled volumes and strong readable silhouette, confident broad shapes with just 2 or 3 leaf notches per lobe. NO realistic leaves, no painted foliage brush texture, no tiny veins or branches, no noise, no intricate bark. Three-quarter elevated orthographic camera, upper-left sunlight, small soft contact shadow. Whole tree inside frame with transparent padding on all sides, no scene or ground plane, no text, no logos or watermark."
+    },
+    {
+      "file": "assets/tours/tours_toon_v2_atlas.png",
+      "layout": "4 colonnes × 2 lignes ; ordre du catalogue.",
+      "prompt": "Use case: stylized-concept. Asset type: ONE transparent PNG tower sprite atlas, STRICT regular 4 columns by 2 rows, landscape 2:1 ratio. Exactly eight towers, centered in eight equal square cells, each tower fully inside its cell with generous transparent gutters and same baseline. Original bold CARTOON medieval fantasy mobile strategy art: smooth toy-like 3D volumes, chunky oversized parts, saturated distinct accents, clean bevelled cream stone, simple warm wood, very few big stone joints, broad highlights and soft compact shadows. Not realistic, not painterly, no intricate shingles, no masonry microdetail, no ornamental clutter. Each tower must read instantly when shown at 40 pixels tall. Consistent elevated three-quarter orthographic camera, upper-left light. TOP ROW left to right: 1 squat archer watchtower with oversized teal roof and a large wooden bow; 2 round cannon base with huge dark cannon barrel, warm orange accents; 3 chunky purple-roof wizard tower with ONE violet glowing orb; 4 low round cream stone base with ONE big magenta floating crystal. BOTTOM ROW left to right: 5 chunky wooden ballista on a small cream stone base, gold accents; 6 compact ice-blue crystal tower on round stone base; 7 stocky earth tower with ONE big orange rune boulder; 8 rounded green alchemist tower with ONE big emerald flask or cauldron. No characters, flags crossing cell edges, labels, text, drawn grid, border, scene, logos or watermark. Real alpha transparency. Exactly 4 equal columns and 2 equal rows."
+    }
+  ],
+  "font": {
+    "file": "assets/polices/LilitaOne-Regular.ttf",
+    "source": "https://github.com/google/fonts/tree/main/ofl/lilitaone",
+    "license": "assets/polices/OFL.txt"
+  },
+  "animation": "L'utilisateur prépare les prochaines animations."
+}

@@ -25,13 +25,15 @@ func _ready() -> void:
 	card = Panel.new()
 
 	var style := StyleBoxFlat.new()
-	style.bg_color = Color("#18291ff5")
-	style.border_color = Color("#bfa56b")
-	style.set_border_width_all(1)
-	style.set_corner_radius_all(14)
+	style.bg_color = Color("#143e4df5")
+	style.border_color = Color("#edc477")
+	style.set_border_width_all(3)
+	style.border_width_bottom = 7
+	style.set_corner_radius_all(22)
 	card.add_theme_stylebox_override("panel", style)
 	add_child(card)
 	title = Controls.label(card, "", Vector2(24, 24), Vector2(392, 54), 34, Color("#f3dfaf"))
+	Controls.headline(title, 34, Color("#ffe184"))
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	description = Controls.label(card, "", Vector2(24, 90), Vector2(392, 56), 19)
 	description.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -47,6 +49,7 @@ func _ready() -> void:
 		card, "Retour accueil", Vector2(64, 242), Vector2(312, 56),
 		func(): home_requested.emit(),
 	)
+	Controls.primary_style(replay_button)
 	resized.connect(arrange)
 	arrange()
 	hide()

@@ -12,11 +12,17 @@ const TowerCombat = preload("res://gameplay/tower_combat.gd")
 const Bosses = preload("res://gameplay/bosses.gd")
 const Simulation = preload("res://gameplay/simulation.gd")
 
+# Les événements visuels annoncent des faits du modèle, sans déplacer les règles dans l'interface.
+signal wave_repelled(number: int, bonus: int)
+signal wave_started(number: int)
+
 
 const LAST_WAVE := 100
 const MAX_LEVEL := 7
 const COMBAT_SPEEDS := [1, 2, 3, 5]
 const SIMULATION_STEP := 1.0 / 60.0
+# Les monstres parcourent ce court sas hors grille avant d'atteindre la case d'entrée.
+const PORTAL_APPROACH_CELLS := 4.0
 const GRID_SIZES := [Vector2i(100, 50), Vector2i(50, 25), Vector2i(200, 100)]
 const TYPES = preload("res://gameplay/tower_catalog.gd").TYPES
 
@@ -62,6 +68,7 @@ var destroyed := 0
 var revision := 0
 var rng := RandomNumberGenerator.new()
 var next_enemy_id := 1
+var presentation_time := 0.0
 
 
 ## Godot appelle cette fonction au moment de créer une partie avec new().
@@ -97,6 +104,7 @@ func reset(grid_index: int = 0) -> void:
 	spawned = 0
 	destroyed = 0
 	next_enemy_id = 1
+	presentation_time = 0.0
 	message = "Bâtissez ou lancez la vague dès que vous êtes prêt."
 	rebuild_flow()
 
@@ -105,6 +113,26 @@ func reset(grid_index: int = 0) -> void:
 ## Renvoie true si ses coordonnées sont valides, ou false si elle est hors de la grille.
 func inside(cell: Vector2i) -> bool:
 	return Navigation.inside(self, cell)
+
+
+## Renvoie les cases réservées au château ; le portail est désormais entièrement hors grille.
+## Le rectangle couvre le château et ses abords, y compris la place sous les toits des tours.
+## Il suit la sortie pour fonctionner avec les trois tailles de carte.
+## Ces zones interdisent uniquement la construction : les monstres peuvent toujours les traverser.
+func landmark_areas() -> Array[Rect2i]:
+	var grid := Rect2i(Vector2i.ZERO, Vector2i(cols, rows))
+	return [
+		Rect2i(exit_cell + Vector2i(-1, -5), Vector2i(2, 8)).intersection(grid),
+	]
+
+
+## Vérifie la réservation avant tout achat, indépendamment du zoom, de la souris ou du toucher.
+## Le dessin du plateau utilise les mêmes zones pour ne pas afficher une limite différente de la règle.
+func is_landmark_area(cell: Vector2i) -> bool:
+	for area in landmark_areas():
+		if area.has_point(cell):
+			return true
+	return false
 
 
 ## Transforme une position de grille (x, y) en numéro de case.

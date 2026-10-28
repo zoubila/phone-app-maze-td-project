@@ -10,6 +10,7 @@ const Model = preload("res://game.gd")
 ## check compte une vérification ; near compare des nombres avec une petite tolérance d'arrondi.
 static func run(suite) -> void:
 	var game = Model.new()
+	landmark_reservations(suite, game)
 
 	# Première étape : on compare les trois grilles avec le calcul de chemin indépendant fourni par Godot.
 	for index in range(3):
@@ -178,8 +179,9 @@ static func run(suite) -> void:
 		game.reset(1)
 		game.gold = 100000
 
-		var archer_cell: Vector2i = game.entry + Vector2i(1, -1)
-		game.build(archer_cell, 0)
+		# La première position libre est à trois colonnes de l'entrée, hors du portail.
+		var archer_cell: Vector2i = game.entry + Vector2i(3, -1)
+		suite.check(game.build(archer_cell, 0), "Cadence archer is built outside the portal")
 
 		for upgrade_index in range(level - 1):
 			game.upgrade(archer_cell)
@@ -187,6 +189,9 @@ static func run(suite) -> void:
 		game.start_wave()
 
 		var dummy: Dictionary = suite.enemy(game)
+		# Déplacer aussi la cible conserve la distance du scénario de cadence initial.
+		dummy.cell += Vector2i(2, 0)
+		dummy.next += Vector2i(2, 0)
 		dummy.hp = 100000.0
 		dummy.speed = 0.0
 		game.to_spawn = 0
@@ -214,11 +219,13 @@ static func run(suite) -> void:
 		game.fire_tower(game.entry + Vector2i(4, 0), game.towers[archer_cell])
 		suite.near(dummy.hp, untouched, "Upgraded archer cannot hit outside its base range")
 	game.reset(1)
-	game.build(game.entry + Vector2i(1, -1), 0)
+	suite.check(game.build(game.entry + Vector2i(3, -1), 0), "TTK archer is built outside the portal")
 	game.preparation = 0
 	game.start_wave()
 
 	var ttk_dummy: Dictionary = suite.enemy(game)
+	ttk_dummy.cell += Vector2i(2, 0)
+	ttk_dummy.next += Vector2i(2, 0)
 	ttk_dummy.hp = 300.0
 	ttk_dummy.speed = 0.0
 	game.to_spawn = 0
@@ -233,7 +240,7 @@ static func run(suite) -> void:
 		"Archer TTK is 22.8 seconds against neutral stationary 300 HP target",
 	)
 	game.reset(1)
-	game.build(game.entry + Vector2i(2, -1), 4)
+	suite.check(game.build(game.entry + Vector2i(3, -1), 4), "First ballista is built outside the portal")
 	game.build(game.entry + Vector2i(7, -1), 4)
 	game.wave = 9
 	game.preparation = 0
@@ -261,6 +268,7 @@ static func run(suite) -> void:
 	game.start_wave()
 
 	var trapped: Dictionary = game.spawn_enemy()
+	trapped.portal_remaining = 0.0
 	trapped.cell = Vector2i(4, 4)
 	trapped.next = Vector2i(5, 4)
 	trapped.fraction = 0.5
@@ -286,7 +294,7 @@ static func run(suite) -> void:
 	for speed in Model.COMBAT_SPEEDS:
 		game.reset(1)
 		game.gold = 10000
-		game.build(game.entry + Vector2i(2, -1), 0)
+		suite.check(game.build(game.entry + Vector2i(3, -1), 0), "Speed test archer is built outside the portal")
 		game.build(game.entry + Vector2i(4, 1), 7)
 		game.build(game.entry + Vector2i(6, -1), 4)
 		game.wave = 9
@@ -321,3 +329,30 @@ static func run(suite) -> void:
 			)
 			suite.near(result.health, reference.health, "Speed preserves damage and poison")
 			suite.near(result.positions, reference.positions, "Speed preserves movement")
+
+
+## Reproduit les achats sur le château, pour chaque carte et état de pause/combat.
+## Un refus ne doit modifier ni l'or, ni les tours, ni le chemin. Les cases voisines restent libres.
+static func landmark_reservations(suite, game) -> void:
+	for grid_index in range(Model.GRID_SIZES.size()):
+		for state in [Vector2i(0, 0), Vector2i(0, 1), Vector2i(1, 0), Vector2i(1, 1)]:
+			game.reset(grid_index)
+			game.active = bool(state.x)
+			game.paused = bool(state.y)
+			var original_gold: int = game.gold
+			var original_revision: int = game.revision
+			var original_route: Array[Vector2i] = game.route.duplicate()
+
+			for area in game.landmark_areas():
+				for y in range(area.position.y, area.end.y):
+					for x in range(area.position.x, area.end.x):
+						suite.check(not game.build(Vector2i(x, y), 0), "No tower anywhere on a landmark footprint")
+				# La réservation doit s'appliquer aux huit types de tours, pas seulement à l'archer.
+				for kind in range(Model.TYPES.size()):
+					suite.check(not game.build(area.position, kind), "Every tower type respects landmark reservations")
+
+			suite.check(game.gold == original_gold and game.towers.is_empty(), "Reserved placement never charges or creates a tower")
+			suite.check(game.revision == original_revision and game.route == original_route, "Reserved placement leaves navigation unchanged")
+			suite.check(game.flow[game.cell_id(game.entry)] >= 0, "Portal and castle remain traversable")
+			suite.check(game.build(game.entry + Vector2i(3, -1), 0), "Can build immediately outside portal footprint")
+			suite.check(game.build(game.exit_cell + Vector2i(-2, -1), 0), "Can build immediately outside castle footprint")

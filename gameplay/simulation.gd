@@ -10,6 +10,8 @@ extends RefCounted
 static func tick(game, delta: float) -> void:
 	if game.paused or game.ended:
 		return
+	# Le halo du portail respire en temps réel et se fige avec la pause.
+	game.presentation_time += delta
 
 	if not game.active:
 		advance_shots(game, delta)
@@ -116,13 +118,16 @@ static func remove_and_pay_enemies(game) -> void:
 ## Vérifie la défaite avant la réussite de la vague et la victoire de campagne.
 ## Une vague terminée paie son bonus une seule fois et prépare l'attente de quinze secondes.
 static func finish_wave_if_needed(game) -> void:
+	if not game.active or game.ended:
+		return
 	if game.lives <= 0:
 		game.active = false
 		game.ended = true
 		game.message = "Le château est tombé. Recomposez votre labyrinthe."
 	elif game.to_spawn == 0 and game.enemies.is_empty():
 		game.active = false
-		game.gold += 20 + game.wave * 3
+		var bonus: int = 20 + game.wave * 3
+		game.gold += bonus
 		game.best = maxi(game.best, game.wave)
 		game.preparation = 15.0
 		game.message = "Vague repoussée. Préparez la suivante."
@@ -131,3 +136,4 @@ static func finish_wave_if_needed(game) -> void:
 			game.ended = true
 			game.won = true
 			game.message = "Victoire ! Les 100 vagues ont été repoussées."
+		game.wave_repelled.emit(game.wave, bonus)

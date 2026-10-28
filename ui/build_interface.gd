@@ -3,6 +3,7 @@ extends RefCounted
 ## Le catalogue ne contient que les huit tours ; le menu et le résultat sont des écrans séparés.
 
 const Controls = preload("res://ui/control_factory.gd")
+const Art = preload("res://rendering/unit_art.gd")
 
 
 ## Prépare le plateau, le catalogue, les informations flottantes, les fiches et les deux écrans.
@@ -29,6 +30,14 @@ static func create_tower_catalog(ui) -> void:
 			Vector2.ZERO, Vector2(144, 72), func(): ui.select_kind(index)
 		)
 		button.mouse_entered.connect(func(): ui.preview_kind(index))
+		button.set_meta("tower_kind", kind)
+		button.icon = Art.tower_icon(kind)
+		button.expand_icon = true
+		button.icon_alignment = HORIZONTAL_ALIGNMENT_LEFT
+		button.add_theme_constant_override("icon_max_width", 48)
+		button.add_theme_constant_override("h_separation", 5)
+		button.add_theme_font_size_override("font_size", 19)
+		Controls.catalog_style(button, false)
 		button.mouse_exited.connect(ui.hide_hover)
 		ui.type_buttons.append(button)
 
@@ -40,8 +49,10 @@ static func create_overlay_controls(ui) -> void:
 	ui.hud_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 	var background := StyleBoxFlat.new()
-	background.bg_color = Color("#112219b8")
-	background.set_corner_radius_all(8)
+	background.bg_color = Color("#102f3edb")
+	background.border_color = Color("#bda16d88")
+	background.set_border_width_all(2)
+	background.set_corner_radius_all(16)
 	ui.hud_panel.add_theme_stylebox_override("panel", background)
 	ui.add_child(ui.hud_panel)
 	ui.status = Controls.label(ui, "", Vector2.ZERO, Vector2.ZERO, 20)
@@ -54,16 +65,23 @@ static func create_overlay_controls(ui) -> void:
 	ui.settings_button.add_theme_font_size_override("font_size", 28)
 	ui.settings_button.tooltip_text = "Paramètres"
 	ui.wave_button = Controls.button(ui, "", Vector2.ZERO, Vector2(272, 44), ui.launch_wave)
+	ui.preparation_hint = Controls.label(ui, "", Vector2.ZERO, Vector2.ZERO, 15, Color("#fff0c4"))
+	ui.preparation_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	ui.preparation_hint.add_theme_constant_override("outline_size", 4)
+	ui.preparation_hint.add_theme_color_override("font_outline_color", Color("#102f3ee0"))
 
 	for button in [ui.pause_button, ui.speed_button, ui.settings_button, ui.wave_button]:
 		var style := background.duplicate() as StyleBoxFlat
 		style.border_color = Color("#c2ac7377")
 		style.set_border_width_all(1)
 		button.add_theme_stylebox_override("normal", style)
+	Controls.primary_style(ui.wave_button)
 
 
 ## Les fiches gèrent seules la vente et l'amélioration. La fin de partie reçoit son propre bouton Rejouer.
 static func create_screens(ui) -> void:
+	ui.wave_feedback = preload("res://ui/wave_feedback.gd").new()
+	ui.add_child(ui.wave_feedback)
 	ui.inspector = preload("res://inspection.gd").new()
 	ui.add_child(ui.inspector)
 	ui.inspector.sell_requested.connect(ui.sell_tower)

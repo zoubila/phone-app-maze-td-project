@@ -43,6 +43,9 @@ func tower(kind: int, level := 1) -> Dictionary:
 ## Renvoie le même dictionnaire que celui de la liste game.enemies pour suivre les modifications.
 func enemy(game, air := false, armor := "none") -> Dictionary:
 	var item: Dictionary = game.spawn_enemy()
+	# Ces cibles isolent le combat sur la grille ; la vraie sortie du portail a ses propres tests.
+	item.portal_remaining = 0.0
+	item.portal_age = 1.0
 	item.air = air
 	item.armor = armor
 	item.hp = 1000.0
@@ -74,6 +77,8 @@ func run() -> void:
 	await inspection_tests()
 	await preload("res://tests/tower_actions_tests.gd").run(self)
 	await preload("res://tests/touch_gestures_tests.gd").run(self)
+	await preload("res://tests/wave_feedback_tests.gd").run(self)
+	preload("res://tests/portal_tests.gd").run(self)
 
 	print("CHECKS: %d / FAILURES: %d / CAMPAIGN KILLS: %d / MS: %d" % [
 		checks,

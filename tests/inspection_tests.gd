@@ -150,11 +150,13 @@ static func run(suite) -> void:
 
 		# La fiche d'un monstre doit suivre ses points de vie, mais ne doit ni acheter ni vendre de tour.
 		var monster: Dictionary = ui.game.spawn_enemy()
+		monster.portal_remaining = 0.0
 		monster.cell = ui.game.entry + Vector2i(6, 0)
 		monster.next = monster.cell + Vector2i.RIGHT
 		monster.fraction = 0.5
 
 		var other: Dictionary = ui.game.spawn_enemy()
+		other.portal_remaining = 0.0
 		other.cell = ui.game.entry + Vector2i(10, 0)
 		other.next = other.cell + Vector2i.RIGHT
 		suite.check(monster.id != other.id, "Identical units receive stable distinct inspection identifiers")
