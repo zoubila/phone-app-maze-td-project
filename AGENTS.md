@@ -11,9 +11,14 @@
 
 - Ranger les exports dans `assets/` selon `assets/LISEZMOI.txt`.
 - Conserver les originaux modifiables dans `assets/sources/`, exclu de l'import Godot par `.gdignore`.
-- Le décor est raccordé dans `scenery.gd` : forêt, caverne et château utilisent les PNG de `assets/terrain/`. Les tours et monstres sont dessinés dans `rendering/board_renderer.gd`. `board.gd` gère la caméra et les interactions. Les règles détaillées sont dans `gameplay/`, l'interface dans `ui/` et sa disposition dans `ui_layout.gd`. `main.gd` relie les commandes à la partie `game.gd`.
+- Le décor est raccordé dans `scenery.gd` : sol médiéval, chênes, portail et bourg fortifié utilisent les PNG cartoon de `assets/terrain/`. Ce fichier dessine aussi le chemin en relief et les abords des portes. Les tours et monstres sont dessinés dans `rendering/board_renderer.gd`, qui prépare le tracé du chemin. `board.gd` gère la caméra et les interactions. Les règles détaillées sont dans `gameplay/`, l'interface dans `ui/` et sa disposition dans `ui_layout.gd`. `main.gd` relie les commandes à la partie `game.gd`.
 - Les fiches au survol et au toucher se trouvent dans `inspection.gd`. Garder les actions de vente et d'amélioration accessibles au toucher pendant les vagues et en pause ; le survol ne doit pas changer la tour sélectionnée.
 - Les tirs se dessinent dans `projectiles.gd`. L'archer utilise `assets/projectiles/fleche.png`, orienté vers la droite au repos. Le vol est visuel ; les dégâts restent appliqués au tir dans `gameplay/tower_combat.gd`.
+- Les illustrations des tours et ennemis sont regroupées dans deux atlas chargés par `rendering/unit_art.gd`. Réutiliser les mêmes régions pour les cartes du catalogue et le plateau ; conserver le type, la portée et le coût dans le modèle.
+- Les événements `wave_started` et `wave_repelled` du modèle pilotent `ui/wave_feedback.gd`. La célébration reste brève, laisse passer les clics et affiche uniquement le bonus réellement versé. La victoire finale conserve son écran de résultat.
+- Le portail et son socle sont entièrement hors grille. `PORTAL_APPROACH_CELLS` définit le trajet réel jusqu'à l'entrée ; `portal_remaining` et `portal_age` pilotent la sortie progressive. Ne pas réintroduire de zone réservée sur les anciennes cases du portail. L'emprise du château reste protégée.
+- Direction visuelle : cartoon mobile très lisible, volumes épais, couleurs franches et peu de détails fins. Les ressources v2 sont `sol_toon_v2.png`, `chene_toon_v2.png` et `tours_toon_v2_atlas.png`. La police de titres Lilita One et sa licence OFL sont dans `assets/polices/`.
+- L'utilisateur prépare désormais les nouvelles animations. Se concentrer sur les ressources statiques et l'intégration de ses exports quand ils seront fournis.
 
 ## Lisibilité et commentaires
 

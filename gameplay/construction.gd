@@ -12,12 +12,20 @@ static func build(game, cell: Vector2i, kind: int) -> bool:
 		game.message = "Construction impossible sur cette case."
 		return false
 
+	# La réservation couvre toute l'emprise du décor, et pas seulement ses deux cases de passage.
+	# Ce refus a lieu avant l'ajout d'une tour, le paiement ou le recalcul du chemin.
+	if game.is_landmark_area(cell):
+		game.message = "Zone réservée au château : construction interdite."
+		return false
+
 	if cell == game.entry or cell == game.exit_cell or game.towers.has(cell):
 		game.message = "Cette case ne peut pas accueillir de tour."
 		return false
 
 	# Un monstre terrestre déjà présent doit conserver sa case actuelle et sa destination immédiate.
 	for enemy in game.enemies:
+		if float(enemy.get("portal_remaining", 0.0)) > 0.0:
+			continue
 		if not enemy.air and enemy.hp > 0 and (cell == enemy.cell or cell == enemy.next):
 			game.message = "Une unité traverse cette case. Choisissez une case libre."
 			return false
@@ -40,6 +48,8 @@ static func build(game, cell: Vector2i, kind: int) -> bool:
 
 	# Un monstre terrestre déjà présent doit conserver sa case actuelle et sa destination immédiate.
 	for enemy in game.enemies:
+		if float(enemy.get("portal_remaining", 0.0)) > 0.0:
+			continue
 		if not enemy.air and enemy.hp > 0 and candidate[game.cell_id(enemy.next)] < 0:
 			game.towers.erase(cell)
 			game.message = "Ce placement piégerait des monstres : achat refusé."

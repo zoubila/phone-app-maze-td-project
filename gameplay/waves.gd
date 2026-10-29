@@ -43,6 +43,7 @@ static func start_wave(game) -> bool:
 		"sol + air" if plan.air else "résistance " + armor_label,
 		" + GROS BOSS" if plan.boss == 2 else (" + mini boss" if plan.boss == 1 else ""),
 	]
+	game.wave_started.emit(game.wave)
 	return true
 
 
@@ -87,6 +88,9 @@ static func spawn_enemy(game) -> Dictionary:
 		"cell": game.entry,
 		"next": game.next_cell(game.entry, game.flow),
 		"fraction": 0.0,
+		# Le sas du portail est hors grille ; ces valeurs animent l'apparition avant l'entrée.
+		"portal_remaining": game.PORTAL_APPROACH_CELLS,
+		"portal_age": 0.0,
 		# flight mesure la distance parcourue par un volant ; speed est une vitesse en cases par seconde.
 		"flight": 0.0,
 		"speed": 4.0 if flying else (1.4 if boss > 0 else 2.5),

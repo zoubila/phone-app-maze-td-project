@@ -68,6 +68,18 @@ static func run(suite) -> void:
 			not ui.has_method("sell_selected") and not ui.has_method("upgrade_selected"),
 			"Obsolete global tower actions are removed",
 		)
+		# Reproduit le clic signalé sur les silhouettes, dans chaque disposition d'écran.
+		var landmark_gold: int = ui.game.gold
+		for landmark_index in [1]:
+			var reserved_cell: Vector2i = ui.game.entry + Vector2i(1, -1)
+			if landmark_index == 1:
+				ui.board.castle_view()
+				reserved_cell = ui.game.exit_cell + Vector2i(-1, -1)
+			var reserved_point: Vector2 = ui.board.pan + (Vector2(reserved_cell) + Vector2.ONE * 0.5) * ui.board.CELL * ui.board.zoom
+			suite.gui_click(ui.board.get_global_transform_with_canvas() * reserved_point)
+			suite.check(ui.game.towers.is_empty() and ui.game.gold == landmark_gold, "Clicking the castle never purchases a tower")
+		ui.board.entry_view()
+
 		suite.gui_click(ui.wave_button.get_global_rect().get_center())
 		suite.check(
 			ui.game.active and ui.game.wave == 1 and not ui.wave_button.visible,

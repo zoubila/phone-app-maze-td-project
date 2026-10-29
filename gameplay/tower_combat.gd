@@ -85,6 +85,7 @@ static func fire_tower(game, cell: Vector2i, tower: Dictionary) -> void:
 		else:
 			# La distance de la prochaine case est entière ; on y ajoute la portion de segment non parcourue.
 			remaining = game.flow[game.cell_id(enemy.next)] + 1.0 - enemy.fraction
+		remaining += float(enemy.get("portal_remaining", 0.0))
 
 		if remaining < shortest:
 			target = enemy

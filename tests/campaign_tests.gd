@@ -45,6 +45,7 @@ static func run(suite) -> int:
 	game.to_spawn = 1
 
 	var leak: Dictionary = game.spawn_enemy()
+	leak.portal_remaining = 0.0
 	leak.cell = game.exit_cell - Vector2i.RIGHT
 	leak.next = game.exit_cell
 	leak.fraction = 0.95

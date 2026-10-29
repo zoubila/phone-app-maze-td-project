@@ -170,7 +170,7 @@ func pick_item(point: Vector2) -> Dictionary:
 			continue
 
 		var p: Vector2 = game.position_of(enemy) * CELL
-		var radius := 22.0 if enemy.boss == 2 else (18.0 if enemy.boss == 1 else (22.0 if enemy.air else 14.0))
+		var radius := 28.0 if enemy.boss == 2 else (23.0 if enemy.boss == 1 else (24.0 if enemy.air else 18.0))
 		var distance := world.distance_squared_to(p)
 
 		if distance <= radius * radius and distance < best_distance:
@@ -191,7 +191,7 @@ func pick_item(point: Vector2) -> Dictionary:
 
 			var center := (Vector2(candidate) + Vector2.ONE * 0.5) * CELL
 
-			if Rect2(center - Vector2(22, 27), Vector2(44, 49)).has_point(world):
+			if Rect2(center - Vector2(22, 31), Vector2(44, 53)).has_point(world):
 				var distance := world.distance_squared_to(center)
 
 				if distance < best_distance:

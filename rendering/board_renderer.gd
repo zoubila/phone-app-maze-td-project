@@ -3,6 +3,8 @@ extends RefCounted
 ## view désigne board.gd : il fournit la caméra et la partie à représenter.
 ## canvas est le nœud Godot sur lequel les formes et images sont dessinées. Aucune règle de combat n'est modifiée.
 
+const Art = preload("res://rendering/unit_art.gd")
+
 
 ## Dessine les couches dans cet ordre : terrain, chemin, portée, tours, monstres, tirs, pause.
 ## Changer cet ordre peut masquer les unités sous le décor ; il doit donc rester explicite.
@@ -12,7 +14,7 @@ static func paint(view, canvas: Node2D) -> void:
 
 	var visible = Rect2(-view.pan / view.zoom, view.size / view.zoom).grow(view.CELL)
 	paint_ground(view, canvas, visible)
-	paint_route(view, canvas)
+	paint_route(view, canvas, visible)
 	paint_range(view, canvas)
 	paint_towers(view, canvas, visible)
 	paint_enemies(view, canvas, visible)
@@ -24,6 +26,8 @@ static func paint(view, canvas: Node2D) -> void:
 ## Le quadrillage reste fin à chaque zoom pour ne pas masquer les unités.
 static func paint_ground(view, canvas: Node2D, visible: Rect2) -> void:
 	view.scenery.paint_ground(canvas, view.game, view.CELL, visible)
+	# Atténue le contraste du fond pour laisser ressortir les silhouettes des unités.
+	canvas.draw_rect(Rect2(Vector2.ZERO, Vector2(view.game.cols, view.game.rows) * view.CELL), Color("#17393b0a"))
 
 	var x0 = maxi(0, floori(visible.position.x / view.CELL))
 	var x1 = mini(view.game.cols, ceili(visible.end.x / view.CELL))
@@ -34,7 +38,7 @@ static func paint_ground(view, canvas: Node2D, visible: Rect2) -> void:
 		canvas.draw_line(
 			Vector2(x * view.CELL, y0 * view.CELL),
 			Vector2(x * view.CELL, y1 * view.CELL),
-			Color("#cad8a33b"),
+			Color("#2e672518"),
 			1.0 / view.zoom,
 		)
 
@@ -42,25 +46,37 @@ static func paint_ground(view, canvas: Node2D, visible: Rect2) -> void:
 		canvas.draw_line(
 			Vector2(x0 * view.CELL, y * view.CELL),
 			Vector2(x1 * view.CELL, y * view.CELL),
-			Color("#cad8a33b"),
+			Color("#2e672518"),
 			1.0 / view.zoom,
 		)
+	view.scenery.paint_reserved_areas(canvas, view.game, view.CELL)
 
 
 ## Dessine le chemin minimal actuellement disponible depuis l'arrivée des monstres.
 ## Ses points sont recalculés seulement quand les constructions changent, puis réutilisés entre les images.
-static func paint_route(view, canvas: Node2D) -> void:
+static func paint_route(view, canvas: Node2D, visible: Rect2) -> void:
 
 	# Réutiliser les mêmes points évite de reconstruire le tracé à chaque image si aucune tour n'a changé.
 	if view.route_revision != view.game.revision:
 		view.route_points.clear()
+		if not view.game.route.is_empty():
+			view.route_points.append(view.scenery.portal_origin(view.game, view.CELL))
 
-		for cell in view.game.route:
+		# Garder seulement les virages évite de redessiner des disques sur chaque case d'une ligne droite.
+		for index in range(view.game.route.size()):
+			var cell: Vector2i = view.game.route[index]
+			if index > 0 and index < view.game.route.size() - 1:
+				var before: Vector2i = view.game.route[index - 1]
+				var after: Vector2i = view.game.route[index + 1]
+				if cell - before == after - cell:
+					continue
 			view.route_points.append((Vector2(cell) + Vector2.ONE * 0.5) * view.CELL)
+		if not view.game.route.is_empty():
+			var goal: Vector2 = (Vector2(view.game.exit_cell) + Vector2.ONE * 0.5) * view.CELL
+			view.route_points.append(goal + Vector2(130, 10))
 		view.route_revision = view.game.revision
 
-	if view.route_points.size() > 1:
-		canvas.draw_polyline(view.route_points, Color("#d5bc7766"), 10, true)
+	view.scenery.paint_path(canvas, view.route_points, view.game.route, view.CELL, visible, view.zoom)
 	view.scenery.paint_landmarks(canvas, view.game, view.CELL)
 
 
@@ -74,7 +90,7 @@ static func paint_range(view, canvas: Node2D) -> void:
 		canvas.draw_arc(point, radius, 0, TAU, 64, Color("#efd58a88"), 2, true)
 
 
-## Dessine les tours provisoires, leur niveau, leur sélection et leurs éventuelles blessures.
+## Dessine les illustrations des tours, leur niveau, leur sélection et leurs éventuelles blessures.
 ## Une tour hors du rectangle visible est ignorée pour éviter du travail inutile.
 static func paint_towers(view, canvas: Node2D, visible: Rect2) -> void:
 	for cell in view.game.towers:
@@ -84,36 +100,20 @@ static func paint_towers(view, canvas: Node2D, visible: Rect2) -> void:
 			continue
 
 		var tower: Dictionary = view.game.towers[cell]
-		var color: Color = view.game.TYPES[int(tower.kind)].color
-		canvas.draw_circle(p + Vector2(2, 3), 18, Color("#15251b"))
-		canvas.draw_rect(Rect2(p - Vector2(14, 13), Vector2(28, 30)), Color("#b8af96"))
-
-		if tower.kind <= 1:
-			canvas.draw_colored_polygon(
-				PackedVector2Array([p + Vector2(-18, -9), p + Vector2(0, -24), p + Vector2(18, -9)]),
-				color,
-			)
-		else:
-			canvas.draw_colored_polygon(
-				PackedVector2Array([
-					p + Vector2(0, -25),
-					p + Vector2(10, -14),
-					p + Vector2(0, -4),
-					p + Vector2(-10, -14),
-				]),
-				color,
-			)
+		canvas.draw_texture_rect(Art.tower_icon(int(tower.kind)), Rect2(p - Vector2(22, 29), Vector2(44, 51)), false)
 
 		# Les détails fins sont masqués quand la carte est très éloignée, car ils deviendraient illisibles.
 		if view.zoom > 0.4:
+			canvas.draw_circle(p + Vector2(14, 13), 7, Color("#173b49"))
+			canvas.draw_arc(p + Vector2(14, 13), 7, 0, TAU, 16, Color("#e7c17a"), 1.0, true)
 			canvas.draw_string(
 				ThemeDB.fallback_font,
-				p + Vector2(-5, 12),
+				p + Vector2(11, 17),
 				str(tower.level),
 				HORIZONTAL_ALIGNMENT_LEFT,
 				-1,
-				16,
-				Color("#263325"),
+				10,
+				Color("#fff0be"),
 			)
 
 		if cell == view.selected:
@@ -137,31 +137,33 @@ static func paint_enemies(view, canvas: Node2D, visible: Rect2) -> void:
 		if not visible.has_point(p):
 			continue
 
-		var color = Color("#c6b88a") if enemy.armor == "physical" else Color("#bd91ce")
-
+		var radius := 19.0 if enemy.boss == 2 else (15.0 if enemy.boss == 1 else 10.0)
+		var sprite_size := 38.0
 		if enemy.air:
-			color = Color("#edc96a")
-
+			sprite_size = 48.0
 		if enemy.boss > 0:
-			color = Color("#e47755")
-
-		if enemy.slow_time > 0:
-			color = Color("#8ad8ea")
-
-		var radius = 19.0 if enemy.boss == 2 else (15.0 if enemy.boss == 1 else 10.0)
-		canvas.draw_circle(p, radius, color)
-
-		if enemy.air:
-			canvas.draw_line(p - Vector2(22, 10), p, color, 5)
-			canvas.draw_line(p, p + Vector2(22, -10), color, 5)
+			sprite_size = 68.0 if enemy.boss == 2 else 56.0
+		var bob := 0.0 if view.game.paused else sin(float(Time.get_ticks_msec()) / 145.0 + float(enemy.id)) * 1.1
+		var tint := Color("#9ae4ff") if enemy.slow_time > 0 else Color("#ffffff")
+		# Une apparition progressive accompagne le trajet réel depuis le portail hors grille.
+		var emergence := clampf(float(enemy.get("portal_age", 1.0)) / 0.32, 0.0, 1.0)
+		sprite_size *= lerpf(0.45, 1.0, emergence)
+		tint.a *= emergence
+		canvas.draw_set_transform(p + Vector2(0, 8), 0.0, Vector2(1.0, 0.35))
+		canvas.draw_circle(Vector2.ZERO, radius, Color("#172f3b70"))
+		canvas.draw_set_transform(Vector2.ZERO)
+		canvas.draw_texture_rect(
+			Art.enemy_icon(enemy),
+			Rect2(p + Vector2(-sprite_size * 0.5, -sprite_size * 0.75 + bob), Vector2.ONE * sprite_size),
+			false,
+			tint,
+		)
 
 		if not enemy.poison.is_empty():
 			canvas.draw_arc(p, radius + 4, 0, TAU, 18, Color("#96d768"), 2)
 
 		# Les détails fins sont masqués quand la carte est très éloignée, car ils deviendraient illisibles.
-		if view.zoom > 0.4:
-			canvas.draw_circle(p + Vector2(-3, -2), 2, Color("#263325"))
-			canvas.draw_circle(p + Vector2(3, -2), 2, Color("#263325"))
+		if view.zoom > 0.4 and enemy.hp < enemy.max_hp:
 			canvas.draw_line(p + Vector2(-15, -radius - 7), p + Vector2(15, -radius - 7), Color("#492c26"), 3)
 			canvas.draw_line(
 				p + Vector2(-15, -radius - 7),

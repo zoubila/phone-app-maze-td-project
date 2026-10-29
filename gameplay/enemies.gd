@@ -8,6 +8,9 @@ extends RefCounted
 ## Le résultat est exprimé en cases, avec des décimales pour obtenir un déplacement fluide.
 ## Le dessin multiplie ensuite cette position par la taille graphique d'une case.
 static func position_of(game, enemy: Dictionary) -> Vector2:
+	var approach: float = enemy.get("portal_remaining", 0.0)
+	if approach > 0.0:
+		return Vector2(game.entry) + Vector2.ONE * 0.5 - Vector2(approach, 0.0)
 	if enemy.air:
 		return Vector2(game.entry).lerp(
 			Vector2(game.exit_cell),
@@ -21,6 +24,15 @@ static func position_of(game, enemy: Dictionary) -> Vector2:
 ## Si le monstre arrive au château, escape retire les vies correspondantes.
 static func move_enemy(game, enemy: Dictionary, dt: float) -> void:
 	var distance: float = enemy.speed * dt * (enemy.slow_factor if enemy.slow_time > 0 else 1.0)
+	enemy.portal_age = float(enemy.get("portal_age", 1.0)) + dt
+	var approach: float = enemy.get("portal_remaining", 0.0)
+	if approach > 0.0:
+		# Consommer seulement la portion du pas passée dans le sas évite un saut à la frontière.
+		var step := minf(distance, approach)
+		enemy.portal_remaining = maxf(0.0, approach - step)
+		distance -= step
+		if distance <= 0.0:
+			return
 
 	if enemy.air:
 		enemy.flight += distance

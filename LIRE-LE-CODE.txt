@@ -15,11 +15,11 @@ PAR OÙ COMMENCER ?
 PLAN DU PROJET
 MazeTD/
   main.gd                       Démarrage et réactions aux actions du joueur.
-  game.gd                       Données de la partie et accès aux règles.
+  game.gd                       Données, zones réservées aux bâtiments et accès aux règles.
   board.gd                      Caméra, zoom et identification des cases touchées.
   inspection.gd                 Apparence et boutons de la fiche d'informations.
   ui_layout.gd                  Disposition mobile en portrait et en paysage.
-  scenery.gd                    Forêt, caverne et château.
+  scenery.gd                    Sol cartoon, chemin en relief, portail et bourg.
   projectiles.gd                Dessin et orientation des flèches.
 
   gameplay/
@@ -39,10 +39,12 @@ MazeTD/
     end_screen.gd               Résultat centré, Rejouer et Retour accueil.
     settings_screen.gd          Fenêtre des paramètres, Options et Retour accueil.
     update_interface.gd         Actualisation des textes et des boutons existants.
+    wave_feedback.gd            Annonces de vague, médaille animée et pluie d'étincelles.
     inspection_text.gd          Phrases et statistiques des fiches de tours/monstres.
 
   rendering/
-    board_renderer.gd           Dessin du terrain, des tours et des monstres.
+    board_renderer.gd           Couches du plateau, tracé du chemin, tours et monstres.
+    unit_art.gd                 Découpage des atlas et illustrations communes au plateau/catalogue.
 
   input/
     board_touch.gd              Pincement à deux doigts et protection contre les clics accidentels après un zoom.
@@ -57,6 +59,8 @@ MazeTD/
     tower_actions_tests.gd      Vente/amélioration dans les fiches avec appui prolongé.
     projectile_tests.gd         Orientation et durée des flèches.
     touch_gestures_tests.gd     Menu, construction et vente au toucher, puis zoom à deux doigts.
+    wave_feedback_tests.gd      Bonus unique, événements et célébration sans blocage des commandes.
+    portal_tests.gd             Portail hors grille, anciennes cases libres et sortie continue vers le labyrinthe.
 
   assets/                       Images, sons, polices et fichiers sources.
   Jouer-MazeTD.cmd              Lanceur Windows à double-cliquer.

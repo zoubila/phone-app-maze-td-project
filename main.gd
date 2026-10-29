@@ -18,6 +18,7 @@ var grid_index := 0
 var status: Label
 var message: Label
 var wave_button: Button
+var preparation_hint: Label
 var pause_button: Button
 var speed_button: Button
 var settings_button: Button
@@ -35,6 +36,7 @@ var inspector: Panel
 var hud_panel: Panel
 var menu_screen: Control
 var end_screen: Panel
+var wave_feedback: Control
 # La préparation et les combats ne commencent qu’après le clic du menu.
 var in_menu := true
 
@@ -47,6 +49,8 @@ func _ready() -> void:
 		game.best = int(save.get_value("progress", "best_wave", 0))
 	saved_best = game.best
 	make_ui()
+	game.wave_repelled.connect(on_wave_repelled)
+	game.wave_started.connect(on_wave_started)
 	get_viewport().size_changed.connect(apply_layout)
 	apply_layout(true)
 	refresh_ui()
@@ -229,6 +233,7 @@ func refresh_inspection(reanchor: bool = false) -> void:
 
 ## Démarre une nouvelle partie après le choix du menu. L'attente d'une minute commence ici, pas dans le menu.
 func start_game(index: int = 0) -> void:
+	wave_feedback.clear()
 	settings_screen.hide()
 	grid_index = index
 	game.reset(index)
@@ -254,6 +259,7 @@ func restart_game() -> void:
 ## Revient au menu ; Commencer créera ensuite une nouvelle partie avec la grille choisie.
 ## Ferme les fenêtres et annule les gestes pour éviter un clic involontaire au prochain lancement.
 func return_home() -> void:
+	wave_feedback.clear()
 	in_menu = true
 	settings_screen.hide()
 	close_inspection()
@@ -312,6 +318,18 @@ func _notification(what: int) -> void:
 ## Ne fait pas avancer la simulation ; demande seulement un nouveau dessin du plateau.
 func refresh_ui() -> void:
 	preload("res://ui/update_interface.gd").refresh(self)
+
+
+## Affiche une célébration unique après le versement du bonus ; la victoire finale a son propre écran.
+func on_wave_repelled(number: int, bonus: int) -> void:
+	if not in_menu and not game.ended:
+		wave_feedback.show_repelled(number, bonus, game.wave_plan(number + 1))
+
+
+## L'annonce accompagne aussi le lancement anticipé et le lancement automatique.
+func on_wave_started(number: int) -> void:
+	if not in_menu:
+		wave_feedback.show_incoming(number)
 
 
 ## Appelée à chaque image par Godot : fait avancer le modèle avec delta secondes réelles.

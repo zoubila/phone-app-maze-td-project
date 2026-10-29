@@ -64,16 +64,47 @@ Conserver les fichiers originaux dans sources/, puis exporter les PNG
 dans les dossiers correspondants.
 
 INTÉGRATION ACTUELLE
-Le décor est intégré : terrain/foret.png, terrain/caverne.png et
-terrain/chateau.png sont chargés par scenery.gd. Pour les remplacer,
-garder ces noms et conserver la transparence des deux bâtiments.
-Le sol utilise la clairière centrale du PNG sur les cases constructibles,
-et la forêt sur les marges. Les tailles et points d'ancrage se règlent
-dans scenery.gd ; adapter ces points si la porte ou la bouche change.
+Le décor cartoon est intégré dans scenery.gd :
+  terrain/sol_toon_v2.png : terre, pelouse et grandes pierres au style cartoon.
+  terrain/chene_toon_v2.png : arbres simplifiés en bordure, hors des cases constructibles.
+  terrain/portail_cartoon.png : apparition des monstres à gauche.
+  terrain/bourg_cartoon.png : château et maisons à protéger à droite.
+Les arbres, le portail et le bourg ont un fond transparent. Le sol se répète
+à une échelle constante. Le quadrillage et le chemin sont dessinés par le code.
+Le chemin de terre suit les cases du modèle, avec des bords arrondis,
+une ombre et des cailloux. Le portail et son socle sont entièrement hors grille :
+ses anciennes cases sont libérées, sauf la case d'entrée du chemin.
+Les monstres apparaissent dans le portail puis traversent un sas réel jusqu'à
+l'entrée. PORTAL_APPROACH_CELLS dans game.gd règle cette distance en cases ;
+scenery.gd utilise la même valeur pour placer le portail et raccorder le chemin.
+Seule l'emprise du château reste réservée et traversable pour les monstres.
+game.gd définit ces cases avec landmark_areas ; scenery.gd affiche leurs limites.
+Les tailles et points d'ancrage des sprites se règlent dans scenery.gd ;
+si le château s'agrandit, adapter aussi son emprise dans game.gd.
+Les prompts des ressources générées sont dans sources/terrain_cartoon_prompts.json.
+Les anciens PNG foret.png, caverne.png et chateau.png sont conservés en réserve.
 Les PNG ne doivent pas contenir d'interface ni de quadrillage.
-Les tours et les monstres restent dessinés dans rendering/board_renderer.gd ;
-leurs sprites seront raccordés séparément. L'interface est assemblée dans
+Les tours et les monstres utilisent maintenant deux atlas transparents :
+  tours/tours_toon_v2_atlas.png : 4 colonnes x 2 lignes, ordre du catalogue.
+  ennemis/ennemis_cartoon_atlas.png : 2 colonnes x 2 lignes ; gobelin physique,
+    mage, volant, puis ogre pour les boss.
+rendering/unit_art.gd prélève les régions sans copier les images. Les mêmes
+illustrations des tours sont utilisées sur les cartes de construction.
+Les sprites sont dessinés par rendering/board_renderer.gd, qui conserve
+les indicateurs de niveau, de sélection, de givre, de poison et de blessures.
+Les prompts sont conservés dans sources/unites_cartoon_prompts.json.
+La direction cartoon plus épurée utilise les prompts de sources/style_toon_v2_prompts.json.
+Les ressources précédentes restent disponibles pour comparaison.
+Les titres et boutons utilisent polices/LilitaOne-Regular.ttf ; sa licence
+libre est conservée dans polices/OFL.txt. Les textes descriptifs gardent
+leur police de lecture habituelle.
+L'interface est assemblée dans
 ui/build_interface.gd puis actualisée dans ui/update_interface.gd.
+
+Les bannières de vague et leurs particules sont dessinées par le code dans
+ui/wave_feedback.gd, sans écran bloquant ni texture d'interface figée.
+Leur durée est en secondes réelles, indépendante des vitesses de combat.
+Les nouvelles animations seront préparées par l'utilisateur, puis intégrées.
 
 Le projectile de l'archer est intégré : projectiles/fleche.png, chargé par
 projectiles.gd. Pour le remplacer, dessiner une seule flèche horizontale

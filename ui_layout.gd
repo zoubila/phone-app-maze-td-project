@@ -59,6 +59,9 @@ static func arrange(ui, area: Rect2) -> void:
 	ui.end_screen.position = ui.board.position
 	ui.end_screen.size = ui.board.size
 	ui.end_screen.arrange()
+	ui.wave_feedback.position = ui.board.position
+	ui.wave_feedback.size = ui.board.size
+	ui.wave_feedback.arrange()
 	ui.settings_screen.position = Vector2.ZERO
 	ui.settings_screen.size = ui.layout_size
 	ui.settings_screen.arrange()
@@ -111,4 +114,6 @@ static func place_overlays(ui) -> void:
 	place(ui.speed_button, board.end.x - 184, board.position.y + 14, 116, 44)
 	place(ui.settings_button, board.end.x - 60, board.position.y + 14, 44, 44)
 	place(ui.wave_button, board.get_center().x - 136, board.end.y - 108, 272, 44)
+	var hint_width := minf(620.0, board.size.x - 36.0)
+	place(ui.preparation_hint, board.get_center().x - hint_width / 2.0, board.end.y - 142, hint_width, 26)
 	place(ui.message, board.position.x + 18, board.end.y - 42, board.size.x - 36, 26)

@@ -37,6 +37,16 @@ static func run(suite) -> void:
 	suite.check(not ui.in_menu, "Touch input starts gameplay from menu")
 	await tap(suite, ui.type_buttons[2].get_global_rect().get_center())
 	suite.check(ui.selected_kind == 2, "Touch input selects a tower type")
+	var landmark_gold: int = ui.game.gold
+	for landmark_index in [1]:
+		var reserved_cell: Vector2i = ui.game.entry + Vector2i(1, -1)
+		if landmark_index == 1:
+			ui.board.castle_view()
+			reserved_cell = ui.game.exit_cell + Vector2i(-1, -1)
+		var reserved_point: Vector2 = ui.board.pan + (Vector2(reserved_cell) + Vector2.ONE * 0.5) * ui.board.CELL * ui.board.zoom
+		await tap(suite, ui.board.get_global_transform_with_canvas() * reserved_point)
+		suite.check(ui.game.towers.is_empty() and ui.game.gold == landmark_gold, "Touching the castle never purchases a tower")
+	ui.board.entry_view()
 	var cell: Vector2i = ui.game.entry + Vector2i(3, -1)
 	var point: Vector2 = ui.board.pan + (Vector2(cell) + Vector2.ONE * 0.5) * ui.board.CELL
 	await tap(suite, ui.board.get_global_transform_with_canvas() * point)
