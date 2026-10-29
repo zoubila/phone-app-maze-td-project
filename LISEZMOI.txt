@@ -15,6 +15,14 @@ Le lanceur fonctionne aussi avec godot.exe dans le PATH, sans .env.local.
 Verification sans lancer le jeu :
 powershell -NoProfile -ExecutionPolicy Bypass -File tools/lancer-jeu.ps1 -Check
 
+Le lanceur prépare automatiquement les images, polices et autres ressources
+avant de démarrer le jeu. Cette étape est nécessaire après un téléchargement
+ou un merge qui ajoute des ressources ; ouvrir l'éditeur Godot n'est plus requis.
+Pour préparer les ressources sans ouvrir le jeu :
+powershell -NoProfile -ExecutionPolicy Bypass -File tools/lancer-jeu.ps1 -PrepareOnly
+Les journaux sont dans .godot/launcher-import.log et .godot/launcher-game.log.
+En cas d'échec de la préparation, le lanceur affiche une erreur et ne lance pas le jeu.
+
 Importer project.godot dans Godot 4.5+ (branche 4.x), puis lancer avec F5.
 Le menu présente le nom du jeu, sa description et le choix de la grille.
 Commencer la partie ouvre le plateau ; Options est un bouton réservé à plus tard.

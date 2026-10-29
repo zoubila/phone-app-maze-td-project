@@ -1,6 +1,7 @@
 # Lanceur Windows : lit des valeurs, sans executer le contenu des fichiers .env.
 # -Check verifie les chemins sans ouvrir de fenetre de jeu.
-param([switch]$Check)
+# -PrepareOnly importe les ressources sans ouvrir le jeu, pour verifier un nouveau checkout.
+param([switch]$Check, [switch]$PrepareOnly)
 
 $ErrorActionPreference = 'Stop'
 $taskProjectRoot = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
@@ -76,7 +77,42 @@ try {
     # au processus du lanceur et n'ecrit pas dans les variables permanentes de Windows.
     $env:GODOT_EXE = $taskGodotExecutable
     $env:GAME_DIR = $taskGameDirectory
-    Start-Process -FilePath $taskGodotExecutable -WorkingDirectory $taskGameDirectory -ArgumentList @('--path', ('"{0}"' -f $taskGameDirectory))
+
+    # Un merge peut ajouter des images ou des polices dont les fichiers prepares par Godot
+    # n'existent pas encore dans .godot. Le mode jeu ne les importe pas tout seul.
+    # On lance donc d'abord l'import de l'editeur sans fenetre et on attend sa fin.
+    # Godot ne retraite que les ressources nouvelles ou modifiees ; les sources restent intactes.
+    $taskCacheDirectory = Join-Path $taskGameDirectory '.godot'
+    [IO.Directory]::CreateDirectory($taskCacheDirectory) | Out-Null
+    $taskImportLog = Join-Path $taskCacheDirectory 'launcher-import.log'
+    Write-Output 'Preparation des ressources Godot...'
+    $taskImportProcess = Start-Process -FilePath $taskGodotExecutable -WorkingDirectory $taskGameDirectory -WindowStyle Hidden -Wait -PassThru -ArgumentList @(
+        '--headless', '--editor', '--import',
+        '--path', ('"{0}"' -f $taskGameDirectory),
+        '--log-file', ('"{0}"' -f $taskImportLog)
+    )
+    if ($taskImportProcess.ExitCode -ne 0) {
+        throw "La preparation Godot a echoue (code $($taskImportProcess.ExitCode)). Consultez : $taskImportLog"
+    }
+    # Certaines erreurs de scripts peuvent etre signalees sans code de sortie non nul.
+    # Dans ce cas, afficher le journal plutot que lancer une fenetre de jeu vide.
+    if (Test-Path -LiteralPath $taskImportLog) {
+        $taskImportErrors = Select-String -LiteralPath $taskImportLog -Pattern 'SCRIPT ERROR:|ERROR:.*(Failed loading resource|Error importing)' -Quiet
+        if ($taskImportErrors) {
+            throw "Godot signale des erreurs pendant la preparation. Consultez : $taskImportLog"
+        }
+    }
+    if ($PrepareOnly) {
+        Write-Output "Ressources pretes. Journal : $taskImportLog"
+        exit 0
+    }
+
+    # Le journal du jeu permet de retrouver une erreur meme si sa fenetre se ferme aussitot.
+    $taskGameLog = Join-Path $taskCacheDirectory 'launcher-game.log'
+    Start-Process -FilePath $taskGodotExecutable -WorkingDirectory $taskGameDirectory -ArgumentList @(
+        '--path', ('"{0}"' -f $taskGameDirectory),
+        '--log-file', ('"{0}"' -f $taskGameLog)
+    )
     exit 0
 } catch {
     [Console]::Error.WriteLine($_.Exception.Message)
