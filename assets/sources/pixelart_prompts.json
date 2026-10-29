@@ -1,0 +1,7 @@
+{
+  "tool": "image_gen intégré",
+  "mode": "generate",
+  "sprites": "Production sprite atlas, exact 4 columns by 4 rows, transparent background. Authentic crisp 16-bit medieval fantasy pixel art. Row 1: archer, cannon, wizard, arcane. Row 2: ballista, frost, earth, poison. Row 3: goblin, hooded mage, flying drake, ogre. Row 4: oak, purple portal, blue roof castle, mossy rocks. Separate static idle sprites with padding. No text, no 3D, no antialiasing.",
+  "ground": "Seamless repeating overhead 16-bit pixel art ground. Calm olive green grass, ochre dirt patches, small grey stones and sparse flowers. Warm daylight. Visible pixel clusters, low contrast, no buildings, no trees, no path, no text. Match dirt colors #b68b52 and #c59d63 so the drawn path blends into the terrain.",
+  "integration": "Full original PNGs preserved. Sprites selected through AtlasTexture regions. No raster postprocessing."
+}
