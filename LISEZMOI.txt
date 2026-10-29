@@ -1,5 +1,5 @@
-MAZE TD — LES MARCHES DU ROYAUME
-Prototype 12 • fantasy médiévale • 25 octobre 2026
+MAZE TD — PIXEL ART
+Fantasy médiévale • direction pixel art • 29 octobre 2026
 
 JOUER
 Sous Windows, double-cliquer sur Jouer-MazeTD.cmd dans ce dossier MazeTD.
@@ -209,3 +209,14 @@ FIN DE PARTIE
 Après une victoire ou une défaite, Rejouer apparaît uniquement au milieu
 du plateau. Il recommence une partie avec la même grille. Le catalogue
 reste désactivé jusqu'à ce redémarrage.
+
+
+DIRECTION GRAPHIQUE CHOISIE : PIXEL ART
+Le terrain, le chemin, les bâtiments, les huit tours et les monstres utilisent
+les nouvelles ressources pixel art. Chaque objet possède son PNG individuel.
+Le gobelin possède huit images de marche : ses pas suivent son déplacement,
+la pause, le ralentissement et les vitesses de combat. Les autres monstres
+conservent leur pose actuelle en attendant leurs cycles.
+Le portail reste hors grille et l'emprise du château reste protégée.
+Le lanceur Jouer-MazeTD.cmd et ses fichiers .env restent ceux du dépôt.
+Les originaux et la source Piskel sont dans assets/sources/.

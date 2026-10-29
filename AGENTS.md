@@ -11,13 +11,13 @@
 
 - Ranger les exports dans `assets/` selon `assets/LISEZMOI.txt`.
 - Conserver les originaux modifiables dans `assets/sources/`, exclu de l'import Godot par `.gdignore`.
-- Le décor est raccordé dans `scenery.gd` : sol médiéval, chênes, portail et bourg fortifié utilisent les PNG cartoon de `assets/terrain/`. Ce fichier dessine aussi le chemin en relief et les abords des portes. Les tours et monstres sont dessinés dans `rendering/board_renderer.gd`, qui prépare le tracé du chemin. `board.gd` gère la caméra et les interactions. Les règles détaillées sont dans `gameplay/`, l'interface dans `ui/` et sa disposition dans `ui_layout.gd`. `main.gd` relie les commandes à la partie `game.gd`.
+- Le décor est raccordé dans `scenery.gd` : sol médiéval, chênes, portail et bourg fortifié utilisent les PNG pixel art individuels de `assets/terrain/`. Ce fichier dessine aussi le chemin intégré au sol et les abords des portes. Les tours et monstres sont dessinés dans `rendering/board_renderer.gd`, qui prépare le tracé du chemin. `board.gd` gère la caméra et les interactions. Les règles détaillées sont dans `gameplay/`, l'interface dans `ui/` et sa disposition dans `ui_layout.gd`. `main.gd` relie les commandes à la partie `game.gd`.
 - Les fiches au survol et au toucher se trouvent dans `inspection.gd`. Garder les actions de vente et d'amélioration accessibles au toucher pendant les vagues et en pause ; le survol ne doit pas changer la tour sélectionnée.
-- Les tirs se dessinent dans `projectiles.gd`. L'archer utilise `assets/projectiles/fleche.png`, orienté vers la droite au repos. Le vol est visuel ; les dégâts restent appliqués au tir dans `gameplay/tower_combat.gd`.
-- Les illustrations des tours et ennemis sont regroupées dans deux atlas chargés par `rendering/unit_art.gd`. Réutiliser les mêmes régions pour les cartes du catalogue et le plateau ; conserver le type, la portée et le coût dans le modèle.
+- Les tirs se dessinent dans `projectiles.gd`. La flèche est dessinée en pixels, tournée vers sa cible. Le vol reste visuel ; les dégâts sont appliqués au tir dans `gameplay/tower_combat.gd`.
+- Les PNG individuels des tours et ennemis sont chargés par `rendering/unit_art.gd`. Réutiliser les mêmes textures pour le catalogue et le plateau. Les huit PNG de marche du gobelin se trouvent dans `assets/ennemis/terrestres/` ; `rendering/enemy_animation.gd` adapte les pas au déplacement réel, gère le miroir horizontal et conserve la pose en pause. Garder les fichiers sources Piskel dans `assets/sources/`.
 - Les événements `wave_started` et `wave_repelled` du modèle pilotent `ui/wave_feedback.gd`. La célébration reste brève, laisse passer les clics et affiche uniquement le bonus réellement versé. La victoire finale conserve son écran de résultat.
 - Le portail et son socle sont entièrement hors grille. `PORTAL_APPROACH_CELLS` définit le trajet réel jusqu'à l'entrée ; `portal_remaining` et `portal_age` pilotent la sortie progressive. Ne pas réintroduire de zone réservée sur les anciennes cases du portail. L'emprise du château reste protégée.
-- Direction visuelle : cartoon mobile très lisible, volumes épais, couleurs franches et peu de détails fins. Les ressources v2 sont `sol_toon_v2.png`, `chene_toon_v2.png` et `tours_toon_v2_atlas.png`. La police de titres Lilita One et sa licence OFL sont dans `assets/polices/`.
+- Direction visuelle choisie : pixel art médiéval fantasy. Utiliser les PNG séparés, le filtrage nearest et des bords nets. Le chemin est au niveau du sol, sans bordure surélevée. Les anciens PNG cartoon sont conservés comme archives mais ne pilotent plus le rendu. L'interface utilise des panneaux anguleux et une police monospace sans anticrénelage.
 - L'utilisateur prépare désormais les nouvelles animations. Se concentrer sur les ressources statiques et l'intégration de ses exports quand ils seront fournis.
 
 ## Lisibilité et commentaires
@@ -36,3 +36,13 @@
 - Pause et Vitesse sont des commandes flottantes à fond semi-transparent sur la carte. Le lancement anticipé flotte seulement pendant la préparation. Rejouer apparaît au centre du plateau après une victoire ou une défaite.
 - Conserver le glissement de la carte, la molette et le pincement, sans achat involontaire à la fin d'un zoom.
 - L'engrenage voisin de Pause et Vitesse ouvre une fenêtre qui suspend le temps et bloque les commandes derrière elle. Options reste sans effet ; Retour accueil quitte la partie pour le menu. La croix conserve l'état de pause antérieur. Le résultat propose aussi Retour accueil sous Rejouer.
+
+## Commits atomiques et commandes à remettre
+
+- À chaque demande qui modifie des fichiers, fournir les commandes exactes `git add` et `git commit -m`, groupées par objectif cohérent.
+- Séparer les ressources graphiques et leurs sources du code. Séparer les changements d'affichage des fonctionnalités et des règles du jeu.
+- Joindre les tests au changement vérifié ; isoler la documentation indépendante.
+- Utiliser des chemins explicites, sans `git add .` ni `git add -A` qui mélangeraient les travaux.
+- Fournir les commandes ne signifie pas exécuter les commits ou publier : suivre l'autorisation de l'utilisateur.
+- Une copie hors Git reste hors Git sans demande explicite. Indiquer cette limite avant de donner des commandes conditionnelles.
+- Ne jamais pousser sur main ; publier par branche et pull request après accord.

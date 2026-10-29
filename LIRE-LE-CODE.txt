@@ -164,3 +164,21 @@ anticipé pendant la préparation. Les boutons de vente et d'amélioration
 appartiennent à inspection.gd. Le résultat final appartient à end_screen.gd.
 ui_layout.gd donne les places et tailles de tous ces éléments en fonction
 de l'écran ; il conserve la caméra et la partie lors de la rotation.
+
+DIRECTION PIXEL ART
+Le projet principal utilise maintenant les sprites individuels et le terrain pixel art.
+Les anciennes ressources cartoon restent archivées ; voir assets/LISEZMOI.txt.
+
+LA MARCHE DU GOBELIN
+rendering/unit_art.gd charge les huit PNG individuels fournis dans
+assets/ennemis/terrestres/gobelin_marche_01.png à gobelin_marche_08.png.
+rendering/enemy_animation.gd conserve la dernière position de chaque
+gobelin et additionne la distance parcourue, y compris hors caméra.
+Une boucle correspond à 2,5 cases, soit 8 images/seconde à vitesse normale.
+Une pause conserve le dernier dessin ; le givre et les vitesses accélérées
+adaptent naturellement les pas par leur effet sur la distance parcourue.
+board.gd possède cet état graphique ; board_renderer.gd dessine l'image
+et son miroir vers la gauche. Aucune règle de combat n'a changé.
+Les PNG et le fichier source Piskel restent séparés du code.
+tests/enemy_animation_tests.gd vérifie cadence, pause, sens et nettoyage.
+Les commandes de migration séparent ressources, affichage avec ses tests, puis documentation.
