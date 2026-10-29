@@ -24,12 +24,13 @@ window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
 window/handheld/orientation=6
 
+[input_devices]
+
+pointing/android/enable_pan_and_scale_gestures=true
+
 [rendering]
 
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
 environment/defaults/default_clear_color=Color(0.07, 0.1, 0.08, 1)
-
-[input_devices]
-
-pointing/android/enable_pan_and_scale_gestures=true
+textures/vram_compression/import_etc2_astc=true
