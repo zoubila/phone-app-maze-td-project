@@ -24,7 +24,7 @@ func _ready() -> void:
 	style.border_color = Color("#f4ca6a")
 	style.set_border_width_all(3)
 	style.border_width_bottom = 7
-	style.set_corner_radius_all(22)
+	style.set_corner_radius_all(0)
 	style.shadow_color = Color("#061a2aa0")
 	style.shadow_size = 18
 	card.add_theme_stylebox_override("panel", style)

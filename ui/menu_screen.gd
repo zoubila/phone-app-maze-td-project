@@ -5,8 +5,8 @@ extends Control
 signal start_requested(grid_index: int)
 
 const Controls = preload("res://ui/control_factory.gd")
-const PORTAL = preload("res://assets/terrain/portail_cartoon.png")
-const TOWN = preload("res://assets/terrain/bourg_cartoon.png")
+const PORTAL = preload("res://assets/terrain/portail_pixelart.png")
+const TOWN = preload("res://assets/terrain/chateau_pixelart.png")
 
 var card: Panel
 var title: Label
@@ -26,7 +26,7 @@ func _ready() -> void:
 	z_index = 40
 	# Le dégradé est calculé une fois ; le fond reste doux quelle que soit la taille de l'écran.
 	var gradient := Gradient.new()
-	gradient.colors = PackedColorArray([Color("#3388c6"), Color("#16396d")])
+	gradient.colors = PackedColorArray([Color("#344c46"), Color("#122b32")])
 	backdrop = GradientTexture2D.new()
 	backdrop.gradient = gradient
 	backdrop.width = 2
@@ -36,17 +36,17 @@ func _ready() -> void:
 	card = Panel.new()
 
 	var style := StyleBoxFlat.new()
-	style.bg_color = Color("#2369a9")
+	style.bg_color = Color("#384b45")
 	style.border_color = Color("#102e50")
 	style.set_border_width_all(4)
 	style.border_width_bottom = 10
-	style.set_corner_radius_all(26)
+	style.set_corner_radius_all(0)
 	style.shadow_color = Color("#031727b0")
 	style.shadow_size = 24
 	card.add_theme_stylebox_override("panel", style)
 	add_child(card)
 
-	title = Controls.label(card, "LES MARCHES\nDU ROYAUME", Vector2.ZERO, Vector2.ZERO, 36, Color("#f3dfaf"))
+	title = Controls.label(card, "MAZE TD\nPIXEL ART", Vector2.ZERO, Vector2.ZERO, 36, Color("#f3dfaf"))
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	Controls.headline(title, 54, Color("#ffe184"))
@@ -76,7 +76,7 @@ func _ready() -> void:
 	grid_choice.add_theme_font_override("font", Controls.DISPLAY_FONT)
 	var choice_style := style.duplicate() as StyleBoxFlat
 	choice_style.bg_color = Color("#164b82")
-	choice_style.set_corner_radius_all(12)
+	choice_style.set_corner_radius_all(0)
 	choice_style.shadow_size = 0
 	choice_style.border_width_bottom = 3
 	grid_choice.add_theme_stylebox_override("normal", choice_style)

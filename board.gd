@@ -9,6 +9,7 @@ const CELL := 42.0
 var scenery = preload("res://scenery.gd").new()
 # Les tirs sont dessinés à part pour pouvoir remplacer leurs sprites sans toucher au combat.
 var projectiles = preload("res://projectiles.gd").new()
+var enemy_animation = preload("res://rendering/enemy_animation.gd").new()
 var game
 # Les gestes tactiles sont séparés des règles de jeu et des commandes de souris.
 var touch_gestures = preload("res://input/board_touch.gd").new()
@@ -49,6 +50,7 @@ func _ready() -> void:
 	clip_contents = true
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	painter = MapPainter.new()
+	painter.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	painter.view = self
 	add_child(painter)
 	# Fonction anonyme appelée à la sortie du pointeur : efface le survol sans toucher à la sélection fixée.

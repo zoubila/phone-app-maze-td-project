@@ -25,7 +25,7 @@ func _ready() -> void:
 	style.bg_color = Color("#18291ff5")
 	style.border_color = Color("#bfa56b")
 	style.set_border_width_all(1)
-	style.set_corner_radius_all(14)
+	style.set_corner_radius_all(0)
 	card.add_theme_stylebox_override("panel", style)
 	add_child(card)
 	Controls.label(card, "Paramètres", Vector2(28, 22), Vector2(320, 50), 30, Color("#f3dfaf"))

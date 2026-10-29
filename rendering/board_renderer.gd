@@ -131,6 +131,7 @@ static func paint_towers(view, canvas: Node2D, visible: Rect2) -> void:
 ## Dessine les monstres avec leur couleur et leurs états : givre, poison et points de vie.
 ## Le modèle donne une position précise entre deux cases afin que leur mouvement soit fluide.
 static func paint_enemies(view, canvas: Node2D, visible: Rect2) -> void:
+	view.enemy_animation.update(view.game)
 	for enemy in view.game.enemies:
 		var p: Vector2 = view.game.position_of(enemy) * view.CELL
 
@@ -143,7 +144,8 @@ static func paint_enemies(view, canvas: Node2D, visible: Rect2) -> void:
 			sprite_size = 48.0
 		if enemy.boss > 0:
 			sprite_size = 68.0 if enemy.boss == 2 else 56.0
-		var bob := 0.0 if view.game.paused else sin(float(Time.get_ticks_msec()) / 145.0 + float(enemy.id)) * 1.1
+		# Le gobelin a déjà ses appuis dessinés : ne pas lui ajouter un balancement artificiel.
+		var bob := 0.0 if Art.has_walk(enemy) else sin(view.game.presentation_time * 6.9 + float(enemy.id)) * 1.1
 		var tint := Color("#9ae4ff") if enemy.slow_time > 0 else Color("#ffffff")
 		# Une apparition progressive accompagne le trajet réel depuis le portail hors grille.
 		var emergence := clampf(float(enemy.get("portal_age", 1.0)) / 0.32, 0.0, 1.0)
@@ -152,9 +154,13 @@ static func paint_enemies(view, canvas: Node2D, visible: Rect2) -> void:
 		canvas.draw_set_transform(p + Vector2(0, 8), 0.0, Vector2(1.0, 0.35))
 		canvas.draw_circle(Vector2.ZERO, radius, Color("#172f3b70"))
 		canvas.draw_set_transform(Vector2.ZERO)
+		var image_rect := Rect2(p + Vector2(-sprite_size * 0.5, -sprite_size * 0.75 + bob), Vector2.ONE * sprite_size)
+		if view.enemy_animation.facing_left(enemy):
+			image_rect.position.x += sprite_size
+			image_rect.size.x = -sprite_size
 		canvas.draw_texture_rect(
-			Art.enemy_icon(enemy),
-			Rect2(p + Vector2(-sprite_size * 0.5, -sprite_size * 0.75 + bob), Vector2.ONE * sprite_size),
+			view.enemy_animation.texture(enemy),
+			image_rect,
 			false,
 			tint,
 		)

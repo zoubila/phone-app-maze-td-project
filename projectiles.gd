@@ -24,7 +24,11 @@ func paint_arrow(canvas: Node2D, shot: Dictionary, cell_size: float) -> void:
 	var transform := arrow_transform(shot, cell_size)
 	var dimensions := Vector2(ARROW_WIDTH, ARROW_WIDTH * ARROW.get_height() / ARROW.get_width())
 	canvas.draw_set_transform(transform.origin, transform.get_rotation())
-	canvas.draw_texture_rect(ARROW, Rect2(-dimensions / 2.0, dimensions), false)
+	canvas.draw_rect(Rect2(-14, -1, 25, 2), Color("#b88950"))
+	canvas.draw_rect(Rect2(9, -3, 4, 6), Color("#d9e0cd"))
+	canvas.draw_rect(Rect2(13, -1, 3, 2), Color("#d9e0cd"))
+	canvas.draw_rect(Rect2(-14, -3, 5, 2), Color("#e5d9b8"))
+	canvas.draw_rect(Rect2(-14, 1, 5, 2), Color("#e5d9b8"))
 	canvas.draw_set_transform(Vector2.ZERO, 0.0)
 
 ## Dessine tous les tirs encore actifs. kind=0 désigne l'archer : aucun segment rouge n'est dessiné.

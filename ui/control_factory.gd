@@ -3,7 +3,14 @@ extends RefCounted
 ## parent est le nœud auquel le contrôle sera ajouté. Le contrôle renvoyé reste modifiable ensuite.
 ## Elles ne décident ni du prix des tours ni du déroulement du combat.
 
-const DISPLAY_FONT = preload("res://assets/polices/LilitaOne-Regular.ttf")
+static var DISPLAY_FONT: SystemFont = pixel_font()
+
+## Le texte conserve une lecture nette tout en évitant la police cartoon arrondie.
+static func pixel_font() -> SystemFont:
+	var font := SystemFont.new()
+	font.font_names = PackedStringArray(["Consolas", "monospace"])
+	font.antialiasing = TextServer.FONT_ANTIALIASING_NONE
+	return font
 const TOWER_COLORS := [
 	Color("#328a52"), Color("#ae6535"), Color("#7650ad"), Color("#a7439c"),
 	Color("#397cb1"), Color("#258dba"), Color("#a56c36"), Color("#669439"),
@@ -59,11 +66,11 @@ static func button(parent, text_value: String, pos: Vector2, dimensions: Vector2
 	item.focus_mode = Control.FOCUS_NONE
 
 	var normal := StyleBoxFlat.new()
-	normal.bg_color = Color("#347fbd")
+	normal.bg_color = Color("#4b6055")
 	normal.border_color = Color("#133552")
 	normal.set_border_width_all(3)
 	normal.border_width_bottom = 7
-	normal.set_corner_radius_all(12)
+	normal.set_corner_radius_all(0)
 	normal.shadow_color = Color("#04192780")
 	normal.shadow_size = 4
 	normal.shadow_offset = Vector2(0, 3)
@@ -71,11 +78,11 @@ static func button(parent, text_value: String, pos: Vector2, dimensions: Vector2
 	item.add_theme_stylebox_override("normal", normal)
 
 	var hover: StyleBoxFlat = normal.duplicate()
-	hover.bg_color = Color("#4899d5")
+	hover.bg_color = Color("#677e62")
 	hover.border_color = Color("#9edcfc")
 	item.add_theme_stylebox_override("hover", hover)
 	var pressed: StyleBoxFlat = normal.duplicate()
-	pressed.bg_color = Color("#24679f")
+	pressed.bg_color = Color("#354c44")
 	pressed.border_color = Color("#153047")
 	pressed.border_width_bottom = 2
 	item.add_theme_stylebox_override("pressed", pressed)
@@ -98,7 +105,7 @@ static func primary_style(item: Button) -> void:
 	normal.border_color = Color("#7b4823")
 	normal.set_border_width_all(3)
 	normal.border_width_bottom = 8
-	normal.set_corner_radius_all(14)
+	normal.set_corner_radius_all(0)
 	normal.shadow_color = Color("#071b2880")
 	normal.shadow_size = 7
 	normal.shadow_offset = Vector2(0, 3)
@@ -129,7 +136,7 @@ static func catalog_style(item: Button, selected: bool) -> void:
 	normal.border_color = Color("#ffe080") if selected else Color("#18334c")
 	normal.set_border_width_all(3)
 	normal.border_width_bottom = 7
-	normal.set_corner_radius_all(12)
+	normal.set_corner_radius_all(0)
 	normal.content_margin_left = 7
 	normal.content_margin_right = 7
 	normal.shadow_color = Color("#061c2870")

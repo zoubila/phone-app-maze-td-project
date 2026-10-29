@@ -43,6 +43,7 @@ var in_menu := true
 ## Appelée par Godot quand la scène entre dans l'arbre : charge le record puis crée l'interface.
 ## Connecte les changements de taille de fenêtre à la disposition mobile et affiche l'état initial.
 func _ready() -> void:
+	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	var save := ConfigFile.new()
 
 	if save.load("user://progress.cfg") == OK:

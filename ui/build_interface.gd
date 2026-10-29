@@ -52,7 +52,7 @@ static func create_overlay_controls(ui) -> void:
 	background.bg_color = Color("#102f3edb")
 	background.border_color = Color("#bda16d88")
 	background.set_border_width_all(2)
-	background.set_corner_radius_all(16)
+	background.set_corner_radius_all(0)
 	ui.hud_panel.add_theme_stylebox_override("panel", background)
 	ui.add_child(ui.hud_panel)
 	ui.status = Controls.label(ui, "", Vector2.ZERO, Vector2.ZERO, 20)

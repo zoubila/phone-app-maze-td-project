@@ -4,10 +4,11 @@ extends RefCounted
 ## Le portail est hors grille. Seule l'emprise du château garde une réservation dans la grille.
 ## Ces réservations sont définies dans game.gd ; le dessin réutilise leurs coordonnées.
 
-const GROUND = preload("res://assets/terrain/sol_toon_v2.png")
-const TREE = preload("res://assets/terrain/chene_toon_v2.png")
-const PORTAL = preload("res://assets/terrain/portail_cartoon.png")
-const TOWN = preload("res://assets/terrain/bourg_cartoon.png")
+const GROUND = preload("res://assets/terrain/sol_pixelart.png")
+const ROCKS = preload("res://assets/terrain/rochers_pixelart.png")
+const TREE = preload("res://assets/terrain/chene_pixelart.png")
+const PORTAL = preload("res://assets/terrain/portail_pixelart.png")
+const TOWN = preload("res://assets/terrain/chateau_pixelart.png")
 # Marge graphique hors grille : les repères ne recouvrent pas les cases constructibles.
 const MARGIN := 370.0
 const LANDMARK_INSET := 340.0
@@ -28,7 +29,7 @@ func paint_ground(canvas: Node2D, game, cell_size: float, visible: Rect2) -> voi
 	var grid := Rect2(Vector2.ZERO, Vector2(game.cols, game.rows) * cell_size)
 	var bounds := world_bounds(game, cell_size)
 	var area := visible.intersection(bounds)
-	var tile_size := 512.0
+	var tile_size := 384.0
 
 	for y in range(floori(area.position.y / tile_size), ceili(area.end.y / tile_size)):
 		for x in range(floori(area.position.x / tile_size), ceili(area.end.x / tile_size)):
@@ -60,19 +61,10 @@ func paint_reserved_areas(canvas: Node2D, game, cell_size: float) -> void:
 
 ## Dessine une dalle basse avec une tranche sombre et un dessus clair, pour suggérer le relief.
 func paint_flat_stone(canvas: Node2D, point: Vector2, half_size: Vector2, color: Color) -> void:
-	var shape := PackedVector2Array([
-		point + Vector2(-half_size.x, -half_size.y * 0.4),
-		point + Vector2(-half_size.x * 0.45, -half_size.y),
-		point + Vector2(half_size.x * 0.7, -half_size.y * 0.85),
-		point + Vector2(half_size.x, half_size.y * 0.25),
-		point + Vector2(half_size.x * 0.3, half_size.y),
-		point + Vector2(-half_size.x * 0.8, half_size.y * 0.8),
-	])
-	canvas.draw_set_transform(Vector2(0, 2))
-	canvas.draw_colored_polygon(shape, Color("#6e7356"))
-	canvas.draw_set_transform(Vector2.ZERO)
-	canvas.draw_colored_polygon(shape, color)
-	canvas.draw_line(shape[1], shape[2], color.lightened(0.2), 1.5, true)
+	var origin := (point - half_size).snapped(Vector2(2, 2))
+	canvas.draw_rect(Rect2(origin + Vector2(0, 2), half_size * 2), Color("#72765a"))
+	canvas.draw_rect(Rect2(origin, half_size * 2 - Vector2(2, 2)), color)
+	canvas.draw_rect(Rect2(origin, Vector2(half_size.x * 2 - 2, 2)), color.lightened(0.15))
 
 
 ## Distingue les deux pôles : terre cendrée et cercle magique à gauche, parvis pavé à droite.
@@ -83,9 +75,9 @@ func paint_landmark_ground(canvas: Node2D, game, cell_size: float, visible: Rect
 	var town_base := goal + Vector2(130, 10)
 	if visible.grow(200.0).has_point(portal_base):
 		canvas.draw_set_transform(portal_base, 0.0, Vector2(1.0, 0.6))
-		canvas.draw_circle(Vector2.ZERO, 146.0, Color("#716c5666"))
-		canvas.draw_circle(Vector2.ZERO, 112.0, Color("#605e6370"))
-		canvas.draw_arc(Vector2.ZERO, 94.0, 0.0, TAU, 48, Color("#a897c0a0"), 3.0, true)
+		canvas.draw_rect(Rect2(-142, -90, 284, 180), Color("#716c5633"))
+		canvas.draw_rect(Rect2(-106, -70, 212, 140), Color("#605e6340"))
+		# Le socle pixel art du portail fournit déjà le repère visuel.
 		canvas.draw_set_transform(Vector2.ZERO)
 		for index in range(8):
 			var angle := float(index) / 8.0 * TAU
@@ -94,7 +86,7 @@ func paint_landmark_ground(canvas: Node2D, game, cell_size: float, visible: Rect
 
 	if visible.grow(230.0).has_point(town_base):
 		canvas.draw_set_transform(town_base, 0.0, Vector2(1.0, 0.55))
-		canvas.draw_circle(Vector2.ZERO, 170.0, Color("#9c8b617d"))
+		canvas.draw_rect(Rect2(-152, -94, 304, 188), Color("#9c8b6133"))
 		canvas.draw_set_transform(Vector2.ZERO)
 		for y in range(-3, 4):
 			for x in range(-6, 7):
@@ -124,43 +116,45 @@ func paint_forest_edge(canvas: Node2D, game, cell_size: float, visible: Rect2, g
 			if cave_area.has_point(point) or castle_area.has_point(point):
 				continue
 
-			canvas.draw_texture_rect(TREE, Rect2(point - Vector2(56, 98), Vector2(112, 118)), false)
+			if seed_value % 7 == 0:
+				canvas.draw_texture_rect(ROCKS, Rect2(point - Vector2(44, 44), Vector2(88, 88)), false)
+			else:
+				canvas.draw_texture_rect(TREE, Rect2(point - Vector2(56, 98), Vector2(112, 118)), false)
 
 
 ## Superpose ombre, bord de terre et surface claire pour donner du volume au chemin.
 ## points contient seulement les extrémités et virages ; route conserve les cases pour les petits cailloux.
 ## Le dessin suit le chemin du modèle sans modifier les déplacements ni les droits de construction.
-func paint_path(canvas: Node2D, points: PackedVector2Array, route: Array, cell_size: float, visible: Rect2, zoom: float) -> void:
+func paint_path(canvas: Node2D, points: PackedVector2Array, route: Array, cell_size: float, visible: Rect2, _zoom: float) -> void:
 	if points.size() < 2:
 		return
-
-	canvas.draw_set_transform(Vector2(0, 3))
-	paint_path_stroke(canvas, points, Color("#31492e55"), 38.0)
-	canvas.draw_set_transform(Vector2.ZERO)
-	paint_path_stroke(canvas, points, Color("#8b592f"), 34.0)
-	paint_path_stroke(canvas, points, Color("#d79d57"), 31.0)
-	paint_path_stroke(canvas, points, Color("#f0ca8c"), 26.0)
-	paint_path_stroke(canvas, points, Color("#f8db9e"), 18.0)
-
-	# Les petits détails disparaissent en vue éloignée pour conserver une lecture claire sur mobile.
-	if zoom < 0.45:
-		return
-
-	for cell in route:
+	# La terre reste au niveau de l'herbe : aucune ombre ni bordure continue.
+	paint_path_stroke(canvas, points, Color("#ad854f"), 30.0)
+	paint_path_stroke(canvas, points, Color("#c29a60"), 24.0)
+	var cells: Array = route.duplicate()
+	# Le même revêtement continue jusqu'à la bouche du portail, hors grille.
+	if not route.is_empty():
+		for step in range(1, 5):
+			cells.append(route[0] - Vector2i(step, 0))
+	for cell in cells:
 		var point := (Vector2(cell) + Vector2.ONE * 0.5) * cell_size
-		if not visible.has_point(point):
+		if not visible.grow(cell_size).has_point(point):
 			continue
-		var variation := absi(cell.x * 17 + cell.y * 31)
-		if variation % 3 != 0:
-			continue
-
-		point += Vector2(variation % 9 - 4, variation % 13 - 6)
-		var pebble := PackedVector2Array([
-			point + Vector2(-4, 0), point + Vector2(-2, -3),
-			point + Vector2(3, -2), point + Vector2(5, 1), point + Vector2(0, 3),
-		])
-		canvas.draw_colored_polygon(pebble, Color("#b89160"))
-		canvas.draw_line(point + Vector2(-2, -2), point + Vector2(2, -2), Color("#f7dca5"), 1.5, true)
+		var seed_value := absi(cell.x * 73 + cell.y * 137)
+		for detail in range(5):
+			var offset := Vector2((seed_value + detail * 17) % 29 - 14, (seed_value + detail * 11) % 19 - 9)
+			var color := Color("#d2ad73") if detail % 2 == 0 else Color("#ae8956")
+			canvas.draw_rect(Rect2((point + offset).snapped(Vector2(2, 2)), Vector2(4, 2)), color)
+		# Les herbes débordent seulement vers les côtés extérieurs de la route.
+		for direction in [Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP, Vector2i.DOWN]:
+			if cells.has(cell + direction):
+				continue
+			var normal := Vector2(direction)
+			var tangent := Vector2(-direction.y, direction.x)
+			for tuft in range(3):
+				var edge := (point + normal * (13 + (seed_value + tuft) % 4) + tangent * (tuft * 11 - 11)).snapped(Vector2(2, 2))
+				canvas.draw_rect(Rect2(edge, Vector2(4, 4)), Color("#63843d"))
+				canvas.draw_rect(Rect2(edge + Vector2(2, -2), Vector2(2, 4)), Color("#91a650"))
 
 
 ## Arrondit les extrémités et les virages d'un trait épais avec des disques de même couleur.
@@ -168,7 +162,7 @@ func paint_path(canvas: Node2D, points: PackedVector2Array, route: Array, cell_s
 func paint_path_stroke(canvas: Node2D, points: PackedVector2Array, color: Color, width: float) -> void:
 	# Des segments indépendants évitent les pointes carrées des jointures d'une polyligne épaisse.
 	for index in range(points.size() - 1):
-		canvas.draw_line(points[index], points[index + 1], color, width, true)
+		canvas.draw_line(points[index], points[index + 1], color, width, false)
 	for point in points:
 		canvas.draw_circle(point, width * 0.5, color)
 
@@ -177,8 +171,8 @@ func paint_path_stroke(canvas: Node2D, points: PackedVector2Array, color: Color,
 func paint_landmarks(canvas: Node2D, game, cell_size: float) -> void:
 	var goal := (Vector2(game.exit_cell) + Vector2.ONE * 0.5) * cell_size
 	var mouth := portal_origin(game, cell_size)
-	canvas.draw_texture_rect(PORTAL, Rect2(mouth - Vector2(132, 205), Vector2(255, 233)), false)
-	canvas.draw_texture_rect(TOWN, Rect2(goal - Vector2(40, 205), Vector2(360, 240)), false)
+	canvas.draw_texture_rect(PORTAL, Rect2(mouth - Vector2(132, 205), Vector2(255, 255)), false)
+	canvas.draw_texture_rect(TOWN, Rect2(goal - Vector2(40, 205), Vector2(280, 280)), false)
 	paint_portal_glow(canvas, game, mouth)
 
 
