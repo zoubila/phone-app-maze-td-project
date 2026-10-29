@@ -28,7 +28,25 @@ const GOBLIN_WALK = [
 	preload("res://assets/ennemis/terrestres/gobelin_marche_08.png"),
 ]
 
-## Seul le gobelin possède un cycle fourni ; les autres monstres gardent leur pose actuelle.
+const DRAGON_FLIGHT = [
+	preload("res://assets/ennemis/aeriens/dragon_vol_01.png"),
+	preload("res://assets/ennemis/aeriens/dragon_vol_02.png"),
+	preload("res://assets/ennemis/aeriens/dragon_vol_03.png"),
+	preload("res://assets/ennemis/aeriens/dragon_vol_04.png"),
+	preload("res://assets/ennemis/aeriens/dragon_vol_05.png"),
+	preload("res://assets/ennemis/aeriens/dragon_vol_06.png"),
+	preload("res://assets/ennemis/aeriens/dragon_vol_07.png"),
+	preload("res://assets/ennemis/aeriens/dragon_vol_08.png"),
+]
+
+## Les boss conservent leur illustration ; les ennemis aériens ordinaires utilisent le dragon.
+static func has_flight(enemy: Dictionary) -> bool:
+	return enemy.air and enemy.boss == 0
+
+static func has_animation(enemy: Dictionary) -> bool:
+	return has_walk(enemy) or has_flight(enemy)
+
+## La marche reste réservée au gobelin terrestre.
 static func has_walk(enemy: Dictionary) -> bool:
 	return not enemy.air and enemy.boss == 0 and enemy.armor == "physical"
 

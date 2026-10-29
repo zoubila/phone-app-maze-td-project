@@ -60,6 +60,27 @@ static func run(suite) -> void:
 	enemy.boss = 0
 	enemy.armor = "magic"
 	suite.check(not Art.has_walk(enemy), "mage keeps its own illustration")
+	# Le vol utilise le temps simulé, indépendamment de la distance et du givre.
+	enemy.air = true
+	enemy.portal_age = 0.0
+	suite.check(animation.texture(enemy) == Art.DRAGON_FLIGHT[0], "dragon starts with first flight frame")
+	for frame in range(8):
+		enemy.portal_age = frame * 0.125
+		suite.check(animation.texture(enemy) == Art.DRAGON_FLIGHT[frame], "dragon plays flight frame %d at eight FPS" % frame)
+	enemy.portal_age = 1.0
+	suite.check(animation.texture(enemy) == Art.DRAGON_FLIGHT[0], "dragon flight loops after one second")
+	game.paused = true
+	stopped = animation.texture(enemy)
+	game.tick(0.5)
+	suite.check(animation.texture(enemy) == stopped, "pause freezes dragon wings")
+	game.paused = false
+	game.speed_multiplier = 1
+	game.move_enemy(enemy, 0.125)
+	animation.update(game)
+	suite.check(animation.texture(enemy) == Art.DRAGON_FLIGHT[1], "dragon wings resume with simulation")
+	suite.check(animation.facing_left(enemy), "dragon mirrors when flying left")
+	enemy.boss = 1
+	suite.check(animation.texture(enemy) == Art.enemy_icon(enemy), "flying boss keeps boss illustration")
 	game.enemies.clear()
 	animation.update(game)
 	suite.check(animation.states.is_empty(), "removed enemies release visual state")

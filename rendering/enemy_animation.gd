@@ -1,6 +1,7 @@
 extends RefCounted
 ## La marche suit la distance réellement parcourue, sans changer les règles du combat.
 ## Une immobilisation conserve donc l'image, et accélérer ou ralentir le monstre adapte ses pas.
+## Le dragon bat des ailes selon son âge dans la simulation : la pause fige aussi son vol.
 const Art = preload("res://rendering/unit_art.gd")
 const FRAMES_PER_CELL := 8.0 / 2.5
 var states: Dictionary = {}
@@ -9,7 +10,7 @@ var states: Dictionary = {}
 func update(game) -> void:
 	var alive: Dictionary = {}
 	for enemy in game.enemies:
-		if not Art.has_walk(enemy):
+		if not Art.has_animation(enemy):
 			continue
 		var id: int = enemy.id
 		var position: Vector2 = game.position_of(enemy)
@@ -34,10 +35,16 @@ static func frame_index(distance: float) -> int:
 	return posmod(floori(maxf(0.0, distance) * FRAMES_PER_CELL), Art.GOBLIN_WALK.size())
 
 func texture(enemy: Dictionary) -> Texture2D:
+	if Art.has_flight(enemy):
+		# portal_age augmente pendant toute la vie du monstre, avec la vitesse de la partie.
+		# Le givre ralentit le déplacement, sans ralentir les battements nécessaires au vol.
+		var age: float = enemy.get("portal_age", 0.0)
+		var frame := posmod(floori(maxf(0.0, age) * 8.0), Art.DRAGON_FLIGHT.size())
+		return Art.DRAGON_FLIGHT[frame]
 	if not Art.has_walk(enemy) or not states.has(enemy.id):
 		return Art.enemy_icon(enemy)
 	return Art.GOBLIN_WALK[frame_index(float(states[enemy.id].distance))]
 
 ## Le miroir couvre les déplacements vers la gauche ; les virages verticaux gardent le dernier sens.
 func facing_left(enemy: Dictionary) -> bool:
-	return Art.has_walk(enemy) and states.has(enemy.id) and bool(states[enemy.id].left)
+	return Art.has_animation(enemy) and states.has(enemy.id) and bool(states[enemy.id].left)
