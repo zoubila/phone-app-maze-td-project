@@ -25,6 +25,7 @@ MazeTD/
 
   gameplay/
     tower_catalog.gd            Prix et caractéristiques de base des huit tours.
+    difficulty.gd               Quatre profils, progression du supplément de PV et multiplicateur des gains.
     construction.gd             Achat, amélioration et vente des tours.
     navigation.gd               Distances au château et chemins des terrestres.
     waves.gd                    Composition des vagues et création des monstres.
@@ -36,7 +37,7 @@ MazeTD/
   ui/
     control_factory.gd          Apparence commune des textes et des boutons.
     build_interface.gd          Carte, catalogue des tours et commandes flottantes.
-    menu_screen.gd              Titre, description, grille, Commencer et Options.
+    menu_screen.gd              Titre, description, grille, difficulté, Commencer et Options.
     end_screen.gd               Résultat centré, Rejouer et Retour accueil.
     settings_screen.gd          Fenêtre des paramètres, Options et Retour accueil.
     update_interface.gd         Actualisation des textes et des boutons existants.
@@ -57,6 +58,7 @@ MazeTD/
     campaign_tests.gd           Cent vagues, récompenses, victoire et défaite.
     interface_tests.gd          Clics, caméra, rotation et zones sûres.
     grid_unlock_tests.gd        Seuils, sauvegarde, ancien record et mode développeur.
+    difficulty_tests.gd         PV, récompenses, bonus, revente et conservation du choix après Rejouer.
     inspection_tests.gd         Survol, fiches, sélection, vente et amélioration.
     enemy_selection_tests.gd    Sprite touché, mouvement pendant l'appui et désélection à la souris/au toucher.
     tower_actions_tests.gd      Vente/amélioration dans les fiches avec appui prolongé.

@@ -14,6 +14,9 @@ var description: Label
 var grid_label: Label
 var grid_choice: OptionButton
 var grid_hint: Label
+var difficulty_label: Label
+var difficulty_choice: OptionButton
+var difficulty_hint: Label
 var grid_info_button: Button
 var grid_info_panel: Panel
 var grid_info_text: Label
@@ -77,6 +80,7 @@ func _ready() -> void:
 	Controls.headline(grid_label, 15, Color("#fff1bf"))
 
 	grid_choice = OptionButton.new()
+	grid_choice.fit_to_longest_item = false
 	grid_choice.add_theme_font_size_override("font_size", 23)
 	grid_choice.add_theme_font_override("font", Controls.DISPLAY_FONT)
 	var choice_style := style.duplicate() as StyleBoxFlat
@@ -104,11 +108,12 @@ func _ready() -> void:
 	for dimensions in preload("res://game.gd").GRID_SIZES:
 		grid_choice.add_item("%d × %d" % [dimensions.y, dimensions.x])
 	card.add_child(grid_choice)
-	style_grid_popup()
+	style_choice_popup(grid_choice)
 	grid_choice.item_selected.connect(func(_index): update_grid_hint())
 	grid_hint = Controls.label(card, "", Vector2.ZERO, Vector2.ZERO, 15, Color("#e5f4ff"))
 	grid_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	create_grid_information()
+	create_difficulty_choice()
 
 	start_button = Controls.button(
 		card,
@@ -175,8 +180,8 @@ func _input(event: InputEvent) -> void:
 
 
 ## Donne à la liste déroulante les mêmes couleurs et de grandes lignes lisibles au doigt.
-func style_grid_popup() -> void:
-	var popup := grid_choice.get_popup()
+func style_choice_popup(choice: OptionButton) -> void:
+	var popup := choice.get_popup()
 	var panel := StyleBoxFlat.new()
 	panel.bg_color = Color("#163e65")
 	panel.border_color = Color("#81cef4")
@@ -195,6 +200,39 @@ func style_grid_popup() -> void:
 	popup.add_theme_color_override("font_color", Color("#fff0c9"))
 	popup.add_theme_color_override("font_hover_color", Color("#ffffff"))
 	popup.add_theme_color_override("font_disabled_color", Color("#92a9bd"))
+
+
+## Prépare un second sélecteur à côté de la grille et explique immédiatement les effets du choix.
+func create_difficulty_choice() -> void:
+	difficulty_label = Controls.label(card, "DIFFICULTÉ", Vector2.ZERO, Vector2.ZERO, 15)
+	Controls.headline(difficulty_label, 15, Color("#fff1bf"))
+	difficulty_choice = OptionButton.new()
+	difficulty_choice.fit_to_longest_item = false
+	difficulty_choice.add_theme_font_override("font", Controls.DISPLAY_FONT)
+	difficulty_choice.add_theme_font_size_override("font_size", 22)
+	for state in ["normal", "hover", "pressed", "focus"]:
+		difficulty_choice.add_theme_stylebox_override(state, grid_choice.get_theme_stylebox(state))
+	for state in ["font_color", "font_hover_color", "font_pressed_color", "font_focus_color", "arrow"]:
+		difficulty_choice.add_theme_color_override(state, grid_choice.get_theme_color(state))
+	difficulty_choice.add_theme_constant_override("arrow_margin", 18)
+	difficulty_choice.add_theme_constant_override("modulate_arrow", 1)
+	for settings in preload("res://gameplay/difficulty.gd").PROFILES:
+		difficulty_choice.add_item(settings.name)
+		difficulty_choice.set_item_tooltip(difficulty_choice.item_count - 1, settings.description)
+	difficulty_choice.select(1)
+	card.add_child(difficulty_choice)
+	style_choice_popup(difficulty_choice)
+	difficulty_hint = Controls.label(card, "", Vector2.ZERO, Vector2.ZERO, 15, Color("#ffe184"))
+	difficulty_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	difficulty_choice.item_selected.connect(func(_index): update_difficulty_hint())
+	update_difficulty_hint()
+
+
+## Les pourcentages affichés viennent du catalogue qui calcule réellement les PV et les revenus.
+func update_difficulty_hint() -> void:
+	var settings: Dictionary = preload("res://gameplay/difficulty.gd").profile(difficulty_choice.selected)
+	difficulty_hint.text = "%s : %s" % [settings.name, settings.description]
+	difficulty_choice.tooltip_text = settings.description
 
 
 ## Actualise les verrous et leurs conditions, sans effacer un choix encore accessible.
@@ -253,6 +291,7 @@ func arrange() -> void:
 	card.position = (size - card.size) / 2.0
 
 	var content := width - 80.0
+	var column := (content - 16.0) / 2.0
 	title.position = Vector2(28, 16)
 	title.size = Vector2(width - 56, 136)
 	hero.position = Vector2(width / 2.0 - 135, 146)
@@ -260,22 +299,28 @@ func arrange() -> void:
 	description.position = Vector2(32, 286)
 	description.size = Vector2(width - 64, 52)
 	description.add_theme_font_size_override("font_size", 17)
-	grid_label.position = Vector2(40, 346)
-	grid_label.size = Vector2(content, 24)
-	grid_info_button.position = Vector2(width - 84, 332)
+	grid_label.position = Vector2(40, 350)
+	grid_label.size = Vector2(column - 48, 24)
+	grid_info_button.position = Vector2(40 + column - 44, 338)
 	grid_info_button.size = Vector2(44, 44)
 	grid_info_panel.position = card.position + Vector2(40, 60)
 	grid_info_panel.size = Vector2(content, 270)
 	grid_info_text.size = Vector2(content - 36, 206)
-	grid_choice.position = Vector2(40, 380)
-	grid_choice.size = Vector2(content, 58)
-	grid_hint.position = Vector2(42, 444)
-	grid_hint.size = Vector2(content - 4, 40)
-	start_button.position = Vector2(40, 494)
-	start_button.size = Vector2(content, 66)
-	options_button.position = Vector2(40, 574)
+	grid_choice.position = Vector2(40, 390)
+	grid_choice.size = Vector2(column, 58)
+	difficulty_label.position = Vector2(56 + column, 350)
+	difficulty_label.size = Vector2(column, 24)
+	difficulty_choice.position = Vector2(56 + column, 390)
+	difficulty_choice.size = Vector2(column, 58)
+	grid_hint.position = Vector2(42, 454)
+	grid_hint.size = Vector2(content - 4, 24)
+	difficulty_hint.position = Vector2(42, 480)
+	difficulty_hint.size = Vector2(content - 4, 40)
+	start_button.position = Vector2(40, 526)
+	start_button.size = Vector2(content, 62)
+	options_button.position = Vector2(40, 600)
 	options_button.size = Vector2(content, 46)
-	footer.position = Vector2(24, 642)
+	footer.position = Vector2(24, 654)
 	footer.size = Vector2(width - 48, 20)
 	queue_redraw()
 

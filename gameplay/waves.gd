@@ -49,9 +49,9 @@ static func start_wave(game) -> bool:
 
 ## Calcule les points de vie initiaux d'un ennemi de la vague number.
 ## Les points de vie progressent de 6 % par vague ; les volants ont un coefficient de 0,6.
-## Le coefficient du mini boss est 16 et celui du gros boss est 75.
-static func enemy_health(_game, number: int, flying: bool = false, boss: int = 0) -> float:
-	# La vague 1 applique une puissance de zéro : on obtient donc exactement les 50 PV de départ.
+## Le coefficient du mini boss est 16 et celui du gros boss est 75, avant application de la difficulté.
+static func enemy_health(game, number: int, flying: bool = false, boss: int = 0) -> float:
+	# La vague 1 applique une puissance de zéro : 50 PV de base, puis le coefficient de difficulté.
 	var health := 50.0 * pow(1.06, maxi(0, number - 1))
 	if flying:
 		health *= 0.6
@@ -61,7 +61,8 @@ static func enemy_health(_game, number: int, flying: bool = false, boss: int = 0
 	elif boss == 1:
 		health *= 16.0
 
-	return health
+	# La même difficulté s'applique aux terrestres, volants et boss, après leurs coefficients propres.
+	return health * game.Difficulty.health_multiplier(game.difficulty_index, number)
 
 
 ## Crée le prochain monstre et l'ajoute à la liste des ennemis de la partie.
@@ -75,6 +76,7 @@ static func spawn_enemy(game) -> Dictionary:
 	var flying: bool = plan.air and boss == 0 and game.spawned % 2 == 0
 	var hp = game.enemy_health(game.wave, flying, boss)
 	var reward: int = (8 + game.wave * 2) * (30 if boss == 2 else (8 if boss == 1 else 1))
+	reward = game.combat_income(reward)
 
 	# La fiche suivante contient tout l'état d'un monstre : position, combat, effets et récompense.
 	var enemy = {

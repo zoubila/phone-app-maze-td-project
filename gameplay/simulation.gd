@@ -126,7 +126,7 @@ static func finish_wave_if_needed(game) -> void:
 		game.message = "Le château est tombé. Recomposez votre labyrinthe."
 	elif game.to_spawn == 0 and game.enemies.is_empty():
 		game.active = false
-		var bonus: int = 20 + game.wave * 3
+		var bonus: int = game.combat_income(20 + game.wave * 3)
 		game.gold += bonus
 		game.best = maxi(game.best, game.wave)
 		game.preparation = 15.0

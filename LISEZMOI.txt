@@ -32,6 +32,21 @@ Le bouton Lancer vague 1 permet de la démarrer immédiatement, quand vous
 êtes prêt, sans attendre la fin des 60 secondes.
 La taille de grille est choisie dans le menu, avant le début de la partie.
 
+DIFFICULTÉ
+Choisir la difficulté à côté de la taille du terrain, avant de commencer.
+Débutant : 30 % de PV en moins pour les monstres et 15 % d'or gagné en plus.
+Normal : PV et revenus actuels, sans multiplicateur supplémentaire.
+Difficile : de 20 % à 50 % de PV supplémentaires, et 10 % d'or gagné en moins.
+Fin du monde : de 50 % à 125 % de PV supplémentaires, et 15 % d'or gagné en moins.
+Dans les deux modes les plus durs, le supplément de PV monte progressivement
+entre les vagues 1 et 25, puis reste stable. La progression habituelle des
+PV par vague continue dans tous les modes. Les volants et les boss sont concernés.
+Les gains ajustés comprennent les récompenses des monstres et les bonus de vague,
+arrondis à la pièce la plus proche. Les 600 pièces initiales, prix, remboursements,
+portées et cadences restent identiques. Rejouer conserve la difficulté de la partie.
+Ces valeurs forment un premier équilibrage ; les essais humains sur la campagne
+complète permettront encore d'affiner la difficulté et le ressenti.
+
 DÉBLOCAGE DES GRILLES ET MODE DÉVELOPPEUR
 La grille 25 × 50 est accessible dès le départ.
 Le bouton ? près de Taille du terrain explique les deux déblocages et affiche
@@ -73,6 +88,8 @@ La vente rembourse 70 % de l'or investi et fonctionne pendant les vagues
 et en pause. La fiche permet aussi d'améliorer la tour jusqu'au niveau 7.
 Le simple survol d'une autre tour ne change pas la tour sélectionnée.
 La case d'une tour sélectionnée est légèrement assombrie, sans cadre autour du sprite.
+Une petite barre rouge sous une tour blessée représente ses PV restants après
+une attaque de gros boss. Ouvrir sa fiche pour connaître les PV exacts.
 Fermer avec ×. Toucher une case vide ferme d'abord la fiche d'une unité
 sans construire ; le toucher suivant permet de poser une tour.
 Faire glisser la carte ferme la fiche. Une fiche de monstre se ferme

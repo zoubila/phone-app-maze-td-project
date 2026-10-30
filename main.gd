@@ -251,7 +251,7 @@ func refresh_inspection(reanchor: bool = false) -> void:
 
 
 ## Démarre une nouvelle partie après le choix du menu. L'attente d'une minute commence ici, pas dans le menu.
-func start_game(index: int = 1) -> void:
+func start_game(index: int = 1, difficulty: int = -1) -> void:
 	# Le verrou est aussi vérifié ici : sélectionner une entrée par code ne doit pas le contourner.
 	if not progression.is_unlocked(index, developer_mode):
 		menu_screen.configure_grids(progression, developer_mode)
@@ -259,7 +259,9 @@ func start_game(index: int = 1) -> void:
 	wave_feedback.clear()
 	settings_screen.hide()
 	grid_index = index
-	game.reset(index)
+	# Le menu choisit la difficulté au lancement ; Rejouer transmet explicitement celle de la partie terminée.
+	var choice: int = menu_screen.difficulty_choice.selected if difficulty < 0 else difficulty
+	game.reset(index, choice)
 	in_menu = false
 	selected = Vector2i(-1, -1)
 	selected_kind = 0
@@ -276,7 +278,7 @@ func start_game(index: int = 1) -> void:
 ## Recommence avec la même taille de grille depuis le bouton central du résultat.
 func restart_game() -> void:
 	if game.ended:
-		start_game(grid_index)
+		start_game(grid_index, game.difficulty_index)
 
 
 ## Revient au menu ; Commencer créera ensuite une nouvelle partie avec la grille choisie.

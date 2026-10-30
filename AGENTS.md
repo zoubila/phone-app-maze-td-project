@@ -31,6 +31,7 @@
 ## Interface de la partie
 
 - Le menu initial contient le titre, la description, le choix de la grille, Commencer et Options (sans action pour le moment). Le temps de jeu ne doit pas avancer dans ce menu.
+- Le menu permet aussi de choisir Débutant, Normal, Difficile ou Fin du monde. gameplay/difficulty.gd est la source commune des libellés et coefficients. La difficulté modifie les PV de toutes les unités et les gains de combat/bonus, sans toucher aux 600 pièces initiales ni aux remboursements. Normal conserve les valeurs de référence ; Rejouer garde la difficulté de la partie terminée.
 - La grille 25 × 50 est accessible dès le départ ; y atteindre la vague 25 débloque 50 × 100, puis y atteindre la vague 50 débloque 100 × 200. Sauvegarder par grille dès le lancement de la vague dans progression.gd. L'ancien record global reste distinct. Vérifier les verrous dans le menu et dans start_game.
 - Le mode développeur est explicite : Jouer-MazeTD-Dev.cmd, option -Dev du lanceur, argument utilisateur --dev ou réglage maze_td/developer_mode. Il autorise toutes les grilles sans changer les déblocages normaux ; ne pas l'activer automatiquement dans une version de débogage.
 - La sélection d'une tour assombrit légèrement le sol de sa case avant le dessin du sprite. Ne pas réintroduire de cadre autour de la tour.

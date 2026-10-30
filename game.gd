@@ -11,6 +11,7 @@ const Enemies = preload("res://gameplay/enemies.gd")
 const TowerCombat = preload("res://gameplay/tower_combat.gd")
 const Bosses = preload("res://gameplay/bosses.gd")
 const Simulation = preload("res://gameplay/simulation.gd")
+const Difficulty = preload("res://gameplay/difficulty.gd")
 
 # Les événements visuels annoncent des faits du modèle, sans déplacer les règles dans l'interface.
 signal wave_repelled(number: int, bonus: int)
@@ -47,6 +48,7 @@ var shots: Array = []
 # Ces variables décrivent les ressources et l'avancement de la partie.
 # active signifie qu'une vague est en cours ; ended indique une fin de partie ; won indique une victoire.
 var gold := 600
+var difficulty_index := 1
 var lives := 20
 var wave := 0
 var best := 0
@@ -81,7 +83,8 @@ func _init() -> void:
 ## Recommence une partie sur la grille choisie par grid_index : 0, 1 ou 2.
 ## Les tours et monstres disparaissent, l'or et les vies reviennent à leur valeur de départ.
 ## Le record best est conservé. Aucun fichier de sauvegarde n'est lu ou écrit ici.
-func reset(grid_index: int = 0) -> void:
+func reset(grid_index: int = 0, difficulty: int = 1) -> void:
+	difficulty_index = clampi(difficulty, 0, Difficulty.PROFILES.size() - 1)
 	var dimensions: Vector2i = GRID_SIZES[clampi(grid_index, 0, 2)]
 	cols = dimensions.x
 	rows = dimensions.y
@@ -107,6 +110,11 @@ func reset(grid_index: int = 0) -> void:
 	presentation_time = 0.0
 	message = "Bâtissez ou lancez la vague dès que vous êtes prêt."
 	rebuild_flow()
+
+
+## Applique la difficulté aux gains des monstres et aux bonus, sans toucher au budget initial ni à la revente.
+func combat_income(amount: int) -> int:
+	return Difficulty.income(difficulty_index, amount)
 
 
 ## Vérifie si cell désigne une case qui existe sur la carte.
