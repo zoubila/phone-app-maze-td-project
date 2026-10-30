@@ -37,6 +37,8 @@ static func refresh(ui) -> void:
 	ui.wave_button.text = "Lancer vague %d · %d s" % [ui.game.wave + 1, int(ceil(ui.game.preparation))]
 	var next_plan: Dictionary = ui.game.wave_plan(ui.game.wave + 1)
 	var next_threat := "résistance physique" if next_plan.armor == "physical" else "résistance magique"
+	if next_plan.mixed_armor:
+		next_threat = "résistances mixtes"
 	if next_plan.air:
 		next_threat = "volants + terrestres"
 	if next_plan.boss > 0:

@@ -35,7 +35,7 @@ static func run(suite) -> void:
 		game.start_wave()
 		game.to_spawn = 1
 		var boss: Dictionary = game.spawn_enemy()
-		suite.check(boss.boss == 2 and boss.reward == Difficulty.income(index, 108 * 30), "Boss reward uses the selected income multiplier")
+		suite.check(boss.boss == 2 and boss.reward == [317, 276, 248, 234][index], "Boss reward stays within the difficulty-adjusted wave budget")
 		suite.near(boss.max_hp, game.enemy_health(50, false, 2), "Spawned boss uses difficulty-adjusted health")
 		boss.hp = 0
 		var bonus_events: Array[int] = []

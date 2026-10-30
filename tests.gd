@@ -71,6 +71,7 @@ func run() -> void:
 	projectile_tests()
 	preload("res://tests/progression_tests.gd").run(self)
 	preload("res://tests/combat_tests.gd").run(self)
+	preload("res://tests/economy_tests.gd").run(self)
 
 	var kills = preload("res://tests/campaign_tests.gd").run(self)
 	await preload("res://tests/interface_tests.gd").run(self)

@@ -16,6 +16,8 @@ const Difficulty = preload("res://gameplay/difficulty.gd")
 # Les événements visuels annoncent des faits du modèle, sans déplacer les règles dans l'interface.
 signal wave_repelled(number: int, bonus: int)
 signal wave_started(number: int)
+# Signal d'observation pour les mesures d'équilibrage : il ne modifie pas les dégâts ni les récompenses.
+signal enemy_defeated(enemy: Dictionary)
 
 
 const LAST_WAVE := 100
@@ -115,9 +117,9 @@ func reset(grid_index: int = 0, difficulty: int = 1, developer: bool = false) ->
 	rebuild_flow()
 
 
-## Applique la difficulté aux gains des monstres et aux bonus, sans toucher au budget initial ni à la revente.
-func combat_income(amount: int) -> int:
-	return Difficulty.income(difficulty_index, amount)
+## Fournit le même coefficient de niveau aux dégâts réels et aux statistiques affichées dans les fiches.
+func tower_power(level: int) -> float:
+	return TowerCombat.power_for_level(level)
 
 
 ## Vérifie si cell désigne une case qui existe sur la carte.

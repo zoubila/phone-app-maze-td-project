@@ -132,12 +132,14 @@ static func run(suite) -> void:
 		)
 		suite.check(plan.armor == ("physical" if wave % 2 == 1 else "magic"), "Alternating ground resistances")
 
-		if wave > 1:
+		if wave > 1 and wave <= 6:
 			suite.near(
 				game.enemy_health(wave) / game.enemy_health(wave - 1),
 				1.06,
-				"Enemy health increases by six percent each wave",
+				"Opening health increases by six percent per wave unchanged",
 			)
+		elif wave > 6:
+			suite.check(game.enemy_health(wave) > game.enemy_health(wave - 1), "Rebalanced health remains strictly increasing")
 
 	for wave in range(10, 101, 10):
 		game.reset(1)

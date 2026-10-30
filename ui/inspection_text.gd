@@ -48,7 +48,9 @@ static func enemy_body(enemy: Dictionary, pinned: bool) -> String:
 		hint = "Toucher ailleurs pour fermer"
 
 	if enemy.boss == 2:
-		hint = "Peut détruire les constructions"
+		hint = "Brise les tours • Givre max 40 %"
+	elif enemy.boss == 1:
+		hint = "Givre limité à 45 %"
 
 	var targets := "tours terrestres"
 
@@ -76,8 +78,8 @@ static func enemy_body(enemy: Dictionary, pinned: bool) -> String:
 
 ## Décrit ce que produit une attaque de la tour au niveau demandé.
 ## Les dégâts progressent avec le niveau ; la cadence et la portée restent celles du type de tour.
-static func tower_effect(spec: Dictionary, level: int) -> String:
-	var damage := float(spec.damage) * pow(1.55, level - 1)
+static func tower_effect(game, spec: Dictionary, level: int) -> String:
+	var damage: float = float(spec.damage) * game.tower_power(level)
 	var scope := "une cible"
 
 	if spec.mode == "aoe" or spec.mode == "slow_aoe":
@@ -137,7 +139,7 @@ static func tower_body(game, tower: Dictionary, catalog: bool) -> String:
 
 	var lines: Array[String] = [
 		"Cibles : %s" % targets,
-		tower_effect(spec, level),
+		tower_effect(game, spec, level),
 		"Portée fixe : %.1f cases" % game.tower_range(tower),
 		"PV : %.0f / %.0f" % [tower.hp, 120.0 + (level - 1) * 60],
 		price,

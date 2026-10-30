@@ -26,6 +26,7 @@ MazeTD/
   gameplay/
     tower_catalog.gd            Prix et caractéristiques de base des huit tours.
     difficulty.gd               Quatre profils, progression du supplément de PV et multiplicateur des gains.
+    economy.gd                  Budget total par vague, part du boss et répartition exacte entre ennemis.
     construction.gd             Achat, amélioration et vente des tours.
     navigation.gd               Distances au château et chemins des terrestres.
     waves.gd                    Composition des vagues et création des monstres.
@@ -59,6 +60,7 @@ MazeTD/
     interface_tests.gd          Clics, caméra, rotation et zones sûres.
     grid_unlock_tests.gd        Seuils, sauvegarde, ancien record et mode développeur.
     difficulty_tests.gd         PV, récompenses, bonus, revente et conservation du choix après Rejouer.
+    economy_tests.gd            Budgets, ouverture conservée, courbes de PV/dégâts et mélange des résistances.
     developer_mode_tests.gd     Château invulnérable, vague de départ, Rejouer et protection des records normaux.
     inspection_tests.gd         Survol, fiches, sélection, vente et amélioration.
     enemy_selection_tests.gd    Sprite touché, mouvement pendant l'appui et désélection à la souris/au toucher.
@@ -75,6 +77,7 @@ MazeTD/
   .env                          Chemins partagés du lanceur.
   .env.local                    Réglages de votre machine, exclus de Git.
   tools/lancer-jeu.ps1          Lecture des réglages, import des ressources puis démarrage de Godot.
+  tools/mesurer-equilibrage.gd   Défense automatique sans triche et rapport CSV pour comparer les réglages.
 
 POURQUOI CERTAINES FONCTIONS DE GAME.GD SONT-ELLES TRÈS COURTES ?
 L'interface appelle toujours game.build, game.sell ou game.tick : elle n'a

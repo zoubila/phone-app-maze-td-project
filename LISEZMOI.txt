@@ -144,14 +144,17 @@ Séisme : ralentissement de zone terrestre, aucun dégât.
 Poison : dégâts magiques sur la durée sur une cible terrestre.
 
 CAMPAGNE
-100 vagues. Vagues impaires : résistance physique et faiblesse magique.
-Vagues paires : résistance magique et faiblesse physique.
+100 vagues. Les six premières alternent résistance physique et magique.
+À partir de la vague 7, la dominante continue d'alterner mais une minorité
+de terrestres possède la résistance opposée : un sur quatre, puis un sur trois
+à partir de la vague 25. Les annonces signalent les résistances mixtes.
 Toutes les 10 vagues : alternance de volants et de monstres terrestres, plus un mini boss terrestre.
 Aux vagues 50 et 100, un gros boss remplace le mini boss.
 Les unités aériennes suivent la ligne directe vers le château. Elles sont
 immunisées aux tours et contrôles terrestres. La balliste leur inflige des
 dégâts physiques normaux, sans bonus de faiblesse ni réduction de résistance.
-L'or par ennemi augmente avec le numéro de vague. Aucun or pour une fuite.
+Le budget d'or total par vague est maîtrisé et réparti entre les ennemis,
+la prime du boss et le bonus de fin de vague. Aucun or pour une fuite.
 
 GROS BOSS
 Toutes les 6 secondes, il a 65 % de chances de tenter une attaque sur une
@@ -167,7 +170,9 @@ Départ : 600 or, château à 20 points.
 Prix N1 : Archer 50, Canon 85, Sorcier 65, Arcane 100, Balliste 70,
 Frost 60, Séisme 90, Poison 80.
 Amélioration : plafond(prix N1 × 1,45^niveau actuel).
-Dégâts : valeur de base × 1,55^(niveau − 1).
+Dégâts : niveaux 1 à 3 inchangés (+55 % par niveau), puis +40 % par niveau.
+Le niveau 7 multiplie les dégâts de base par environ 9,23, contre 13,87 auparavant.
+Les fiches et le poison utilisent exactement la même courbe que les tirs directs.
 Portée : fixe pour chaque type de tour, du niveau 1 au niveau 7.
 La cadence ne change pas non plus avec les niveaux. Les améliorations de
 dégâts augmentent les dégâts par tir, sans accélérer les attaques.
@@ -183,14 +188,29 @@ Séisme : vitesse ×0,75 au N1 jusqu'à ×0,51 au N7.
 Ralentissements : 2 + niveau ×0,2 secondes. Le plus fort s'applique,
 sans multiplication des ralentissements ; une nouvelle application du
 même effet renouvelle sa durée.
+Les mini boss ne peuvent pas être ralentis de plus de 45 %, et les gros boss
+de plus de 40 %. Leurs fiches indiquent cette résistance au givre.
 Poison : 7 dégâts magiques/seconde au N1, augmentés avec les niveaux.
 Durée : 4 + niveau ×0,5 secondes. Une même tour renouvelle son poison.
 Les poisons provenant de tours différentes se cumulent.
-Ennemis : 50 PV au départ, puis +6 % de PV à chaque vague. Les volants ont
-60 % des PV des monstres terrestres de la même vague (environ 51 PV à la
-vague 10). Boss : multiplicateurs de PV ×16 pour les mini boss et ×75
-pour les gros boss. Par rapport au prototype 03, les mini boss ont deux
-fois plus de PV et les gros boss trois fois plus de PV à vague égale.
+Ennemis : 50 PV au départ et +6 % par vague jusqu'à la vague 6, comme avant.
+Ensuite, une croissance continue relie les points de contrôle suivants en Normal :
+vague 10 : 96 PV ; vague 20 : 350 ; vague 30 : 900 ; vague 50 : 2 200 ; vague 100 : 6 000.
+Le milieu de partie est renforcé ; la fin reste compatible avec les revenus réduits.
+Les volants ont 60 % des PV ordinaires (57,6 PV à la vague 10).
+Boss : multiplicateurs de PV ×16 pour les mini boss et ×75 pour les gros boss.
+
+ÉCONOMIE PAR VAGUE
+Les gains des vagues 1 à 6 sont conservés exactement dans chaque difficulté.
+Après la vague 6, le budget de base en Normal vaut :
+438 + 44 × (vague − 6) + 0,4 × (vague − 6)², arrondi à la pièce.
+Le bonus de fin reste 20 + 3 × vague. Une prime maîtrisée est ajoutée aux
+vagues de boss : le mini boss reçoit quatre parts ordinaires, le gros boss dix.
+La difficulté ajuste le budget, qui est ensuite réparti sans inflation d'arrondi.
+Si tous les ennemis sont tués, les gains totaux en Normal sont par exemple :
+vague 10 : 680 or ; vague 20 : 1 195 ; vague 30 : 1 793 ; vague 50 : 3 391 ; vague 100 : 8 441.
+Les monstres échappés perdent leur part : elle n'est jamais ajoutée au bonus final.
+Le budget initial, les prix d'achat, les coûts d'amélioration et les remboursements sont conservés.
 Entre les vagues : 15 secondes de préparation avec lancement anticipé
 possible. Construction, vente et amélioration possibles en combat et en pause.
 Impossible de construire sous un monstre terrestre ou sur sa case suivante,
@@ -212,6 +232,15 @@ les huit tours, leurs niveaux, le ciblage sol/air, les résistances, les effets,
 les boss et le recalcul de chemin, les temporisations, l'économie et les
 commandes de vue. Une simulation parcourt les 100 vagues avec des ennemis
 éliminés artificiellement : elle vérifie le déroulement, pas la difficulté.
+Un scénario séparé achète et améliore une vraie défense avec les revenus gagnés,
+sans invulnérabilité et sans retirer de monstres artificiellement :
+godot --headless --path . --script tools/mesurer-equilibrage.gd -- --waves=30 --difficulty=1
+Il écrit user://equilibrage-1.csv : or avant/après, dépenses, gains, tours,
+améliorations, vies perdues et progression moyenne des monstres avant leur mort.
+Options : --waves=1..100, --difficulty=0..3, --grid=0..2, --output=chemin.csv.
+La stratégie par défaut prépare les vagues aériennes. --strategy=0 sert de
+comparaison avec une défense qui investit surtout au sol. Ces mesures ne
+remplacent pas des essais humains sur les trois tailles de grille.
 Le record est sauvegardé localement ; la partie en cours n'est pas sauvegardée.
 Les graphismes sont temporaires, sans dépendances externes.
 

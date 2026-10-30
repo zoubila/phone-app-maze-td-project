@@ -112,6 +112,7 @@ static func remove_and_pay_enemies(game) -> void:
 			survivors.append(enemy)
 		elif not enemy.escaped:
 			game.gold += int(enemy.reward)
+			game.enemy_defeated.emit(enemy)
 	game.enemies = survivors
 
 
@@ -126,7 +127,7 @@ static func finish_wave_if_needed(game) -> void:
 		game.message = "Le château est tombé. Recomposez votre labyrinthe."
 	elif game.to_spawn == 0 and game.enemies.is_empty():
 		game.active = false
-		var bonus: int = game.combat_income(20 + game.wave * 3)
+		var bonus: int = game.wave_plan(game.wave).income.clear_bonus
 		game.gold += bonus
 		game.best = maxi(game.best, game.wave)
 		game.preparation = 15.0

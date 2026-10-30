@@ -4,6 +4,13 @@ extends RefCounted
 ## Les animations sont enregistrées dans game.shots, mais les dégâts sont décidés immédiatement ici.
 
 
+## Préserve les niveaux 1 à 3, puis limite les pics de puissance : +40 % par niveau au lieu de +55 %.
+## Le niveau 7 reste un investissement fort, sans rendre les défenses disproportionnées au milieu de partie.
+static func power_for_level(level: int) -> float:
+	var value := clampi(level, 1, 7)
+	return pow(1.55, mini(value - 1, 2)) * pow(1.40, maxi(value - 3, 0))
+
+
 ## Renvoie le coefficient qui transforme les dégâts en fonction de la résistance.
 ## Une résistance au type school donne 0,5 ; l'autre type donne 1,5.
 ## Une unité sans résistance, notamment aérienne, reçoit le coefficient neutre de 1.
@@ -41,6 +48,9 @@ static func apply_hit(game, source: Vector2i, tower: Dictionary, enemy: Dictiona
 			base_factor = 0.75
 
 		var factor := maxf(0.35, base_factor - (level - 1) * 0.04)
+		# Les boss ne peuvent pas être presque immobilisés par une seule tour améliorée.
+		if enemy.boss > 0:
+			factor = maxf(factor, 0.60 if enemy.boss == 2 else 0.55)
 
 		# Un facteur plus petit ralentit davantage. Le meilleur ralentissement est conservé ; on ne les multiplie pas.
 		if enemy.slow_time <= 0 or factor <= enemy.slow_factor:
@@ -52,10 +62,10 @@ static func apply_hit(game, source: Vector2i, tower: Dictionary, enemy: Dictiona
 		# Une autre tour possède une autre clé et ajoute donc un poison distinct.
 		enemy.poison[source] = {
 			"time": 4.0 + level * 0.5,
-			"dps": float(spec.damage) * pow(1.55, level - 1),
+			"dps": float(spec.damage) * game.tower_power(level),
 		}
 	else:
-		enemy.hp -= float(spec.damage) * pow(1.55, level - 1) * game.damage_multiplier(enemy, spec.school)
+		enemy.hp -= float(spec.damage) * game.tower_power(level) * game.damage_multiplier(enemy, spec.school)
 
 
 ## Cherche, parmi les ennemis à portée, celui qui a le moins de chemin restant jusqu'au château.

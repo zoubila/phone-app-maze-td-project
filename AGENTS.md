@@ -21,6 +21,7 @@
 - Pour le château actuel, réserver uniquement la case de sortie et les deux cases juste au-dessus dans la dernière colonne. Le rectangle historique de deux colonnes sur huit lignes condamnait du terrain vide : les cases au-dessus du bâtiment et l'avant-dernière colonne doivent rester constructibles si elles laissent un chemin ouvert.
 - Direction visuelle : cartoon mobile très lisible, volumes épais, couleurs franches et peu de détails fins. Les ressources v2 sont `sol_toon_v2.png`, `chene_toon_v2.png` et `tours_toon_v2_atlas.png`. La police de titres Lilita One et sa licence OFL sont dans `assets/polices/`.
 - L'utilisateur prépare désormais les nouvelles animations. Se concentrer sur les ressources statiques et l'intégration de ses exports quand ils seront fournis.
+- Pour l'équilibrage, préserver les gains et les PV des vagues 1 à 6 et les dégâts des niveaux 1 à 3. economy.gd fixe un budget de vague avant sa répartition ; ne pas réintroduire la double croissance du nombre d'ennemis et de leur prime. tower_power fournit la même puissance aux dégâts directs, poisons et fiches. Les PV suivent les points de contrôle de waves.gd, les résistances deviennent mixtes après la vague 6 et les boss limitent le ralentissement. Le scénario tools/mesurer-equilibrage.gd mesure les vrais achats et combats ; les tests à morts forcées ne prouvent pas la jouabilité.
 
 ## Lisibilité et commentaires
 

@@ -55,6 +55,8 @@ func show_repelled(number: int, bonus: int, plan: Dictionary) -> void:
 	heading.text = "VAGUE %d REPOUSSÉE !" % number
 	reward.text = "+%d or  ·  Le royaume tient bon !" % bonus
 	var threat := "ennemis résistants au physique" if plan.armor == "physical" else "ennemis résistants à la magie"
+	if plan.mixed_armor:
+		threat = "résistances physiques et magiques"
 	if plan.air:
 		threat = "unités volantes et terrestres"
 	if plan.boss > 0:
