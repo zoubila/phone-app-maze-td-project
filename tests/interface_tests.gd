@@ -16,6 +16,7 @@ static func run(suite) -> void:
 		suite.root.size = dimensions
 
 		var ui = load("res://main.tscn").instantiate()
+		ui.developer_mode = true
 		suite.root.add_child(ui)
 		ui.set_process(false)
 		await suite.process_frame

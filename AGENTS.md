@@ -31,6 +31,9 @@
 ## Interface de la partie
 
 - Le menu initial contient le titre, la description, le choix de la grille, Commencer et Options (sans action pour le moment). Le temps de jeu ne doit pas avancer dans ce menu.
+- La grille 25 × 50 est accessible dès le départ ; y atteindre la vague 25 débloque 50 × 100, puis y atteindre la vague 50 débloque 100 × 200. Sauvegarder par grille dès le lancement de la vague dans progression.gd. L'ancien record global reste distinct. Vérifier les verrous dans le menu et dans start_game.
+- Le mode développeur est explicite : Jouer-MazeTD-Dev.cmd, option -Dev du lanceur, argument utilisateur --dev ou réglage maze_td/developer_mode. Il autorise toutes les grilles sans changer les déblocages normaux ; ne pas l'activer automatiquement dans une version de débogage.
+- La sélection d'une tour assombrit légèrement le sol de sa case avant le dessin du sprite. Ne pas réintroduire de cadre autour de la tour.
 - Réserver plus de 80 % de la surface utile au plateau. Le catalogue contient uniquement les huit tours, à droite en paysage et sous la carte en portrait.
 - Vendre et Améliorer sont uniquement dans les fiches des tours. Ne pas réintroduire de boutons globaux ni de boutons Entrée, Château, Vue ou zoom.
 - Pause et Vitesse sont des commandes flottantes à fond semi-transparent sur la carte. Le lancement anticipé flotte seulement pendant la préparation. Rejouer apparaît au centre du plateau après une victoire ou une défaite.

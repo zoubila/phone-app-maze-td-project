@@ -34,6 +34,7 @@ static func run(suite) -> void:
 
 	suite.root.size = Vector2i(1280, 720)
 	var ui = load("res://main.tscn").instantiate()
+	ui.developer_mode = true
 	suite.root.add_child(ui)
 	ui.set_process(false)
 	await suite.process_frame

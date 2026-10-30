@@ -12,13 +12,17 @@ var projectiles = preload("res://projectiles.gd").new()
 var game
 # Les gestes tactiles sont séparés des règles de jeu et des commandes de souris.
 var touch_gestures = preload("res://input/board_touch.gd").new()
-# CAMÉRA ET SÉLECTION : selected sert à dessiner portée et contour ; pan/zoom cadrent la carte.
+# CAMÉRA ET SÉLECTION : selected sert à dessiner la portée et assombrir la case ; pan/zoom cadrent la carte.
 var selected := Vector2i(-1, -1)
 var zoom := 1.0
 var pan := Vector2.ZERO
 # GESTE EN COURS : start/pan_start gardent l'état de départ ; moved distingue glissement et toucher.
 var dragging := false
 var moved := false
+# Le monstre touché à l'appui garde son identité jusqu'au relâchement, même s'il avance entre les deux.
+var pressed_item: Dictionary = {}
+# Un appui destiné à fermer une fiche ne doit pas acheter une tour sur une case vide.
+var suppress_empty_tap := false
 var start := Vector2.ZERO
 var pan_start := Vector2.ZERO
 # CACHE DU CHEMIN : recalcul graphique seulement quand game.revision change.
@@ -170,10 +174,10 @@ func pick_item(point: Vector2) -> Dictionary:
 			continue
 
 		var p: Vector2 = game.position_of(enemy) * CELL
-		var radius := 28.0 if enemy.boss == 2 else (23.0 if enemy.boss == 1 else (24.0 if enemy.air else 18.0))
 		var distance := world.distance_squared_to(p)
+		var bounds: Rect2 = preload("res://rendering/unit_art.gd").enemy_bounds(enemy, p).grow(3.0)
 
-		if distance <= radius * radius and distance < best_distance:
+		if bounds.has_point(world) and distance < best_distance:
 			nearest = {"type": "enemy", "id": enemy.id}
 			best_distance = distance
 
@@ -214,6 +218,7 @@ func _gui_input(event: InputEvent) -> void:
 			set_zoom(zoom / 1.2, event.position)
 		elif event.button_index == MOUSE_BUTTON_LEFT:
 			if event.pressed:
+				pressed_item = pick_item(event.position)
 				dragging = true
 				moved = false
 				start = event.position
@@ -221,10 +226,14 @@ func _gui_input(event: InputEvent) -> void:
 			else:
 				if dragging and not moved and Rect2(Vector2.ZERO, size).has_point(event.position):
 					var target := pick_item(event.position)
+					if pressed_item.get("type") == "enemy":
+						target = pressed_item
 					var cell := cell_at(event.position)
 
 					if not target.is_empty():
 						item_tapped.emit(target, event.position)
+					elif suppress_empty_tap:
+						pass
 					elif game.inside(cell):
 						# En vue d'ensemble, agrandit d'abord au lieu d'acheter une tour sur une case trop petite.
 						if zoom * CELL < 20:
@@ -235,6 +244,8 @@ func _gui_input(event: InputEvent) -> void:
 						# Le décor hors grille peut aussi fermer une fiche ; game.build refuse cette case sans achat.
 						cell_tapped.emit(cell)
 				dragging = false
+				pressed_item = {}
+				suppress_empty_tap = false
 	elif event is InputEventMouseMotion:
 		hover_point = event.position
 		hovering = Rect2(Vector2.ZERO, size).has_point(event.position)

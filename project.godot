@@ -28,6 +28,10 @@ window/handheld/orientation=6
 
 pointing/android/enable_pan_and_scale_gestures=true
 
+[maze_td]
+
+developer_mode=false
+
 [rendering]
 
 renderer/rendering_method="gl_compatibility"

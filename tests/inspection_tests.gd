@@ -9,6 +9,7 @@ extends RefCounted
 ## check compte une vérification ; near compare des nombres avec une petite tolérance d'arrondi.
 static func run(suite) -> void:
 	var ui = load("res://main.tscn").instantiate()
+	ui.developer_mode = true
 	suite.root.add_child(ui)
 	ui.set_process(false)
 	ui.start_game(0)

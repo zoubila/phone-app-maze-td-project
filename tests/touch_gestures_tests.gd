@@ -30,6 +30,7 @@ static func run(suite) -> void:
 	var original_emulation: bool = Input.emulate_mouse_from_touch
 	Input.emulate_mouse_from_touch = true
 	var ui = load("res://main.tscn").instantiate()
+	ui.developer_mode = true
 	suite.root.add_child(ui)
 	ui.set_process(false)
 	await suite.process_frame

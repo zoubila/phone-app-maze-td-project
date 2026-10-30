@@ -8,6 +8,17 @@ static var tower_icons: Array[AtlasTexture] = []
 static var enemy_icons: Array[AtlasTexture] = []
 
 
+## Calcule l'emprise réelle du sprite : le dessin et la sélection doivent utiliser la même taille.
+## Le déplacement vertical bob anime la marche ; l'émergence réduit le sprite à la sortie du portail.
+static func enemy_bounds(enemy: Dictionary, point: Vector2, bob: float = 0.0) -> Rect2:
+	var dimensions := 48.0 if enemy.air else 38.0
+	if enemy.boss > 0:
+		dimensions = 68.0 if enemy.boss == 2 else 56.0
+	var emergence := clampf(float(enemy.get("portal_age", 1.0)) / 0.32, 0.0, 1.0)
+	dimensions *= lerpf(0.45, 1.0, emergence)
+	return Rect2(point + Vector2(-dimensions * 0.5, -dimensions * 0.75 + bob), Vector2.ONE * dimensions)
+
+
 ## Prépare une texture par cellule de l'atlas ; le filtrage ne déborde pas sur la cellule voisine.
 static func prepare_icons() -> void:
 	if not tower_icons.is_empty():

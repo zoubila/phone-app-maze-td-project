@@ -6,7 +6,7 @@ extends RefCounted
 const Art = preload("res://rendering/unit_art.gd")
 
 
-## Dessine les couches dans cet ordre : terrain, chemin, portée, tours, monstres, tirs, pause.
+## Dessine les couches dans cet ordre : terrain, chemin, quadrillage, bâtiments, portée, unités, tirs, pause.
 ## Changer cet ordre peut masquer les unités sous le décor ; il doit donc rester explicite.
 static func paint(view, canvas: Node2D) -> void:
 	if view.game == null:
@@ -15,6 +15,8 @@ static func paint(view, canvas: Node2D) -> void:
 	var visible = Rect2(-view.pan / view.zoom, view.size / view.zoom).grow(view.CELL)
 	paint_ground(view, canvas, visible)
 	paint_route(view, canvas, visible)
+	paint_grid(view, canvas, visible)
+	view.scenery.paint_landmarks(canvas, view.game, view.CELL)
 	paint_range(view, canvas)
 	paint_towers(view, canvas, visible)
 	paint_enemies(view, canvas, visible)
@@ -22,12 +24,18 @@ static func paint(view, canvas: Node2D) -> void:
 	paint_pause(view, canvas)
 
 
-## Dessine la forêt et le quadrillage seulement dans la portion visible de la carte.
-## Le quadrillage reste fin à chaque zoom pour ne pas masquer les unités.
+## Dessine le terrain et les emprises réservées aux bâtiments, avant le chemin et le quadrillage.
 static func paint_ground(view, canvas: Node2D, visible: Rect2) -> void:
 	view.scenery.paint_ground(canvas, view.game, view.CELL, visible)
 	# Atténue le contraste du fond pour laisser ressortir les silhouettes des unités.
 	canvas.draw_rect(Rect2(Vector2.ZERO, Vector2(view.game.cols, view.game.rows) * view.CELL), Color("#17393b0a"))
+	view.scenery.paint_reserved_areas(canvas, view.game, view.CELL)
+
+
+## Pose le quadrillage sur le terrain ET sur le chemin afin de distinguer toutes les cases.
+## Le trait garde une épaisseur d'un pixel à chaque zoom ; seules les lignes visibles sont dessinées.
+## Les bâtiments et les unités sont dessinés ensuite pour ne pas être striés par cette surcouche.
+static func paint_grid(view, canvas: Node2D, visible: Rect2) -> void:
 
 	var x0 = maxi(0, floori(visible.position.x / view.CELL))
 	var x1 = mini(view.game.cols, ceili(visible.end.x / view.CELL))
@@ -38,7 +46,7 @@ static func paint_ground(view, canvas: Node2D, visible: Rect2) -> void:
 		canvas.draw_line(
 			Vector2(x * view.CELL, y0 * view.CELL),
 			Vector2(x * view.CELL, y1 * view.CELL),
-			Color("#2e672518"),
+			Color("#2e67252e"),
 			1.0 / view.zoom,
 		)
 
@@ -46,10 +54,9 @@ static func paint_ground(view, canvas: Node2D, visible: Rect2) -> void:
 		canvas.draw_line(
 			Vector2(x0 * view.CELL, y * view.CELL),
 			Vector2(x1 * view.CELL, y * view.CELL),
-			Color("#2e672518"),
+			Color("#2e67252e"),
 			1.0 / view.zoom,
 		)
-	view.scenery.paint_reserved_areas(canvas, view.game, view.CELL)
 
 
 ## Dessine le chemin minimal actuellement disponible depuis l'arrivée des monstres.
@@ -77,7 +84,6 @@ static func paint_route(view, canvas: Node2D, visible: Rect2) -> void:
 		view.route_revision = view.game.revision
 
 	view.scenery.paint_path(canvas, view.route_points, view.game.route, view.CELL, visible, view.zoom)
-	view.scenery.paint_landmarks(canvas, view.game, view.CELL)
 
 
 ## Dessine un cercle indiquant la portée de la tour sélectionnée, si elle existe encore.
@@ -100,6 +106,9 @@ static func paint_towers(view, canvas: Node2D, visible: Rect2) -> void:
 			continue
 
 		var tower: Dictionary = view.game.towers[cell]
+		# Assombrit uniquement le sol de la case, avant de dessiner la tour pour garder son illustration lumineuse.
+		if cell == view.selected:
+			canvas.draw_rect(Rect2(Vector2(cell) * view.CELL, Vector2.ONE * view.CELL), Color("#00000030"))
 		canvas.draw_texture_rect(Art.tower_icon(int(tower.kind)), Rect2(p - Vector2(22, 29), Vector2(44, 51)), false)
 
 		# Les détails fins sont masqués quand la carte est très éloignée, car ils deviendraient illisibles.
@@ -115,9 +124,6 @@ static func paint_towers(view, canvas: Node2D, visible: Rect2) -> void:
 				10,
 				Color("#fff0be"),
 			)
-
-		if cell == view.selected:
-			canvas.draw_rect(Rect2(p - Vector2(20, 20), Vector2(40, 40)), Color("#f8dc8b"), false, 2)
 
 		if tower.hp < 120.0 + (tower.level - 1) * 60:
 			canvas.draw_line(
@@ -138,23 +144,17 @@ static func paint_enemies(view, canvas: Node2D, visible: Rect2) -> void:
 			continue
 
 		var radius := 19.0 if enemy.boss == 2 else (15.0 if enemy.boss == 1 else 10.0)
-		var sprite_size := 38.0
-		if enemy.air:
-			sprite_size = 48.0
-		if enemy.boss > 0:
-			sprite_size = 68.0 if enemy.boss == 2 else 56.0
 		var bob := 0.0 if view.game.paused else sin(float(Time.get_ticks_msec()) / 145.0 + float(enemy.id)) * 1.1
 		var tint := Color("#9ae4ff") if enemy.slow_time > 0 else Color("#ffffff")
 		# Une apparition progressive accompagne le trajet réel depuis le portail hors grille.
 		var emergence := clampf(float(enemy.get("portal_age", 1.0)) / 0.32, 0.0, 1.0)
-		sprite_size *= lerpf(0.45, 1.0, emergence)
 		tint.a *= emergence
 		canvas.draw_set_transform(p + Vector2(0, 8), 0.0, Vector2(1.0, 0.35))
 		canvas.draw_circle(Vector2.ZERO, radius, Color("#172f3b70"))
 		canvas.draw_set_transform(Vector2.ZERO)
 		canvas.draw_texture_rect(
 			Art.enemy_icon(enemy),
-			Rect2(p + Vector2(-sprite_size * 0.5, -sprite_size * 0.75 + bob), Vector2.ONE * sprite_size),
+			Art.enemy_bounds(enemy, p, bob),
 			false,
 			tint,
 		)

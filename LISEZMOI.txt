@@ -32,6 +32,25 @@ Le bouton Lancer vague 1 permet de la démarrer immédiatement, quand vous
 êtes prêt, sans attendre la fin des 60 secondes.
 La taille de grille est choisie dans le menu, avant le début de la partie.
 
+DÉBLOCAGE DES GRILLES ET MODE DÉVELOPPEUR
+La grille 25 × 50 est accessible dès le départ.
+Le bouton ? près de Taille du terrain explique les deux déblocages et affiche
+vos records : survoler à la souris ou toucher pour garder l'infobulle ouverte.
+Toucher ailleurs ou à nouveau sur ? pour la fermer.
+Atteindre la vague 25 sur 25 × 50 débloque la grille 50 × 100.
+Atteindre la vague 50 sur 50 × 100 débloque la grille 100 × 200.
+La vague est comptée dès son lancement, même si elle se termine par une défaite.
+Ces records sont sauvegardés par grille et conservés entre les sessions.
+L'ancien record global reste conservé, mais ne débloque pas de terrain car
+il n'indiquait pas sur quelle grille il avait été réalisé.
+
+Pour tester librement toutes les tailles, double-cliquer sur Jouer-MazeTD-Dev.cmd.
+On peut aussi exécuter Jouer-MazeTD.cmd -Dev, ou lancer Godot avec -- --dev.
+Dans l'éditeur Godot, le réglage de projet maze_td/developer_mode permet aussi
+d'activer ce mode. Le laisser à false pour une partie normale.
+Le menu indique le mode développeur ; ces parties ne débloquent aucune grille
+dans la progression normale.
+
 PARAMÈTRES ET RETOUR À L'ACCUEIL
 L'engrenage à côté de Pause et Vitesse ouvre les paramètres. Le jeu est
 suspendu pendant l'ouverture de cette fenêtre. Options est réservé à plus tard.
@@ -44,11 +63,16 @@ SÉLECTION, INFOBULLES ET REVENTE
 Sur ordinateur, survoler une tour, un monstre ou un type de tour dans le
 catalogue pour afficher ses caractéristiques. Cliquer ou toucher garde
 la fiche ouverte. Les PV et les effets des monstres se mettent à jour.
+La sélection couvre tout le sprite du monstre, y compris sa tête, et garde
+le monstre touché même s'il avance pendant l'appui. Sa fiche reste fixe.
+Appuyer ailleurs désélectionne le monstre ; toucher une case vide ferme
+seulement sa fiche et ne construit pas de tour avec ce même toucher.
 Cliquer sur une tour construite, y compris sur son toit, sélectionne cette
 tour. Utiliser Vendre dans sa fiche : les boutons globaux de vente et d’amélioration ont été retirés.
 La vente rembourse 70 % de l'or investi et fonctionne pendant les vagues
 et en pause. La fiche permet aussi d'améliorer la tour jusqu'au niveau 7.
 Le simple survol d'une autre tour ne change pas la tour sélectionnée.
+La case d'une tour sélectionnée est légèrement assombrie, sans cadre autour du sprite.
 Fermer avec ×. Toucher une case vide ferme d'abord la fiche d'une unité
 sans construire ; le toucher suivant permet de poser une tour.
 Faire glisser la carte ferme la fiche. Une fiche de monstre se ferme

@@ -7,12 +7,15 @@ extends Node2D
 # preload trouve le script avant le démarrage ; new crée la partie que l'on va utiliser.
 # game garde les règles et les données. board est le contrôle qui affiche la carte et reçoit les touchers.
 var game = preload("res://game.gd").new()
+var progression = preload("res://progression.gd").new()
+# Le contournement des verrous est explicite : option de projet ou argument utilisateur --dev.
+var developer_mode := bool(ProjectSettings.get_setting("maze_td/developer_mode", false)) or "--dev" in OS.get_cmdline_user_args()
 var board: Control
 # selected est la case de la tour sélectionnée ; (-1, -1) signifie aucune sélection.
 # selected_kind est le type à construire (0 à 7) ; grid_index désigne l'une des trois grilles.
 var selected := Vector2i(-1, -1)
 var selected_kind := 0
-var grid_index := 0
+var grid_index := 1
 # RÉFÉRENCES D'INTERFACE : Label = texte, Button = bouton, OptionButton = liste de choix.
 # Conserver ces objets permet à refresh_ui et ui_layout de modifier les mêmes contrôles.
 var status: Label
@@ -43,12 +46,11 @@ var in_menu := true
 ## Appelée par Godot quand la scène entre dans l'arbre : charge le record puis crée l'interface.
 ## Connecte les changements de taille de fenêtre à la disposition mobile et affiche l'état initial.
 func _ready() -> void:
-	var save := ConfigFile.new()
-
-	if save.load("user://progress.cfg") == OK:
-		game.best = int(save.get_value("progress", "best_wave", 0))
+	progression.load_save()
+	game.best = progression.best
 	saved_best = game.best
 	make_ui()
+	menu_screen.configure_grids(progression, developer_mode)
 	game.wave_repelled.connect(on_wave_repelled)
 	game.wave_started.connect(on_wave_started)
 	get_viewport().size_changed.connect(apply_layout)
@@ -94,6 +96,23 @@ func select_kind(index: int) -> void:
 		true,
 	)
 	refresh_ui()
+
+
+## Un appui hors d'une fiche de monstre la ferme, même sur Pause ou dans une marge de l'écran.
+## Le tactile utilise les mêmes événements souris grâce à l'émulation Godot déjà employée par les boutons.
+## La commande visée reste utilisable ; une case vide ferme seulement la fiche, sans achat involontaire.
+func _input(event: InputEvent) -> void:
+	if not event is InputEventMouseButton or event.button_index != MOUSE_BUTTON_LEFT or not event.pressed:
+		return
+	if not is_instance_valid(board):
+		return
+	board.suppress_empty_tap = false
+	if in_menu or not inspector.visible or not inspector.pinned or inspector.target.get("type") != "enemy":
+		return
+	if inspector.get_global_rect().has_point(event.position):
+		return
+	close_inspection()
+	board.suppress_empty_tap = true
 
 
 ## Traite un toucher sur une case : sélection de tour, fermeture de fiche ou construction.
@@ -232,7 +251,11 @@ func refresh_inspection(reanchor: bool = false) -> void:
 
 
 ## Démarre une nouvelle partie après le choix du menu. L'attente d'une minute commence ici, pas dans le menu.
-func start_game(index: int = 0) -> void:
+func start_game(index: int = 1) -> void:
+	# Le verrou est aussi vérifié ici : sélectionner une entrée par code ne doit pas le contourner.
+	if not progression.is_unlocked(index, developer_mode):
+		menu_screen.configure_grids(progression, developer_mode)
+		return
 	wave_feedback.clear()
 	settings_screen.hide()
 	grid_index = index
@@ -259,6 +282,8 @@ func restart_game() -> void:
 ## Revient au menu ; Commencer créera ensuite une nouvelle partie avec la grille choisie.
 ## Ferme les fenêtres et annule les gestes pour éviter un clic involontaire au prochain lancement.
 func return_home() -> void:
+	save_progress()
+	menu_screen.configure_grids(progression, developer_mode)
 	wave_feedback.clear()
 	in_menu = true
 	settings_screen.hide()
@@ -329,7 +354,17 @@ func on_wave_repelled(number: int, bonus: int) -> void:
 ## L'annonce accompagne aussi le lancement anticipé et le lancement automatique.
 func on_wave_started(number: int) -> void:
 	if not in_menu:
+		progression.record_wave(grid_index, number, developer_mode)
+		save_progress()
 		wave_feedback.show_incoming(number)
+
+
+## Sauvegarde les nouveaux records seulement lorsqu'ils changent, et réessaie après un échec d'écriture.
+func save_progress() -> void:
+	if game.best != saved_best or progression.dirty:
+		progression.best = game.best
+		if progression.save():
+			saved_best = game.best
 
 
 ## Appelée à chaque image par Godot : fait avancer le modèle avec delta secondes réelles.
@@ -350,10 +385,4 @@ func _process(delta: float) -> void:
 	else:
 		board.refresh()
 
-	if game.best != saved_best:
-		# user:// est le dossier de données privé du jeu sur l'appareil, et non le dossier du code source.
-		var save := ConfigFile.new()
-		save.set_value("progress", "best_wave", game.best)
-
-		if save.save("user://progress.cfg") == OK:
-			saved_best = game.best
+	save_progress()

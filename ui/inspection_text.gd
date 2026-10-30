@@ -45,7 +45,7 @@ static func enemy_body(enemy: Dictionary, pinned: bool) -> String:
 	var hint := "Cliquer / toucher pour garder la fiche"
 
 	if pinned:
-		hint = "Fiche fixe • × pour fermer"
+		hint = "Fiche fixe • Toucher ailleurs pour fermer"
 
 	if enemy.boss == 2:
 		hint = "Peut détruire les constructions"

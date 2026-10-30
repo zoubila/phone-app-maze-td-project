@@ -16,6 +16,7 @@ PLAN DU PROJET
 MazeTD/
   main.gd                       Démarrage et réactions aux actions du joueur.
   game.gd                       Données, zones réservées aux bâtiments et accès aux règles.
+  progression.gd                Records par grille, déblocages et sauvegarde locale.
   board.gd                      Caméra, zoom et identification des cases touchées.
   inspection.gd                 Apparence et boutons de la fiche d'informations.
   ui_layout.gd                  Disposition mobile en portrait et en paysage.
@@ -44,7 +45,7 @@ MazeTD/
 
   rendering/
     board_renderer.gd           Couches du plateau, tracé du chemin, tours et monstres.
-    unit_art.gd                 Découpage des atlas et illustrations communes au plateau/catalogue.
+    unit_art.gd                 Atlas, illustrations et emprise commune au dessin/sélection des monstres.
 
   input/
     board_touch.gd              Pincement à deux doigts et protection contre les clics accidentels après un zoom.
@@ -55,7 +56,9 @@ MazeTD/
     combat_tests.gd             Résistances, effets et gros boss.
     campaign_tests.gd           Cent vagues, récompenses, victoire et défaite.
     interface_tests.gd          Clics, caméra, rotation et zones sûres.
+    grid_unlock_tests.gd        Seuils, sauvegarde, ancien record et mode développeur.
     inspection_tests.gd         Survol, fiches, sélection, vente et amélioration.
+    enemy_selection_tests.gd    Sprite touché, mouvement pendant l'appui et désélection à la souris/au toucher.
     tower_actions_tests.gd      Vente/amélioration dans les fiches avec appui prolongé.
     projectile_tests.gd         Orientation et durée des flèches.
     touch_gestures_tests.gd     Menu, construction et vente au toucher, puis zoom à deux doigts.
@@ -64,6 +67,7 @@ MazeTD/
 
   assets/                       Images, sons, polices et fichiers sources.
   Jouer-MazeTD.cmd              Lanceur Windows à double-cliquer.
+  Jouer-MazeTD-Dev.cmd          Même lanceur avec toutes les grilles accessibles pour les essais.
   .env                          Chemins partagés du lanceur.
   .env.local                    Réglages de votre machine, exclus de Git.
   tools/lancer-jeu.ps1          Lecture des réglages, import des ressources puis démarrage de Godot.

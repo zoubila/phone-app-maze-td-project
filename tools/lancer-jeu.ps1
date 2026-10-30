@@ -1,7 +1,7 @@
 # Lanceur Windows : lit des valeurs, sans executer le contenu des fichiers .env.
 # -Check verifie les chemins sans ouvrir de fenetre de jeu.
 # -PrepareOnly importe les ressources sans ouvrir le jeu, pour verifier un nouveau checkout.
-param([switch]$Check, [switch]$PrepareOnly)
+param([switch]$Check, [switch]$PrepareOnly, [switch]$Dev)
 
 $ErrorActionPreference = 'Stop'
 $taskProjectRoot = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
@@ -109,10 +109,13 @@ try {
 
     # Le journal du jeu permet de retrouver une erreur meme si sa fenetre se ferme aussitot.
     $taskGameLog = Join-Path $taskCacheDirectory 'launcher-game.log'
-    Start-Process -FilePath $taskGodotExecutable -WorkingDirectory $taskGameDirectory -ArgumentList @(
+    $taskGameArguments = @(
         '--path', ('"{0}"' -f $taskGameDirectory),
         '--log-file', ('"{0}"' -f $taskGameLog)
     )
+    # Les arguments apres -- sont lus par le jeu, sans etre interpretes comme des options du moteur.
+    if ($Dev) { $taskGameArguments += @('--', '--dev') }
+    Start-Process -FilePath $taskGodotExecutable -WorkingDirectory $taskGameDirectory -ArgumentList $taskGameArguments
     exit 0
 } catch {
     [Console]::Error.WriteLine($_.Exception.Message)
