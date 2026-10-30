@@ -10,6 +10,7 @@ const Art = preload("res://rendering/unit_art.gd")
 static func create(ui) -> void:
 	ui.board = preload("res://board.gd").new()
 	ui.board.game = ui.game
+	ui.board.touch_allowed = ui.allows_board_touch
 	ui.board.size = Vector2(1000, 696)
 	ui.board.cell_tapped.connect(ui.interact)
 	ui.board.item_tapped.connect(ui.inspect_item)

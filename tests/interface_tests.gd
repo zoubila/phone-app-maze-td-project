@@ -256,6 +256,6 @@ static func run(suite) -> void:
 		await suite.process_frame
 
 	suite.check(
-		ProjectSettings.get_setting("input_devices/pointing/android/enable_pan_and_scale_gestures"),
-		"Android native pinch gesture support is enabled",
+		not ProjectSettings.get_setting("input_devices/pointing/android/enable_pan_and_scale_gestures"),
+		"Android native recognizer is disabled so simultaneous touches reach the custom pinch handler",
 	)

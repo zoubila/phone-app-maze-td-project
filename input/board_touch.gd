@@ -1,6 +1,8 @@
 extends RefCounted
 ## Suit les doigts posés sur le plateau pour reconnaître un pincement, y compris sans geste natif du système.
 ## Un seul doigt garde les clics/glissements émulés par Godot ; deux doigts commandent le zoom et le déplacement.
+## Sur Android, laisser enable_pan_and_scale_gestures désactivé : son détecteur natif peut annuler les contacts
+## quand les deux doigts se posent ensemble, avant que ce suivi direct ait reçu leur déplacement.
 
 var points: Dictionary = {}
 var pinched := false

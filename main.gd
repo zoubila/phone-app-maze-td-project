@@ -116,6 +116,22 @@ func _input(event: InputEvent) -> void:
 	board.suppress_empty_tap = true
 
 
+## Réserve les gestes de caméra aux contacts démarrés sur la carte, hors boutons et fenêtres.
+## Le point reçu est dans le viewport, comme les événements tactiles avant conversion dans board.gd.
+func allows_board_touch(point: Vector2) -> bool:
+	if in_menu or game.ended or settings_screen.visible:
+		return false
+	for button in [pause_button, speed_button, settings_button, wave_button]:
+		if button.visible and button.get_global_rect().has_point(point):
+			return false
+	if inspector.visible:
+		if inspector.mouse_filter == Control.MOUSE_FILTER_STOP and inspector.get_global_rect().has_point(point):
+			return false
+		if inspector.close_button.visible and inspector.close_button.get_global_rect().has_point(point):
+			return false
+	return true
+
+
 ## Traite un toucher sur une case : sélection de tour, fermeture de fiche ou construction.
 ## cell est une coordonnée de grille. Le premier toucher hors d'une fiche d'unité ferme sans achat.
 ## Le modèle valide et facture une construction ; l'interface se met ensuite à jour.

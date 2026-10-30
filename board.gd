@@ -12,6 +12,8 @@ var projectiles = preload("res://projectiles.gd").new()
 var game
 # Les gestes tactiles sont séparés des règles de jeu et des commandes de souris.
 var touch_gestures = preload("res://input/board_touch.gd").new()
+# L'interface indique si un contact démarre sur la carte libre, plutôt que sur un bouton ou une fenêtre.
+var touch_allowed: Callable
 # CAMÉRA ET SÉLECTION : selected sert à dessiner la portée et assombrir la case ; pan/zoom cadrent la carte.
 var selected := Vector2i(-1, -1)
 var zoom := 1.0
@@ -203,10 +205,36 @@ func pick_item(point: Vector2) -> Dictionary:
 					best_distance = distance
 	return nearest
 
+## Suit les contacts avant leur répartition entre les contrôles graphiques.
+## Cela permet de recevoir les deux doigts immédiatement, sans dépendre du premier clic souris émulé.
+## Un doigt démarré sur un bouton n'est pas capturé ; un doigt déjà suivi peut sortir du plateau jusqu'au relâchement.
+func _input(event: InputEvent) -> void:
+	if not is_visible_in_tree():
+		return
+	if event is InputEventScreenTouch:
+		if event.pressed and not event.canceled:
+			if not get_global_rect().has_point(event.position):
+				return
+			if touch_allowed.is_valid() and not touch_allowed.call(event.position):
+				return
+		elif not touch_gestures.points.has(event.index):
+			return
+	elif event is InputEventScreenDrag:
+		if not touch_gestures.points.has(event.index):
+			return
+	else:
+		return
+	touch_gestures.handle(self, make_input_local(event))
+
+
 ## Reçoit les événements du plateau : clic, déplacement, molette et geste de zoom.
 ## Distingue un toucher d'un glissement par un seuil de 10 unités ; émet ensuite les signaux.
 ## Le tactile utilise l'émulation souris de Godot pour ces mêmes commandes.
 func _gui_input(event: InputEvent) -> void:
+	# Les contacts tactiles ont déjà été suivis par _input ; ne pas appliquer une seconde fois leur mouvement.
+	if event is InputEventScreenTouch or event is InputEventScreenDrag:
+		accept_event()
+		return
 	if touch_gestures.handle(self, event):
 		accept_event()
 		return

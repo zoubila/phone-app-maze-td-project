@@ -17,7 +17,7 @@ MazeTD/
   main.gd                       Démarrage et réactions aux actions du joueur.
   game.gd                       Données, zones réservées aux bâtiments et accès aux règles.
   progression.gd                Records par grille, déblocages et sauvegarde locale.
-  board.gd                      Caméra, zoom et identification des cases touchées.
+  board.gd                      Caméra, suivi des contacts bruts, zoom et identification des cases touchées.
   inspection.gd                 Apparence et boutons de la fiche d'informations.
   ui_layout.gd                  Disposition mobile en portrait et en paysage.
   scenery.gd                    Sol cartoon, chemin en relief, portail et bourg.

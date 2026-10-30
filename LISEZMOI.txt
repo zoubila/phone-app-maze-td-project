@@ -124,6 +124,13 @@ Faire glisser la carte pour se déplacer. La molette permet de zoomer sur
 ordinateur et le pincement sur smartphone. Les anciens boutons de caméra
 et de zoom ont été retirés. Un zoom pendant un appui ne construit pas de tour.
 Le pincement suit les deux doigts et conserve le point de la carte sous leur milieu.
+Les deux doigts peuvent être posés immédiatement : aucun appui long préalable
+n'est nécessaire. Le jeu suit les contacts directement, avant leur répartition
+dans les contrôles de l'interface. Les boutons et les fenêtres ne démarrent pas
+de geste de caméra. Le détecteur natif Android pan/scale reste désactivé pour
+éviter qu'il annule les contacts du pincement géré par le jeu.
+Après une modification de ce réglage, réexporter l'APK et installer la nouvelle
+version sur le téléphone : relancer l'ancien APK n'applique pas la correction.
 En vue très éloignée, un toucher
 rapproche la vue avant de permettre de construire, pour éviter les erreurs.
 

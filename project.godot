@@ -26,7 +26,8 @@ window/handheld/orientation=6
 
 [input_devices]
 
-pointing/android/enable_pan_and_scale_gestures=true
+; Le jeu suit directement les deux doigts. Le détecteur natif Android peut annuler ces contacts.
+pointing/android/enable_pan_and_scale_gestures=false
 
 [maze_td]
 
