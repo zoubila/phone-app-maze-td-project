@@ -6,6 +6,7 @@ extends Panel
 signal sell_requested(cell: Vector2i)
 signal upgrade_requested(cell: Vector2i)
 signal dismiss_requested
+const Controls = preload("res://ui/control_factory.gd")
 
 # target vaut {} sans cible, ou contient type=tower/catalog/enemy avec cell/kind/id.
 # pinned distingue une fiche gardée au toucher d'un simple aperçu qui suit le survol.
@@ -25,21 +26,17 @@ func _ready() -> void:
 	size = Vector2(320, 300)
 	z_index = 20
 
-	var style := StyleBoxFlat.new()
-	style.bg_color = Color("#17271ff5")
-	style.border_color = Color("#d5bc77")
-	style.set_border_width_all(2)
-	style.set_corner_radius_all(8)
-	style.shadow_color = Color("#00000066")
-	style.shadow_size = 8
-	add_theme_stylebox_override("panel", style)
+	Controls.style_panel(self, true)
 	title_label = make_label(Vector2(14, 10), Vector2(240, 30), 21)
+	Controls.headline(title_label, 21, Controls.GOLD)
 	body_label = make_label(Vector2(14, 48), Vector2(292, 186), 17)
 	body_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	close_button = make_button("×", Vector2(264, 6), Vector2(44, 40))
 	# Ce petit rappel anonyme demande seulement la fermeture ; main reçoit le signal.
 	close_button.pressed.connect(func(): dismiss_requested.emit())
 	upgrade_button = make_button("Améliorer", Vector2(12, 244), Vector2(144, 44))
+	Controls.play_style(upgrade_button)
+	upgrade_button.add_theme_font_size_override("font_size", 17)
 	# Fonction anonyme de bouton : transmet la case mémorisée, pas une nouvelle sélection au survol.
 	upgrade_button.pressed.connect(func():
 		if target.get("type") == "tower":
@@ -54,26 +51,13 @@ func _ready() -> void:
 ## Crée et renvoie un texte à la position pos et aux dimensions demandées.
 ## Ignore les événements souris pour qu'un aperçu ne bloque pas le clic sur le plateau.
 func make_label(pos: Vector2, dimensions: Vector2, font_size: int) -> Label:
-	var label := Label.new()
-	label.position = pos
-	label.size = dimensions
-	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	label.clip_text = true
-	label.add_theme_font_size_override("font_size", font_size)
-	label.add_theme_color_override("font_color", Color("#eee4c8"))
-	add_child(label)
-	return label
+	return Controls.label(self, "", pos, dimensions, font_size)
 
 ## Crée et renvoie un bouton de fiche avec une police commune et sans focus clavier.
 ## La connexion à son action est faite par _ready.
 func make_button(text_value: String, pos: Vector2, dimensions: Vector2) -> Button:
-	var button := Button.new()
-	button.position = pos
-	button.size = dimensions
-	button.text = text_value
+	var button := Controls.button(self, text_value, pos, dimensions)
 	button.add_theme_font_size_override("font_size", 17)
-	button.focus_mode = Control.FOCUS_NONE
-	add_child(button)
 	return button
 
 ## Masque la fiche et efface sa cible ainsi que son état fixé.
@@ -139,6 +123,7 @@ func show_enemy_card(game) -> bool:
 	for enemy in game.enemies:
 		if enemy.id == target.id and enemy.hp > 0:
 			title_label.text = descriptions.enemy_title(enemy)
+			Controls.fit_headline(title_label)
 			body_label.text = descriptions.enemy_body(enemy, pinned)
 			return true
 
@@ -168,6 +153,7 @@ func show_tower_card(game) -> bool:
 		level_text = "N%d/7" % level
 
 	title_label.text = "%s • %s" % [spec.name, level_text]
+	Controls.fit_headline(title_label)
 	body_label.text = descriptions.tower_body(game, tower, catalog)
 
 	# Le remboursement utilise tout l'or investi, pas seulement le prix du niveau 1.

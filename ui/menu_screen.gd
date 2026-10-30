@@ -47,15 +47,8 @@ func _ready() -> void:
 	backdrop.fill_to = Vector2(0, 1)
 	card = Panel.new()
 
-	var style := StyleBoxFlat.new()
-	style.bg_color = Color("#2369a9")
-	style.border_color = Color("#102e50")
-	style.set_border_width_all(4)
-	style.border_width_bottom = 10
-	style.set_corner_radius_all(26)
-	style.shadow_color = Color("#031727b0")
-	style.shadow_size = 24
-	card.add_theme_stylebox_override("panel", style)
+	Controls.style_panel(card)
+	var style := Controls.panel_style()
 	add_child(card)
 
 	title = Controls.label(card, "LES MARCHES\nDU ROYAUME", Vector2.ZERO, Vector2.ZERO, 36, Color("#f3dfaf"))
@@ -156,16 +149,10 @@ func create_grid_information() -> void:
 	grid_info_panel = Panel.new()
 	grid_info_panel.z_index = 10
 	grid_info_panel.mouse_filter = Control.MOUSE_FILTER_STOP
-	var style := StyleBoxFlat.new()
-	style.bg_color = Color("#102e50fa")
-	style.border_color = Color("#81cef4")
-	style.set_border_width_all(2)
-	style.set_corner_radius_all(12)
-	style.shadow_color = Color("#03172790")
-	style.shadow_size = 10
-	grid_info_panel.add_theme_stylebox_override("panel", style)
+	Controls.style_panel(grid_info_panel, true)
 	add_child(grid_info_panel)
-	Controls.label(grid_info_panel, "Débloquer les terrains", Vector2(18, 12), Vector2(480, 28), 20, Color("#ffe184"))
+	var heading := Controls.label(grid_info_panel, "Débloquer les terrains", Vector2(18, 12), Vector2(480, 28), 20)
+	Controls.headline(heading, 22, Controls.GOLD)
 	grid_info_text = Controls.label(grid_info_panel, "", Vector2(18, 48), Vector2(480, 140), 17, Color("#e5f4ff"))
 	grid_info_text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	grid_info_panel.hide()
@@ -190,11 +177,8 @@ func _input(event: InputEvent) -> void:
 ## Donne à la liste déroulante les mêmes couleurs et de grandes lignes lisibles au doigt.
 func style_choice_popup(choice: OptionButton) -> void:
 	var popup := choice.get_popup()
-	var panel := StyleBoxFlat.new()
+	var panel := Controls.panel_style(true)
 	panel.bg_color = Color("#163e65")
-	panel.border_color = Color("#81cef4")
-	panel.set_border_width_all(2)
-	panel.set_corner_radius_all(12)
 	panel.content_margin_top = 12
 	panel.content_margin_bottom = 12
 	popup.add_theme_stylebox_override("panel", panel)

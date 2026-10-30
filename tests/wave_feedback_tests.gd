@@ -76,3 +76,34 @@ static func run(suite) -> void:
 	suite.check(ui.end_screen.visible and not ui.wave_feedback.visible, "Campaign victory uses the final screen rather than a new-wave celebration")
 	ui.queue_free()
 	await suite.process_frame
+
+	# Vérifie le tout premier état, le milieu et la dernière image : l'étoile ne doit jamais vivre seule.
+	var feedback = preload("res://ui/wave_feedback.gd").new()
+	suite.root.add_child(feedback)
+	feedback.size = Vector2(696, 1096)
+	for celebration in [false, true]:
+		if celebration:
+			feedback.show_repelled(10, 50, game.wave_plan(11))
+		else:
+			feedback.show_incoming(10)
+		feedback.set_process(false)
+		suite.check(feedback.visible and feedback.card.modulate.a == 0, "Banner starts fully transparent before its first animation frame")
+		suite.check(feedback.decoration.get_parent() == feedback.card, "Star shares the same animated parent as panel and text")
+		feedback._process(0.08)
+		suite.near(feedback.card.modulate.a, 0.5, "Panel and all ornaments share the entrance fade")
+		suite.check(feedback.decoration.get_global_transform().is_equal_approx(feedback.card.get_global_transform()), "Star follows the panel zoom during entrance")
+		feedback._process(0.4)
+		suite.near(feedback.card.modulate.a, 1.0, "Banner becomes fully visible as a group")
+		feedback._process(feedback.duration - feedback.age - 0.1)
+		suite.check(feedback.visible and feedback.card.modulate.a > 0 and feedback.card.modulate.a < 1, "Panel and star fade out before hiding")
+		feedback._process(0.11)
+		suite.check(not feedback.is_visible_in_tree() and not feedback.decoration.is_visible_in_tree(), "Star and panel disappear in the same frame")
+		suite.check(feedback.card.modulate.a == 0, "Hidden banner keeps no opaque state for a subsequent announcement")
+	feedback.show_repelled(20, 80, game.wave_plan(21))
+	feedback.set_process(false)
+	feedback._process(0.3)
+	feedback.show_incoming(21)
+	feedback.set_process(false)
+	suite.check(feedback.age == 0 and feedback.card.modulate.a == 0, "Interrupting one announcement resets the complete visual group without a flash")
+	feedback.queue_free()
+	await suite.process_frame

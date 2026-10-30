@@ -12,7 +12,7 @@ static func build(game, cell: Vector2i, kind: int) -> bool:
 		game.message = "Construction impossible sur cette case."
 		return false
 
-	# La réservation couvre toute l'emprise du décor, et pas seulement ses deux cases de passage.
+	# La réservation couvre seulement les cases réellement occupées par le château dans la grille.
 	# Ce refus a lieu avant l'ajout d'une tour, le paiement ou le recalcul du chemin.
 	if game.is_landmark_area(cell):
 		game.message = "Zone réservée au château : construction interdite."

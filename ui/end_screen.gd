@@ -19,18 +19,11 @@ func _ready() -> void:
 	z_index = 30
 	mouse_filter = Control.MOUSE_FILTER_STOP
 
-	var veil := StyleBoxFlat.new()
-	veil.bg_color = Color("#09150dd9")
-	add_theme_stylebox_override("panel", veil)
+	theme = Controls.shared_theme()
+	add_theme_stylebox_override("panel", Controls.veil_style())
 	card = Panel.new()
 
-	var style := StyleBoxFlat.new()
-	style.bg_color = Color("#143e4df5")
-	style.border_color = Color("#edc477")
-	style.set_border_width_all(3)
-	style.border_width_bottom = 7
-	style.set_corner_radius_all(22)
-	card.add_theme_stylebox_override("panel", style)
+	Controls.style_panel(card)
 	add_child(card)
 	title = Controls.label(card, "", Vector2(24, 24), Vector2(392, 54), 34, Color("#f3dfaf"))
 	Controls.headline(title, 34, Color("#ffe184"))
@@ -49,7 +42,7 @@ func _ready() -> void:
 		card, "Retour accueil", Vector2(64, 242), Vector2(312, 56),
 		func(): home_requested.emit(),
 	)
-	Controls.primary_style(replay_button)
+	Controls.play_style(replay_button)
 	resized.connect(arrange)
 	arrange()
 	hide()

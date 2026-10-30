@@ -35,7 +35,7 @@ MazeTD/
     simulation.gd               Temps de jeu et ordre des événements du combat.
 
   ui/
-    control_factory.gd          Apparence commune des textes et des boutons.
+    control_factory.gd          Palette commune, panneaux bleus, boutons, titres et infobulles natives.
     build_interface.gd          Carte, catalogue des tours et commandes flottantes.
     menu_screen.gd              Titre, description, grille, difficulté, Commencer et Options.
     end_screen.gd               Résultat centré, Rejouer et Retour accueil.
@@ -67,6 +67,7 @@ MazeTD/
     touch_gestures_tests.gd     Menu, construction et vente au toucher, puis zoom à deux doigts.
     wave_feedback_tests.gd      Bonus unique, événements et célébration sans blocage des commandes.
     portal_tests.gd             Portail hors grille, anciennes cases libres et sortie continue vers le labyrinthe.
+    castle_approach_tests.gd    Terrain vide constructible près du château, protection du bâtiment et clics après zoom.
 
   assets/                       Images, sons, polices et fichiers sources.
   Jouer-MazeTD.cmd              Lanceur Windows à double-cliquer.

@@ -83,6 +83,7 @@ func run() -> void:
 	await preload("res://tests/touch_gestures_tests.gd").run(self)
 	await preload("res://tests/wave_feedback_tests.gd").run(self)
 	preload("res://tests/portal_tests.gd").run(self)
+	await preload("res://tests/castle_approach_tests.gd").run(self)
 
 	print("CHECKS: %d / FAILURES: %d / CAMPAIGN KILLS: %d / MS: %d" % [
 		checks,

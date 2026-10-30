@@ -15,7 +15,7 @@ static func run(suite) -> void:
 		for offset in [Vector2i(1, -1), Vector2i(2, 0), Vector2i(0, -4)]:
 			suite.check(game.build(game.entry + offset, 0), "Former portal footprint is constructible")
 		suite.check(not game.build(game.entry, 0), "Only the actual entrance cell remains protected")
-		suite.check(not game.build(game.exit_cell + Vector2i(-1, -1), 0), "Castle reservation is preserved")
+		suite.check(not game.build(game.exit_cell + Vector2i(0, -1), 0), "Castle reservation is preserved")
 		var astar := AStarGrid2D.new()
 		astar.region = Rect2i(Vector2i.ZERO, Vector2i(game.cols, game.rows))
 		astar.diagonal_mode = AStarGrid2D.DIAGONAL_MODE_NEVER

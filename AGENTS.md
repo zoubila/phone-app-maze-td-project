@@ -16,7 +16,9 @@
 - Les tirs se dessinent dans `projectiles.gd`. L'archer utilise `assets/projectiles/fleche.png`, orienté vers la droite au repos. Le vol est visuel ; les dégâts restent appliqués au tir dans `gameplay/tower_combat.gd`.
 - Les illustrations des tours et ennemis sont regroupées dans deux atlas chargés par `rendering/unit_art.gd`. Réutiliser les mêmes régions pour les cartes du catalogue et le plateau ; conserver le type, la portée et le coût dans le modèle.
 - Les événements `wave_started` et `wave_repelled` du modèle pilotent `ui/wave_feedback.gd`. La célébration reste brève, laisse passer les clics et affiche uniquement le bonus réellement versé. La victoire finale conserve son écran de résultat.
+- Dans les annonces de vague, la médaille, l'étoile, les étincelles et les textes sont tous enfants du panneau animé. Initialiser son opacité avant de l'afficher ; ne pas redessiner l'étoile séparément sur le parent de la fenêtre, sinon son apparition et son zoom se désynchronisent.
 - Le portail et son socle sont entièrement hors grille. `PORTAL_APPROACH_CELLS` définit le trajet réel jusqu'à l'entrée ; `portal_remaining` et `portal_age` pilotent la sortie progressive. Ne pas réintroduire de zone réservée sur les anciennes cases du portail. L'emprise du château reste protégée.
+- Pour le château actuel, réserver uniquement la case de sortie et les deux cases juste au-dessus dans la dernière colonne. Le rectangle historique de deux colonnes sur huit lignes condamnait du terrain vide : les cases au-dessus du bâtiment et l'avant-dernière colonne doivent rester constructibles si elles laissent un chemin ouvert.
 - Direction visuelle : cartoon mobile très lisible, volumes épais, couleurs franches et peu de détails fins. Les ressources v2 sont `sol_toon_v2.png`, `chene_toon_v2.png` et `tours_toon_v2_atlas.png`. La police de titres Lilita One et sa licence OFL sont dans `assets/polices/`.
 - L'utilisateur prépare désormais les nouvelles animations. Se concentrer sur les ressources statiques et l'intégration de ses exports quand ils seront fournis.
 
@@ -29,6 +31,8 @@
 - Mettre à jour LIRE-LE-CODE.txt si un fichier change de rôle ou de dossier. Garder game.gd comme point d'accès aux règles pour main.gd et les tests.
 
 ## Interface de la partie
+
+- Le menu d'accueil sert de référence visuelle à toute l'interface. Réutiliser control_factory.gd pour les panneaux bleus en relief, les contours foncés, les titres dorés et les boutons arrondis. Les actions principales sont vertes, les commandes secondaires bleues ; les commandes flottantes conservent leur transparence et le catalogue ses couleurs par tour. Les fiches d'unités, paramètres, résultats, annonces et infobulles natives partagent ce thème.
 
 - Le menu initial contient le titre, la description, le choix de la grille, Commencer et Options (sans action pour le moment). Le temps de jeu ne doit pas avancer dans ce menu.
 - Le menu permet aussi de choisir Débutant, Normal, Difficile ou Fin du monde. gameplay/difficulty.gd est la source commune des libellés et coefficients. La difficulté modifie les PV de toutes les unités et les gains de combat/bonus, sans toucher aux 600 pièces initiales ni aux remboursements. Normal conserve les valeurs de référence ; Rejouer garde la difficulté de la partie terminée.

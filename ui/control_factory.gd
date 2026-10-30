@@ -4,10 +4,67 @@ extends RefCounted
 ## Elles ne décident ni du prix des tours ni du déroulement du combat.
 
 const DISPLAY_FONT = preload("res://assets/polices/LilitaOne-Regular.ttf")
+const PANEL_BLUE := Color("#2369a9")
+const INK := Color("#102e50")
+const CREAM := Color("#fff0c9")
+const GOLD := Color("#ffe184")
+static var common_theme: Theme
 const TOWER_COLORS := [
 	Color("#328a52"), Color("#ae6535"), Color("#7650ad"), Color("#a7439c"),
 	Color("#397cb1"), Color("#258dba"), Color("#a56c36"), Color("#669439"),
 ]
+
+
+## Fabrique le même panneau bleu en relief pour l'accueil, les fiches et les fenêtres.
+## Les petites fiches ont des angles et une ombre plus discrets, sans changer de palette.
+static func panel_style(compact: bool = false) -> StyleBoxFlat:
+	var style := StyleBoxFlat.new()
+	style.bg_color = PANEL_BLUE
+	style.border_color = INK
+	style.set_border_width_all(3 if compact else 4)
+	style.border_width_bottom = 7 if compact else 10
+	style.set_corner_radius_all(16 if compact else 26)
+	style.shadow_color = Color("#031727b0")
+	style.shadow_size = 10 if compact else 24
+	return style
+
+
+## Centralise aussi les infobulles natives de Godot, par exemple celles des boutons Options et Paramètres.
+## La même ressource est réutilisée : on ne reconstruit pas le thème à chaque bouton ni à chaque image.
+static func shared_theme() -> Theme:
+	if common_theme == null:
+		common_theme = Theme.new()
+		var tooltip := panel_style(true)
+		tooltip.content_margin_left = 16
+		tooltip.content_margin_right = 16
+		tooltip.content_margin_top = 12
+		tooltip.content_margin_bottom = 16
+		common_theme.set_stylebox("panel", "TooltipPanel", tooltip)
+		common_theme.set_color("font_color", "TooltipLabel", CREAM)
+		common_theme.set_font_size("font_size", "TooltipLabel", 17)
+	return common_theme
+
+
+## Applique le panneau commun et les infobulles natives aux contrôles qui en dépendent.
+static func style_panel(item: Panel, compact: bool = false) -> void:
+	item.theme = shared_theme()
+	item.add_theme_stylebox_override("panel", panel_style(compact))
+
+
+## Le voile des fenêtres modales garde la même teinte bleue que les contours, en laissant voir la carte.
+static func veil_style() -> StyleBoxFlat:
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color("#071b30cc")
+	return style
+
+
+## Conserve les formes et états des boutons, avec un fond translucide pour les commandes sur la carte.
+static func floating_style(item: Button) -> void:
+	for state in ["normal", "hover", "pressed"]:
+		var style := item.get_theme_stylebox(state).duplicate() as StyleBoxFlat
+		style.bg_color.a = 0.78 if state == "normal" else 0.94
+		style.shadow_size = 2
+		item.add_theme_stylebox_override(state, style)
 
 
 ## Réserve la police épaisse aux titres et aux commandes ; les descriptions gardent leur police de lecture.
@@ -21,6 +78,15 @@ static func headline(item: Label, font_size: int, color := Color("#fff5d7")) -> 
 	item.add_theme_constant_override("shadow_offset_y", 3)
 
 
+## Réduit légèrement les titres longs pour conserver leur texte complet à côté du bouton de fermeture.
+## Le calcul utilise la vraie police d'affichage ; les descriptions gardent leur taille de lecture habituelle.
+static func fit_headline(item: Label, preferred: int = 21, minimum: int = 17) -> void:
+	var font_size := preferred
+	while font_size > minimum and DISPLAY_FONT.get_string_size(item.text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x > item.size.x - 8:
+		font_size -= 1
+	item.add_theme_font_size_override("font_size", font_size)
+
+
 ## Crée un texte et le renvoie pour pouvoir changer son contenu plus tard.
 ## pos et dimensions indiquent sa place et sa taille dans l'interface.
 ## Le texte laisse passer les clics : il ne doit pas empêcher de toucher le plateau en dessous.
@@ -30,9 +96,10 @@ static func label(
 	pos: Vector2,
 	dimensions: Vector2,
 	font_size: int,
-	color := Color("#e9e1c8"),
+	color := CREAM,
 ) -> Label:
 	var item := Label.new()
+	item.theme = shared_theme()
 	item.text = text_value
 	item.position = pos
 	item.size = dimensions
@@ -47,8 +114,9 @@ static func label(
 ## Crée un bouton, applique ses trois apparences et le relie à l'action demandée.
 ## action est une fonction à exécuter quand le bouton sera pressé ; connect prépare ce lien sans l'exécuter.
 ## Le bouton renvoyé pourra ensuite être déplacé ou désactivé par l'interface.
-static func button(parent, text_value: String, pos: Vector2, dimensions: Vector2, action: Callable) -> Button:
+static func button(parent, text_value: String, pos: Vector2, dimensions: Vector2, action: Callable = Callable()) -> Button:
 	var item := Button.new()
+	item.theme = shared_theme()
 	item.text = text_value
 	item.position = pos
 	item.size = dimensions
@@ -84,9 +152,11 @@ static func button(parent, text_value: String, pos: Vector2, dimensions: Vector2
 	disabled.bg_color = Color("#293e48")
 	disabled.border_color = Color("#52616a")
 	item.add_theme_stylebox_override("disabled", disabled)
+	item.add_theme_color_override("font_disabled_color", Color("#afc4d4"))
 
 	# On enregistre la fonction à appeler plus tard. Connecter le bouton n'exécute pas immédiatement l'action.
-	item.pressed.connect(action)
+	if action.is_valid():
+		item.pressed.connect(action)
 	parent.add_child(item)
 	return item
 

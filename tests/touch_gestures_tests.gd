@@ -43,7 +43,7 @@ static func run(suite) -> void:
 		var reserved_cell: Vector2i = ui.game.entry + Vector2i(1, -1)
 		if landmark_index == 1:
 			ui.board.castle_view()
-			reserved_cell = ui.game.exit_cell + Vector2i(-1, -1)
+			reserved_cell = ui.game.exit_cell + Vector2i(0, -1)
 		var reserved_point: Vector2 = ui.board.pan + (Vector2(reserved_cell) + Vector2.ONE * 0.5) * ui.board.CELL * ui.board.zoom
 		await tap(suite, ui.board.get_global_transform_with_canvas() * reserved_point)
 		suite.check(ui.game.towers.is_empty() and ui.game.gold == landmark_gold, "Touching the castle never purchases a tower")

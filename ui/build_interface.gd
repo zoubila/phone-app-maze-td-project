@@ -48,11 +48,10 @@ static func create_overlay_controls(ui) -> void:
 	ui.hud_panel = Panel.new()
 	ui.hud_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
-	var background := StyleBoxFlat.new()
-	background.bg_color = Color("#102f3edb")
-	background.border_color = Color("#bda16d88")
-	background.set_border_width_all(2)
-	background.set_corner_radius_all(16)
+	var background := Controls.panel_style(true)
+	background.bg_color = Color("#164b82c7")
+	background.shadow_size = 3
+	background.border_width_bottom = 4
 	ui.hud_panel.add_theme_stylebox_override("panel", background)
 	ui.add_child(ui.hud_panel)
 	ui.status = Controls.label(ui, "", Vector2.ZERO, Vector2.ZERO, 20)
@@ -70,12 +69,9 @@ static func create_overlay_controls(ui) -> void:
 	ui.preparation_hint.add_theme_constant_override("outline_size", 4)
 	ui.preparation_hint.add_theme_color_override("font_outline_color", Color("#102f3ee0"))
 
-	for button in [ui.pause_button, ui.speed_button, ui.settings_button, ui.wave_button]:
-		var style := background.duplicate() as StyleBoxFlat
-		style.border_color = Color("#c2ac7377")
-		style.set_border_width_all(1)
-		button.add_theme_stylebox_override("normal", style)
-	Controls.primary_style(ui.wave_button)
+	for button in [ui.pause_button, ui.speed_button, ui.settings_button]:
+		Controls.floating_style(button)
+	Controls.play_style(ui.wave_button)
 
 
 ## Les fiches gèrent seules la vente et l'amélioration. La fin de partie reçoit son propre bouton Rejouer.

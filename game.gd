@@ -127,13 +127,14 @@ func inside(cell: Vector2i) -> bool:
 
 
 ## Renvoie les cases réservées au château ; le portail est désormais entièrement hors grille.
-## Le rectangle couvre le château et ses abords, y compris la place sous les toits des tours.
+## Le château est dessiné principalement hors grille : seules trois cases de la dernière colonne le recouvrent.
+## Les toits élevés sont hors grille et ne doivent pas condamner les cases vides au-dessus de l'arrivée.
 ## Il suit la sortie pour fonctionner avec les trois tailles de carte.
 ## Ces zones interdisent uniquement la construction : les monstres peuvent toujours les traverser.
 func landmark_areas() -> Array[Rect2i]:
 	var grid := Rect2i(Vector2i.ZERO, Vector2i(cols, rows))
 	return [
-		Rect2i(exit_cell + Vector2i(-1, -5), Vector2i(2, 8)).intersection(grid),
+		Rect2i(exit_cell + Vector2i(0, -2), Vector2i(1, 3)).intersection(grid),
 	]
 
 
