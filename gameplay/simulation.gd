@@ -120,7 +120,7 @@ static func remove_and_pay_enemies(game) -> void:
 static func finish_wave_if_needed(game) -> void:
 	if not game.active or game.ended:
 		return
-	if game.lives <= 0:
+	if game.lives <= 0 and not game.developer_mode:
 		game.active = false
 		game.ended = true
 		game.message = "Le château est tombé. Recomposez votre labyrinthe."

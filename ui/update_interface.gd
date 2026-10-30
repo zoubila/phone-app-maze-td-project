@@ -24,7 +24,8 @@ static func refresh(ui) -> void:
 		ui.end_screen.hide()
 		return
 
-	ui.status.text = "Or %d  •  Château %d  •  Vague %d/100" % [ui.game.gold, ui.game.lives, ui.game.wave]
+	var castle := "∞" if ui.game.developer_mode else str(ui.game.lives)
+	ui.status.text = "Or %d  •  Château %s  •  Vague %d/100" % [ui.game.gold, castle, ui.game.wave]
 	ui.message.text = ui.game.message
 	ui.pause_button.text = "Reprendre" if ui.game.paused else "Pause"
 	ui.pause_button.disabled = ui.game.ended

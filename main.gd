@@ -16,6 +16,7 @@ var board: Control
 var selected := Vector2i(-1, -1)
 var selected_kind := 0
 var grid_index := 1
+var starting_wave := 1
 # RÉFÉRENCES D'INTERFACE : Label = texte, Button = bouton, OptionButton = liste de choix.
 # Conserver ces objets permet à refresh_ui et ui_layout de modifier les mêmes contrôles.
 var status: Label
@@ -251,7 +252,7 @@ func refresh_inspection(reanchor: bool = false) -> void:
 
 
 ## Démarre une nouvelle partie après le choix du menu. L'attente d'une minute commence ici, pas dans le menu.
-func start_game(index: int = 1, difficulty: int = -1) -> void:
+func start_game(index: int = 1, difficulty: int = -1, first_wave: int = -1) -> void:
 	# Le verrou est aussi vérifié ici : sélectionner une entrée par code ne doit pas le contourner.
 	if not progression.is_unlocked(index, developer_mode):
 		menu_screen.configure_grids(progression, developer_mode)
@@ -261,7 +262,11 @@ func start_game(index: int = 1, difficulty: int = -1) -> void:
 	grid_index = index
 	# Le menu choisit la difficulté au lancement ; Rejouer transmet explicitement celle de la partie terminée.
 	var choice: int = menu_screen.difficulty_choice.selected if difficulty < 0 else difficulty
-	game.reset(index, choice)
+	game.reset(index, choice, developer_mode)
+	# Les vagues précédentes ne sont ni simulées ni récompensées. La préparation lance exactement la vague choisie.
+	var requested: int = int(menu_screen.dev_wave.value) if first_wave < 0 else first_wave
+	starting_wave = clampi(requested, 1, game.LAST_WAVE) if developer_mode else 1
+	game.wave = starting_wave - 1
 	in_menu = false
 	selected = Vector2i(-1, -1)
 	selected_kind = 0
@@ -278,7 +283,7 @@ func start_game(index: int = 1, difficulty: int = -1) -> void:
 ## Recommence avec la même taille de grille depuis le bouton central du résultat.
 func restart_game() -> void:
 	if game.ended:
-		start_game(grid_index, game.difficulty_index)
+		start_game(grid_index, game.difficulty_index, starting_wave)
 
 
 ## Revient au menu ; Commencer créera ensuite une nouvelle partie avec la grille choisie.
@@ -363,6 +368,9 @@ func on_wave_started(number: int) -> void:
 
 ## Sauvegarde les nouveaux records seulement lorsqu'ils changent, et réessaie après un échec d'écriture.
 func save_progress() -> void:
+	# Un saut à une vague avancée ne doit pas écrire un faux record dans les parties normales.
+	if developer_mode:
+		return
 	if game.best != saved_best or progression.dirty:
 		progression.best = game.best
 		if progression.save():

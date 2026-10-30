@@ -65,6 +65,15 @@ Dans l'éditeur Godot, le réglage de projet maze_td/developer_mode permet aussi
 d'activer ce mode. Le laisser à false pour une partie normale.
 Le menu indique le mode développeur ; ces parties ne débloquent aucune grille
 dans la progression normale.
+Dans ce mode, le château est invulnérable et affiche le symbole ∞. Les monstres
+qui l'atteignent disparaissent sans retirer de vies et sans rapporter d'or.
+Le champ Vague de départ du menu permet de saisir un nombre entre 1 et 100,
+ou d'utiliser les boutons − et +. La minute de préparation commence directement
+avant cette vague ; Lancer vague permet toujours de démarrer immédiatement.
+Les vagues sautées ne versent aucune récompense. Rejouer garde la vague choisie
+et la difficulté. Aucun record de ces essais n'est sauvegardé dans la progression
+normale. Les boss peuvent encore endommager les tours et la victoire finale
+reste possible. Le mode normal commence toujours à la vague 1 et conserve la défaite.
 
 PARAMÈTRES ET RETOUR À L'ACCUEIL
 L'engrenage à côté de Pause et Vitesse ouvre les paramètres. Le jeu est

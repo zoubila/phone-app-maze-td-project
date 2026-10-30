@@ -17,6 +17,10 @@ var grid_hint: Label
 var difficulty_label: Label
 var difficulty_choice: OptionButton
 var difficulty_hint: Label
+var dev_wave_label: Label
+var dev_wave: SpinBox
+var dev_wave_less: Button
+var dev_wave_more: Button
 var grid_info_button: Button
 var grid_info_panel: Panel
 var grid_info_text: Label
@@ -114,13 +118,17 @@ func _ready() -> void:
 	grid_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	create_grid_information()
 	create_difficulty_choice()
+	create_developer_controls()
 
 	start_button = Controls.button(
 		card,
 		"COMMENCER",
 		Vector2.ZERO,
 		Vector2.ZERO,
-		func(): start_requested.emit(grid_choice.selected),
+		func():
+			# Valide aussi un nombre saisi au clavier sans avoir appuyé sur Entrée.
+			dev_wave.apply()
+			start_requested.emit(grid_choice.selected),
 	)
 
 	Controls.play_style(start_button)
@@ -235,9 +243,38 @@ func update_difficulty_hint() -> void:
 	difficulty_choice.tooltip_text = settings.description
 
 
+## Ce choix existe uniquement pour les essais : saisir une vague ou utiliser les boutons moins et plus.
+## Les boutons gardent une surface tactile confortable ; le champ est borné entre 1 et 100.
+func create_developer_controls() -> void:
+	dev_wave_label = Controls.label(card, "VAGUE DE DÉPART", Vector2.ZERO, Vector2.ZERO, 17, Color("#ffe184"))
+	dev_wave = SpinBox.new()
+	dev_wave.min_value = 1
+	dev_wave.max_value = 100
+	dev_wave.step = 1
+	dev_wave.value = 1
+	dev_wave.tooltip_text = "Préparer directement cette vague, sans jouer les précédentes."
+	card.add_child(dev_wave)
+	var editor := dev_wave.get_line_edit()
+	editor.add_theme_font_size_override("font_size", 21)
+	editor.add_theme_color_override("font_color", Color("#16334d"))
+	for state in ["normal", "focus"]:
+		var input_style := grid_choice.get_theme_stylebox(state).duplicate() as StyleBoxFlat
+		input_style.content_margin_left = 12
+		input_style.content_margin_right = 8
+		editor.add_theme_stylebox_override(state, input_style)
+	editor.alignment = HORIZONTAL_ALIGNMENT_CENTER
+	editor.add_theme_color_override("caret_color", Color("#16334d"))
+	editor.virtual_keyboard_type = LineEdit.KEYBOARD_TYPE_NUMBER
+	dev_wave_less = Controls.button(card, "−", Vector2.ZERO, Vector2(44, 44), func(): dev_wave.value -= 1)
+	dev_wave_more = Controls.button(card, "+", Vector2.ZERO, Vector2(44, 44), func(): dev_wave.value += 1)
+
+
 ## Actualise les verrous et leurs conditions, sans effacer un choix encore accessible.
 ## Les identifiants des grilles restent ceux du modèle, même si leur libellé change.
 func configure_grids(progress, developer: bool) -> void:
+	for control in [dev_wave_label, dev_wave, dev_wave_less, dev_wave_more]:
+		control.visible = developer
+	footer.text = "MODE DEV · CHÂTEAU INVULNÉRABLE" if developer else "8 TOURS  ·  100 VAGUES  ·  UN ROYAUME"
 	grid_info_pinned = false
 	grid_info_panel.hide()
 	var explanations: Array[String] = []
@@ -269,6 +306,7 @@ func configure_grids(progress, developer: bool) -> void:
 	grid_choice.set_meta("next_unlock", next_unlock)
 	grid_choice.set_meta("all_unlocked", progress.is_unlocked(2))
 	update_grid_hint()
+	arrange()
 
 
 ## Explique le prochain objectif sous le champ, sans exiger un survol indisponible sur téléphone.
@@ -295,7 +333,14 @@ func arrange() -> void:
 	title.position = Vector2(28, 16)
 	title.size = Vector2(width - 56, 136)
 	hero.position = Vector2(width / 2.0 - 135, 146)
-	hero.size = Vector2(270, 140)
+	hero.size = Vector2(270, 94 if dev_wave.visible else 140)
+	dev_wave_label.position = Vector2(40, 242)
+	dev_wave_label.size = Vector2(content - 300, 44)
+	dev_wave_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	dev_wave_less.position = Vector2(width - 320, 242)
+	dev_wave.position = Vector2(width - 270, 242)
+	dev_wave.size = Vector2(180, 44)
+	dev_wave_more.position = Vector2(width - 84, 242)
 	description.position = Vector2(32, 286)
 	description.size = Vector2(width - 64, 52)
 	description.add_theme_font_size_override("font_size", 17)

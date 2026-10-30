@@ -49,6 +49,8 @@ var shots: Array = []
 # active signifie qu'une vague est en cours ; ended indique une fin de partie ; won indique une victoire.
 var gold := 600
 var difficulty_index := 1
+# Cette protection concerne seulement les essais explicitement lancés en mode développeur.
+var developer_mode := false
 var lives := 20
 var wave := 0
 var best := 0
@@ -83,7 +85,8 @@ func _init() -> void:
 ## Recommence une partie sur la grille choisie par grid_index : 0, 1 ou 2.
 ## Les tours et monstres disparaissent, l'or et les vies reviennent à leur valeur de départ.
 ## Le record best est conservé. Aucun fichier de sauvegarde n'est lu ou écrit ici.
-func reset(grid_index: int = 0, difficulty: int = 1) -> void:
+func reset(grid_index: int = 0, difficulty: int = 1, developer: bool = false) -> void:
+	developer_mode = developer
 	difficulty_index = clampi(difficulty, 0, Difficulty.PROFILES.size() - 1)
 	var dimensions: Vector2i = GRID_SIZES[clampi(grid_index, 0, 2)]
 	cols = dimensions.x

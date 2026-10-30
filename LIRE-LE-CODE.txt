@@ -59,6 +59,7 @@ MazeTD/
     interface_tests.gd          Clics, caméra, rotation et zones sûres.
     grid_unlock_tests.gd        Seuils, sauvegarde, ancien record et mode développeur.
     difficulty_tests.gd         PV, récompenses, bonus, revente et conservation du choix après Rejouer.
+    developer_mode_tests.gd     Château invulnérable, vague de départ, Rejouer et protection des records normaux.
     inspection_tests.gd         Survol, fiches, sélection, vente et amélioration.
     enemy_selection_tests.gd    Sprite touché, mouvement pendant l'appui et désélection à la souris/au toucher.
     tower_actions_tests.gd      Vente/amélioration dans les fiches avec appui prolongé.

@@ -66,4 +66,6 @@ static func escape(game, enemy: Dictionary) -> void:
 		return
 	enemy.escaped = true
 	enemy.hp = 0.0
-	game.lives = maxi(0, game.lives - (5 if enemy.boss == 2 else (3 if enemy.boss == 1 else 1)))
+	# Le monstre quitte bien la carte en mode développeur, sans récompense et sans blesser le château.
+	if not game.developer_mode:
+		game.lives = maxi(0, game.lives - (5 if enemy.boss == 2 else (3 if enemy.boss == 1 else 1)))
